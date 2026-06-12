@@ -14,7 +14,7 @@ export default function HistoryTimeline() {
             <MotionItem key={item.year}>
               <Card
                 variant="transparent"
-                className="liquid-readable text-[#1d1d1f] transition-transform duration-300 hover:-translate-y-1"
+                className="liquid-readable text-[#1d1d1f]"
               >
                 <CardContent className="grid gap-5 p-7 md:grid-cols-[160px_1fr] md:items-center">
                   <p

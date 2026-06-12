@@ -15,10 +15,10 @@ export default function FeaturedEvent({
   onRegister,
 }: FeaturedEventProps) {
   return (
-    <section className="bg-white px-5 py-20 md:py-24">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-[0.9fr_1fr]">
+    <section className="liquid-glass mx-auto w-[calc(100%_-_2rem)] max-w-7xl p-6 md:p-10">
+      <div className="grid items-center gap-12 md:grid-cols-[0.95fr_0.85fr]">
         <div>
-          <div className="mb-20 flex items-center gap-3">
+          <div className="mb-10 flex items-center gap-3">
             <span className="h-px w-12 bg-[#0066cc]" />
             <p className="text-sm font-medium text-[#424245]">Sự Kiện Tiêu Điểm</p>
           </div>
@@ -63,7 +63,9 @@ export default function FeaturedEvent({
           </div>
         </div>
 
-        <div className={`calendar-event-${event.image} min-h-[520px] rounded-[22px] shadow-[0_18px_44px_rgba(0,0,0,0.14)]`} />
+        <div className="liquid-readable p-2">
+          <div className={`calendar-event-${event.image} min-h-[460px] rounded-[14px] shadow-[0_18px_44px_rgba(0,0,0,0.14)]`} />
+        </div>
       </div>
     </section>
   );

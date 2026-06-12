@@ -14,19 +14,19 @@ export default function NewsFilterBar({
   onQueryChange,
 }: NewsFilterBarProps) {
   return (
-    <section className="bg-[#f5f5f7] px-5 pt-20">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-3">
+    <section className="mx-auto w-[calc(100%_-_2rem)] max-w-7xl">
+      <div className="liquid-glass flex flex-col gap-5 p-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
           {newsCategories.map((category) => (
             <button
               key={category}
               type="button"
               onClick={() => onCategoryChange(category)}
               className={[
-                "h-9 rounded-full px-5 text-sm font-semibold transition-colors",
+                "h-9 shrink-0 whitespace-nowrap rounded-full px-5 text-sm font-semibold",
                 activeCategory === category
                   ? "bg-[#0066cc] text-white"
-                  : "border border-[#dedee3] bg-white text-[#6e6e73] hover:text-[#0066cc]",
+                  : "border border-white bg-white/68 text-[#6e6e73]",
               ].join(" ")}
             >
               {category}
@@ -37,7 +37,7 @@ export default function NewsFilterBar({
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="Tìm kiếm tin tức..."
-          className="h-11 w-full rounded-[10px] border border-[#d6d6d8] bg-white px-4 text-sm outline-none placeholder:text-[#9a9aa0] focus:border-[#0066cc] md:w-80"
+          className="h-11 w-full shrink-0 rounded-[10px] border border-white/90 bg-white/76 px-4 text-sm outline-none placeholder:text-[#9a9aa0] focus:border-[#0066cc] md:w-80"
         />
       </div>
     </section>

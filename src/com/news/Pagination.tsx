@@ -16,7 +16,7 @@ export default function Pagination({
       <button
         type="button"
         onClick={() => onPageChange(Math.max(1, page - 1))}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dedee3] bg-white text-[#6e6e73] disabled:opacity-40"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/90 bg-white/76 text-[#6e6e73] disabled:opacity-40"
         disabled={page === 1}
         aria-label="Trang trước"
       >
@@ -32,7 +32,7 @@ export default function Pagination({
               "flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold",
               page === pageNumber
                 ? "border-[#0066cc] bg-[#0066cc] text-white"
-                : "border-[#dedee3] bg-white text-[#6e6e73]",
+                : "border-white/90 bg-white/76 text-[#6e6e73]",
             ].join(" ")}
           >
             {pageNumber}
@@ -42,7 +42,7 @@ export default function Pagination({
       <button
         type="button"
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dedee3] bg-white text-[#6e6e73] disabled:opacity-40"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/90 bg-white/76 text-[#6e6e73] disabled:opacity-40"
         disabled={page === totalPages}
         aria-label="Trang sau"
       >

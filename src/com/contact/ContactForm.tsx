@@ -37,7 +37,7 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[18px] bg-white p-6 shadow-sm md:p-8">
+    <form onSubmit={handleSubmit} className="liquid-readable p-6 md:p-8">
       <div>
         <p className="text-sm font-medium text-[#0066cc]">Form liên hệ</p>
         <h2 className="mt-3 text-3xl font-semibold tracking-normal text-[#1d1d1f]">
@@ -64,7 +64,7 @@ export default function ContactForm() {
           Họ và tên
           <input
             name="name"
-            className="h-12 rounded-[12px] border border-[#d6d6d8] bg-[#f5f5f7] px-4 text-[#1d1d1f] outline-none transition-colors placeholder:text-[#86868b] focus:border-[#0099ff]"
+            className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
             placeholder="Nhập họ và tên"
           />
         </label>
@@ -75,7 +75,7 @@ export default function ContactForm() {
             <input
               name="email"
               type="email"
-              className="h-12 rounded-[12px] border border-[#d6d6d8] bg-[#f5f5f7] px-4 text-[#1d1d1f] outline-none transition-colors placeholder:text-[#86868b] focus:border-[#0099ff]"
+              className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
               placeholder="email@example.com"
             />
           </label>
@@ -84,7 +84,7 @@ export default function ContactForm() {
             <input
               name="phone"
               type="tel"
-              className="h-12 rounded-[12px] border border-[#d6d6d8] bg-[#f5f5f7] px-4 text-[#1d1d1f] outline-none transition-colors placeholder:text-[#86868b] focus:border-[#0099ff]"
+              className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
               placeholder="+84..."
             />
           </label>
@@ -95,7 +95,7 @@ export default function ContactForm() {
           <textarea
             name="message"
             rows={6}
-            className="resize-none rounded-[12px] border border-[#d6d6d8] bg-[#f5f5f7] px-4 py-3 text-[#1d1d1f] outline-none transition-colors placeholder:text-[#86868b] focus:border-[#0099ff]"
+            className="resize-none rounded-[12px] border border-white/90 bg-white/76 px-4 py-3 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
             placeholder="Bạn muốn chia sẻ điều gì?"
           />
         </label>

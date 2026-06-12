@@ -24,7 +24,7 @@ function Field({
       <input
         name={name}
         type={type}
-        className="h-14 rounded-[14px] border border-transparent bg-[#f1f1f4] px-5 text-base text-[#1d1d1f] outline-none transition-colors placeholder:text-[#a0a0a6] focus:border-[#0a84ff] focus:bg-white"
+        className="h-14 rounded-[14px] border border-white/90 bg-white/76 px-5 text-base text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#8b8b91] focus:border-[#0a84ff] focus:bg-white/90"
         placeholder={placeholder}
       />
     </label>
@@ -48,13 +48,13 @@ function PasswordInput({
         id={id}
         name={name}
         type={isVisible ? "text" : "password"}
-        className="h-14 w-full rounded-[14px] border border-transparent bg-[#f1f1f4] px-5 pr-14 text-base text-[#1d1d1f] outline-none transition-colors placeholder:text-[#a0a0a6] focus:border-[#0a84ff] focus:bg-white"
+        className="h-14 w-full rounded-[14px] border border-white/90 bg-white/76 px-5 pr-14 text-base text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#8b8b91] focus:border-[#0a84ff] focus:bg-white/90"
         placeholder={placeholder}
       />
       <button
         type="button"
         onClick={() => setIsVisible((current) => !current)}
-        className="absolute inset-y-0 right-2 flex w-11 items-center justify-center rounded-full text-[#6e6e73] transition-colors hover:text-[#0066cc]"
+        className="absolute inset-y-0 right-2 flex w-11 items-center justify-center rounded-full text-[#6e6e73] hover:text-[#0066cc]"
         aria-label={isVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
         title={isVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
       >
@@ -118,14 +118,14 @@ function SocialActions() {
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
         <button
           type="button"
-          className="flex h-14 items-center justify-center gap-3 rounded-[14px] border border-[#e3e3e7] bg-white px-4 text-base font-semibold text-[#1d1d1f] transition-colors hover:border-[#0a84ff] hover:text-[#0066cc]"
+          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
         >
           <span className="text-xl tracking-wider">GOOGLE</span>
           <span>Google</span>
         </button>
         <button
           type="button"
-          className="flex h-14 items-center justify-center gap-3 rounded-[14px] border border-[#e3e3e7] bg-white px-4 text-base font-semibold text-[#1d1d1f] transition-colors hover:border-[#0a84ff] hover:text-[#0066cc]"
+          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
         >
           <span className="text-lg">◎</span>
           <span>Facebook</span>
@@ -152,7 +152,7 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
             <button
               type="button"
               onClick={onForgot}
-              className="text-sm font-semibold text-[#0066cc] transition-colors hover:text-[#0a84ff]"
+              className="text-sm font-semibold text-[#0066cc] hover:text-[#0a84ff]"
             >
               Quên mật khẩu?
             </button>
@@ -210,8 +210,8 @@ function RegisterForm() {
 
 function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   return (
-    <div className="w-full max-w-[560px] rounded-[20px] bg-white p-10 text-[#1d1d1f] shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:p-12">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f0f1f4] text-[#0a7bea]">
+    <div className="liquid-glass w-full max-w-[560px] p-7 text-[#1d1d1f] md:p-12">
+      <div className="liquid-readable mx-auto flex h-16 w-16 items-center justify-center rounded-full text-[#0a7bea]">
         <ClockIcon className="h-8 w-8" />
       </div>
       <div className="mt-7 text-center">
@@ -241,7 +241,7 @@ function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="mx-auto mt-9 flex items-center gap-2 text-base font-medium text-[#0066cc] transition-colors hover:text-[#0a84ff]"
+        className="mx-auto mt-9 flex items-center gap-2 text-base font-medium text-[#0066cc] hover:text-[#0a84ff]"
       >
         <span aria-hidden="true">←</span>
         Quay lại Đăng nhập
@@ -266,7 +266,7 @@ export default function AuthTabs() {
   }
 
   return (
-    <div className="w-full max-w-[620px] rounded-[20px] bg-white p-10 text-[#1d1d1f] shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:p-12">
+    <div className="liquid-glass w-full max-w-[620px] p-7 text-[#1d1d1f] md:p-12">
       <Tabs
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(String(key) as AuthTab)}
@@ -274,16 +274,16 @@ export default function AuthTabs() {
         variant="primary"
         aria-label="Đăng nhập hoặc đăng ký"
       >
-        <Tabs.List className="grid w-full grid-cols-2 rounded-[14px] bg-[#f1f1f4] p-1">
+        <Tabs.List className="liquid-readable grid w-full grid-cols-2 p-1">
           <Tabs.Tab
             id="login"
-            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73] transition-colors"
+            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73]"
           >
             Đăng nhập
           </Tabs.Tab>
           <Tabs.Tab
             id="register"
-            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73] transition-colors"
+            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73]"
           >
             Đăng ký
           </Tabs.Tab>

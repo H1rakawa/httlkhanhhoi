@@ -29,7 +29,7 @@ export default function EventCard({ event, compact = false, onSelect }: EventCar
   return (
     <article
       className={[
-        "rounded-[12px] border border-[#dedee3] bg-white transition-transform hover:-translate-y-0.5 hover:shadow-sm",
+        "liquid-readable",
         compact ? "p-3" : "p-5",
       ].join(" ")}
     >

@@ -125,7 +125,13 @@ body {
 .liquid-glass:hover::before,
 .liquid-glass-item:hover::before {
   opacity: 1;
-  transform: translate3d(1%, -1%, 0) scale(1.02);
+}
+
+* {
+  scroll-behavior: auto !important;
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
 }
 
 @media (prefers-contrast: more) {
@@ -162,9 +168,15 @@ html {
 }
 
 .auth-tab[data-selected] {
-  background: #ffffff;
-  color: #111111;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  background: #087be8;
+  color: #ffffff;
+  box-shadow:
+    0 10px 22px rgba(0, 102, 204, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.auth-tab:not([data-selected]) {
+  color: #68686d;
 }
 
 .hero-sanctuary {

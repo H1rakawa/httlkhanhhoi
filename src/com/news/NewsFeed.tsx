@@ -54,8 +54,8 @@ export default function NewsFeed() {
         onQueryChange={updateQuery}
       />
 
-      <section className="bg-[#f5f5f7] px-5 py-16 md:py-20">
-        <div className="mx-auto max-w-7xl">
+      <section className="px-5 py-16 md:py-20">
+        <div className="liquid-glass mx-auto max-w-7xl p-5 md:p-8">
           {currentPosts.length > 0 ? (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {currentPosts.map((post) => (
@@ -63,7 +63,7 @@ export default function NewsFeed() {
               ))}
             </div>
           ) : (
-            <div className="rounded-[16px] border border-[#dedee3] bg-white p-10 text-center text-[#6e6e73]">
+            <div className="liquid-readable p-10 text-center text-[#6e6e73]">
               Không tìm thấy bài viết phù hợp.
             </div>
           )}
@@ -72,8 +72,8 @@ export default function NewsFeed() {
         </div>
       </section>
 
-      <section className="bg-[#f5f5f7] px-5 pb-20 md:pb-24">
-        <div className="mx-auto grid max-w-7xl gap-8 rounded-[24px] border border-[#dedee3] bg-white p-8 md:grid-cols-[1fr_0.9fr] md:p-10">
+      <section className="px-5 pb-20 md:pb-24">
+        <div className="liquid-glass mx-auto grid max-w-7xl gap-8 p-8 md:grid-cols-[1fr_0.9fr] md:p-10">
           <div>
             <h2 className="text-3xl font-semibold tracking-normal">
               Đăng ký nhận tin tức
@@ -87,11 +87,11 @@ export default function NewsFeed() {
             <input
               type="email"
               placeholder="Địa chỉ email của bạn"
-              className="h-12 rounded-[10px] border border-[#d6d6d8] bg-[#f5f5f7] px-5 text-sm outline-none focus:border-[#0066cc]"
+              className="h-12 rounded-[10px] border border-white/90 bg-white/76 px-5 text-sm outline-none focus:border-[#0066cc]"
             />
             <button
               type="submit"
-              className="h-12 rounded-[10px] bg-[#0066cc] text-sm font-semibold text-white transition-colors hover:bg-[#0055aa]"
+              className="h-12 rounded-[10px] bg-[#0066cc] text-sm font-semibold text-white"
             >
               Đăng ký ngay
             </button>

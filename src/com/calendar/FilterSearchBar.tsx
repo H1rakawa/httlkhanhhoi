@@ -1,5 +1,24 @@
 import { eventCategories } from "@/com/calendar/calendarData";
 
+function buildMonthOptions(activeMonth: string) {
+  const [activeYear, activeMonthNumber] = activeMonth.split("-").map(Number);
+  const center = new Date(activeYear, activeMonthNumber - 1, 1);
+
+  return Array.from({ length: 25 }, (_, index) => {
+    const date = new Date(center.getFullYear(), center.getMonth() + index - 12, 1);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const label = new Intl.DateTimeFormat("vi-VN", {
+      month: "long",
+      year: "numeric",
+    }).format(date);
+
+    return {
+      value,
+      label: label.charAt(0).toUpperCase() + label.slice(1),
+    };
+  });
+}
+
 type FilterSearchBarProps = {
   activeCategory: string;
   query: string;
@@ -21,20 +40,22 @@ export default function FilterSearchBar({
   onMonthChange,
   onViewModeChange,
 }: FilterSearchBarProps) {
+  const monthOptions = buildMonthOptions(month);
+
   return (
-    <section className="border-y border-[#e5e5e8] bg-white px-5 py-5">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-3">
+    <section className="mx-auto w-[calc(100%_-_2rem)] max-w-7xl">
+      <div className="liquid-glass flex flex-col gap-4 p-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
           {eventCategories.map((category) => (
             <button
               key={category}
               type="button"
               onClick={() => onCategoryChange(category)}
               className={[
-                "h-9 rounded-full px-5 text-sm font-semibold transition-colors",
+                "h-9 shrink-0 whitespace-nowrap rounded-full px-5 text-sm font-semibold",
                 activeCategory === category
                   ? "bg-[#0066cc] text-white"
-                  : "bg-[#f5f5f7] text-[#424245] hover:bg-[#e8f2ff] hover:text-[#0066cc]",
+                  : "border border-white bg-white/68 text-[#424245]",
               ].join(" ")}
             >
               {category}
@@ -42,27 +63,33 @@ export default function FilterSearchBar({
           ))}
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-[1fr_170px_150px]">
+        <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
           <input
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Tìm kiếm sự kiện..."
-            className="h-10 min-w-64 rounded-[10px] border border-[#d6d6d8] bg-white px-4 text-sm outline-none transition-colors placeholder:text-[#9a9aa0] focus:border-[#0066cc]"
+            className="h-10 min-w-64 shrink-0 rounded-[10px] border border-white/90 bg-white/72 px-4 text-sm outline-none placeholder:text-[#9a9aa0] focus:border-[#0066cc]"
           />
-          <input
-            type="month"
+          <select
+            aria-label="Chọn tháng"
             value={month}
             onChange={(event) => onMonthChange(event.target.value)}
-            className="h-10 rounded-[10px] border border-[#d6d6d8] bg-white px-3 text-sm outline-none focus:border-[#0066cc]"
-          />
-          <div className="grid grid-cols-2 rounded-[10px] bg-[#f5f5f7] p-1">
+            className="h-10 w-48 shrink-0 cursor-pointer rounded-[10px] border border-white/90 bg-white/72 px-3 text-sm font-medium text-[#424245] outline-none focus:border-[#0066cc]"
+          >
+            {monthOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="grid w-40 shrink-0 grid-cols-2 rounded-[10px] border border-white/90 bg-white/54 p-1">
             {(["calendar", "list"] as const).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => onViewModeChange(mode)}
                 className={[
-                  "h-8 rounded-[8px] text-sm font-semibold transition-colors",
+                  "h-8 whitespace-nowrap rounded-[8px] text-sm font-semibold",
                   viewMode === mode
                     ? "bg-white text-[#0066cc] shadow-sm"
                     : "text-[#6e6e73]",

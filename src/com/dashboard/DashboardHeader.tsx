@@ -78,7 +78,7 @@ export default function DashboardHeader() {
           <Dropdown>
             <Dropdown.Trigger
               aria-label="Mở menu tài khoản"
-              className="h-10 w-10 rounded-full bg-transparent p-0 outline-none ring-offset-2 transition-transform hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#0066cc]"
+              className="h-10 w-10 rounded-full bg-transparent p-0 outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#0066cc]"
             >
               <span className="dashboard-avatar block h-10 w-10 rounded-full border-2 border-white shadow-sm" />
             </Dropdown.Trigger>

@@ -16,7 +16,7 @@ export default function MissionVision() {
         <MotionGroup className="mt-10 grid gap-6 md:grid-cols-3">
           {values.map((item) => (
             <MotionItem key={item.title}>
-              <Card className="liquid-readable h-full transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-[0_24px_55px_rgba(0,102,204,0.16),inset_0_1px_0_white]">
+              <Card className="liquid-readable h-full">
                 <CardContent className="p-8">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white bg-[#e8f2ff]/80 text-[#0066cc] shadow-[0_8px_18px_rgba(0,102,204,0.15)]">
                     <ValueIcon name={item.icon} />

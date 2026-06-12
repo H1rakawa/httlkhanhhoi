@@ -34,8 +34,8 @@ const contactItems = [
 
 export default function ContactInfo() {
   return (
-    <MotionSection className="bg-white px-5 py-16 md:py-20">
-      <div className="mx-auto max-w-7xl">
+    <MotionSection className="liquid-glass mx-auto w-full max-w-7xl p-5 md:p-10">
+      <div className="p-1 md:p-2">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-medium text-[#0066cc]">
@@ -48,14 +48,14 @@ export default function ContactInfo() {
           <div className="flex gap-3">
             <a
               href="#"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0099ff] text-white transition-colors hover:bg-[#0077cc]"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0099ff] text-white hover:bg-[#0077cc]"
               aria-label="Facebook"
             >
               <FacebookIcon className="h-4 w-4" />
             </a>
             <a
               href="#"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0099ff] text-white transition-colors hover:bg-[#0077cc]"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0099ff] text-white hover:bg-[#0077cc]"
               aria-label="Youtube"
             >
               <YoutubeIcon className="h-4 w-4" />
@@ -69,7 +69,7 @@ export default function ContactInfo() {
 
             return (
               <MotionItem key={item.title}>
-                <Card className="h-full rounded-[16px] border border-[#ececee] bg-[#f5f5f7] shadow-none">
+                <Card className="liquid-glass-item h-full border-2 border-white/90 shadow-none">
                   <CardContent className="p-6">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0099ff]/12 text-[#0077cc]">
                       <Icon className="h-5 w-5" />

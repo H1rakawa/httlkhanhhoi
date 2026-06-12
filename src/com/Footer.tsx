@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { FacebookIcon, YoutubeIcon } from "@/com/shared/Icons";
@@ -27,7 +28,19 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-3 md:px-8">
         <div className="grid gap-10 md:grid-cols-[1.1fr_0.85fr_0.85fr_1fr]">
           <div>
-            <p className="text-sm font-semibold">HTTL. Khánh Hội</p>
+            <NextLink
+              href="/"
+              className="inline-flex items-center no-underline"
+              aria-label="HTTL. Khánh Hội trang chủ"
+            >
+              <Image
+                src="/logo.png"
+                alt="Hội Thánh Tin Lành Khánh Hội"
+                width={355}
+                height={101}
+                className="h-11 w-auto brightness-0 invert"
+              />
+            </NextLink>
             <p className="mt-5 max-w-xs text-sm font-medium leading-7 text-white/68">
               Nầy, sự yêu thương của Đức Chúa Trời đã bày tỏ ra trong chúng ta:
               Đức Chúa Trời đã sai Con một Ngài đến thế gian, đặng chúng ta

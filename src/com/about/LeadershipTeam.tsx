@@ -13,7 +13,7 @@ export default function LeadershipTeam() {
           {leaders.map((leader) => (
             <MotionItem
               key={leader.name}
-              className="liquid-readable px-5 py-7 text-center transition-transform duration-300 hover:-translate-y-2"
+              className="liquid-readable px-5 py-7 text-center"
             >
               <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-white shadow-[0_14px_28px_rgba(31,48,70,0.2)]">
                 <Image

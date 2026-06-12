@@ -99,8 +99,8 @@ export default function CalendarPageClient() {
         onViewModeChange={setViewMode}
       />
 
-      <section className="bg-[#f5f5f7] px-5 py-20 md:py-24">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.25fr_0.85fr]">
+      <section className="py-16 md:py-24">
+        <div className="liquid-glass mx-auto grid w-[calc(100%_-_2rem)] max-w-7xl gap-8 p-5 lg:grid-cols-[1.25fr_0.85fr] md:p-8">
           {viewMode === "calendar" ? (
             <CalendarGrid
               month={month}
@@ -136,7 +136,7 @@ export default function CalendarPageClient() {
                 />
               ))}
               {upcomingEvents.length === 0 && (
-                <div className="rounded-[12px] border border-[#dedee3] bg-white p-6 text-sm text-[#6e6e73]">
+                <div className="liquid-readable p-6 text-sm text-[#6e6e73]">
                   Không tìm thấy sự kiện phù hợp.
                 </div>
               )}
@@ -145,32 +145,36 @@ export default function CalendarPageClient() {
         </div>
       </section>
 
-      <FeaturedEvent
-        event={featuredEvent}
-        isRegistered={registeredIds.includes(featuredEvent.id)}
-        onSelect={setSelectedEvent}
-        onRegister={registerEvent}
-      />
+      <div className="pb-16 md:pb-24">
+        <FeaturedEvent
+          event={featuredEvent}
+          isRegistered={registeredIds.includes(featuredEvent.id)}
+          onSelect={setSelectedEvent}
+          onRegister={registerEvent}
+        />
+      </div>
 
-      <section className="bg-[#f5f5f7] px-5 py-20 text-center md:py-24">
-        <h2 className="text-xl font-semibold">Đừng bỏ lỡ bất kỳ hoạt động nào</h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#6e6e73]">
-          Đăng ký nhận bản tin hằng tuần để luôn cập nhật những sự kiện mới nhất
-          từ HTTL. Khánh Hội.
-        </p>
-        <form className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
-          <input
-            type="email"
-            placeholder="Địa chỉ email của bạn"
-            className="h-12 flex-1 rounded-full border border-[#d6d6d8] bg-white px-6 text-sm outline-none focus:border-[#0066cc]"
-          />
-          <button
-            type="submit"
-            className="h-12 rounded-full bg-white px-8 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-[#0066cc] hover:text-white"
-          >
-            Đăng ký
-          </button>
-        </form>
+      <section className="px-5 py-24 text-center">
+        <div className="liquid-glass mx-auto max-w-4xl px-6 py-12">
+          <h2 className="text-xl font-semibold">Đừng bỏ lỡ bất kỳ hoạt động nào</h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#6e6e73]">
+            Đăng ký nhận bản tin hằng tuần để luôn cập nhật những sự kiện mới nhất
+            từ HTTL. Khánh Hội.
+          </p>
+          <form className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
+            <input
+              type="email"
+              placeholder="Địa chỉ email của bạn"
+              className="h-12 flex-1 rounded-full border border-white/90 bg-white/76 px-6 text-sm outline-none focus:border-[#0066cc]"
+            />
+            <button
+              type="submit"
+              className="h-12 rounded-full bg-[#0066cc] px-8 text-sm font-semibold text-white"
+            >
+              Đăng ký
+            </button>
+          </form>
+        </div>
       </section>
 
       <EventDetailDialog

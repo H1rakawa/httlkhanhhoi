@@ -34,7 +34,7 @@ export default function EventDetailDialog({
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-5 py-8">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-auto rounded-[18px] bg-white p-6 text-[#1d1d1f] shadow-2xl md:p-8">
+      <div className="liquid-glass max-h-[92vh] w-full max-w-2xl overflow-auto p-6 text-[#1d1d1f] md:p-8">
         <div className={`calendar-event-${event.image} min-h-56 rounded-[12px]`} />
         <div className="mt-7 flex items-start justify-between gap-6">
           <div>

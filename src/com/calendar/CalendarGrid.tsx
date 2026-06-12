@@ -57,7 +57,7 @@ export default function CalendarGrid({
   };
 
   return (
-    <div className="rounded-[14px] border border-[#dedee3] bg-white p-6 shadow-sm md:p-8">
+    <div className="liquid-readable p-6 md:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <p className="text-base font-semibold text-[#1d1d1f]">
@@ -122,9 +122,9 @@ export default function CalendarGrid({
             <div
               key={day.toISOString()}
               className={[
-                "relative flex aspect-square items-center justify-center rounded-[10px] text-sm transition-colors",
+                "relative flex aspect-square items-center justify-center rounded-[10px] text-sm",
                 isOutsideMonth ? "text-[#d0d0d4]" : "text-[#8a8a8f]",
-                isSelected ? "bg-[#242426] text-white" : "hover:bg-[#f5f5f7]",
+                isSelected ? "bg-[#0066cc] text-white shadow-[0_8px_18px_rgba(0,102,204,0.24)]" : "",
                 isToday && !isSelected
                   ? "ring-2 ring-[#0066cc] ring-offset-2 text-[#0066cc] font-semibold"
                   : "",

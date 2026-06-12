@@ -4,8 +4,8 @@ import Image from "next/image";
 export default function ChurchStory() {
   return (
     <MotionSection className="liquid-glass mx-auto w-[calc(100%_-_2rem)] max-w-7xl p-5 text-[#1d1d1f] md:p-10">
-      <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr] md:gap-16">
-        <div className="liquid-readable p-7 transition-transform duration-300 hover:-translate-y-1 md:p-10">
+      <div className="grid gap-10 md:grid-cols-[1.12fr_0.88fr] md:gap-16">
+        <div className="liquid-readable min-h-[430px] p-7 md:p-10">
           <p className="text-sm font-medium text-[#6e6e73]">
             Trái tim của Cộng đồng
           </p>
@@ -27,7 +27,7 @@ export default function ChurchStory() {
             </p>
           </div>
         </div>
-        <div className="liquid-readable relative aspect-[4/3] overflow-hidden p-2">
+        <div className="liquid-readable relative my-8 min-h-[340px] overflow-hidden p-2 md:my-10">
           <Image
             src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1400&q=88"
             alt="Cộng đồng cùng trò chuyện và chia sẻ"

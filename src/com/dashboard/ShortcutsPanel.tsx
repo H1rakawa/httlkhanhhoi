@@ -18,7 +18,7 @@ export default function ShortcutsPanel() {
             key={shortcut.label}
             href={shortcut.href}
             className={[
-              "flex aspect-square flex-col items-center justify-center gap-5 rounded-[14px] border no-underline transition-transform hover:-translate-y-1",
+              "flex aspect-square flex-col items-center justify-center gap-5 rounded-[14px] border no-underline",
               shortcut.primary
                 ? "border-[#0066cc] bg-[#0066cc] text-white"
                 : "border-[#e4e4e7] bg-white text-[#0066cc]",

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { NewsPost } from "@/com/news/newsData";
 
@@ -17,13 +18,21 @@ function formatDate(date: string) {
 
 export default function NewsCard({ post }: { post: NewsPost }) {
   return (
-    <article className="rounded-[14px] border border-[#dedee3] bg-white p-5 transition-transform hover:-translate-y-1 hover:shadow-sm">
+    <article className="liquid-readable overflow-hidden p-2">
       <Link
         href={`/news/${post.slug}`}
-        className={`news-image-${post.image} block min-h-44 rounded-[10px] no-underline`}
+        className="relative block aspect-[16/9] overflow-hidden rounded-[12px] no-underline"
         aria-label={`Đọc bài ${post.title}`}
-      />
-      <div className="mt-5">
+      >
+        <Image
+          src={post.photo}
+          alt={post.title}
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+          className="object-cover"
+        />
+      </Link>
+      <div className="px-3 pb-4 pt-4">
         <p className="text-xs font-semibold uppercase text-[#8a8a8f]">
           <span className={categoryClass[post.category]}>{post.category}</span>
           <span className="mx-2">·</span>

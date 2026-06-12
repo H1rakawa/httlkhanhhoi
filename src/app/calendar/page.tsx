@@ -1,18 +1,21 @@
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
+import CalendarBackdrop from "@/com/calendar/CalendarBackdrop";
 import CalendarPageClient from "@/com/calendar/CalendarPageClient";
 
 export default function CalendarPage() {
   return (
-    <main className="min-h-screen bg-white text-[#1d1d1f]">
+    <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
+      <CalendarBackdrop />
       <Header activePath="/calendar" />
-      <section className="relative isolate flex min-h-[520px] items-center justify-center overflow-hidden bg-white px-5 pt-14 text-center">
-        <div className="calendar-hero-image absolute inset-0 opacity-58" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.72)_68%,#fff_100%)]" />
-        <div className="relative z-10 mx-auto max-w-3xl">
-          <p className="text-sm font-medium text-[#424245]">Lịch Sinh Hoạt</p>
-          <h1 className="mt-5 text-5xl font-semibold tracking-normal md:text-6xl">
-            Kết nối qua từng hoạt động ý nghĩa.
+      <section className="relative z-10 flex min-h-[520px] items-center justify-center px-5 pt-14 text-center">
+        <div className="liquid-glass mx-auto w-full max-w-7xl px-8 py-12 md:px-16 md:py-16">
+          <p className="mx-auto w-fit rounded-full border border-white bg-white/75 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#0066cc]">
+            Lịch sinh hoạt
+          </p>
+          <h1 className="mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-normal md:text-6xl">
+            Gắn Kết Trong
+            <span className="block text-[#0066cc]">Ân Điển</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6e6e73]">
             Theo dõi lịch thờ phượng, học Kinh Thánh, thiện nguyện và các buổi
@@ -20,8 +23,10 @@ export default function CalendarPage() {
           </p>
         </div>
       </section>
-      <CalendarPageClient />
-      <Footer />
+      <div className="relative z-10">
+        <CalendarPageClient />
+        <Footer />
+      </div>
     </main>
   );
 }

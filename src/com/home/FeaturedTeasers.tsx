@@ -34,7 +34,7 @@ export default function FeaturedTeasers() {
             <MotionItem key={sermon.title} className="h-full">
               <Card
                 variant="transparent"
-                className="liquid-glass-item group h-full overflow-hidden border-2 border-white/90 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-2 hover:border-[#2997ff] hover:shadow-[0_18px_38px_rgba(0,102,204,0.18)]"
+                className="liquid-glass-item group h-full overflow-hidden border-2 border-white/90"
               >
                 <CardHeader className="relative aspect-[16/9] overflow-hidden p-0">
                   <Image
@@ -42,10 +42,10 @@ export default function FeaturedTeasers() {
                     alt={sermon.title}
                     fill
                     sizes="(min-width: 768px) 33vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    className="object-cover"
                   />
                 </CardHeader>
-                <CardContent className="gap-3 bg-white/58 px-5 pb-3 pt-5 backdrop-blur-xl">
+                <CardContent className="gap-3 px-5 pb-3 pt-5">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.12em]">
                     <p className="text-[#0066cc]">Series: {sermon.category}</p>
                     <p className="text-[#8a8a8f]">{sermon.date}</p>
@@ -57,7 +57,7 @@ export default function FeaturedTeasers() {
                     {sermon.excerpt}
                   </p>
                 </CardContent>
-                <CardFooter className="flex items-center justify-between gap-3 border-t border-white/80 bg-white/48 px-5 py-4 text-xs backdrop-blur-xl">
+                <CardFooter className="flex items-center justify-between gap-3 border-t border-white/80 px-5 py-4 text-xs">
                   <span className="text-[#6e6e73]">{sermon.pastor}</span>
                   <Link
                     href="/news"
@@ -95,7 +95,7 @@ export function EventList() {
             <MotionItem key={event.title}>
               <Card
                 variant="transparent"
-                className="liquid-glass-item border-2 border-white/90 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-[#2997ff] hover:shadow-[0_16px_32px_rgba(0,102,204,0.16)]"
+                className="liquid-glass-item border-2 border-white/90"
               >
                 <CardContent className="grid gap-5 p-5 sm:grid-cols-[82px_minmax(0,1fr)_auto] sm:items-center md:p-6">
                   <div className="flex min-h-16 flex-col justify-center border-b border-[#dedee3] pb-4 text-center sm:border-b-0 sm:border-r sm:pb-0 sm:pr-5">

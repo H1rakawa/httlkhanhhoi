@@ -9,6 +9,7 @@ export type NewsPost = {
   excerpt: string;
   content: string[];
   image: "church" | "table" | "book" | "meeting" | "retreat" | "podcast";
+  photo: string;
   featured?: boolean;
 };
 
@@ -29,6 +30,8 @@ export const newsPosts: NewsPost[] = [
       "Kính mời quý con cái Chúa, thân hữu và các gia đình sắp xếp thời gian tham dự.",
     ],
     image: "church",
+    photo:
+      "https://images.unsplash.com/photo-1438032005730-c779502df39b?auto=format&fit=crop&w=1400&q=86",
     featured: true,
   },
   {
@@ -45,6 +48,8 @@ export const newsPosts: NewsPost[] = [
       "Hội thánh khích lệ các thành viên đăng ký tham gia theo khả năng và thời gian phù hợp.",
     ],
     image: "table",
+    photo:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "su-tinh-lang-giua-the-gioi-on-ao",
@@ -60,6 +65,8 @@ export const newsPosts: NewsPost[] = [
       "Mỗi ngày chỉ cần một khoảng lặng nhỏ cũng có thể trở thành điểm neo cho tâm hồn.",
     ],
     image: "book",
+    photo:
+      "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "tuyen-cong-tac-vien-ban-truyen-thong",
@@ -75,6 +82,8 @@ export const newsPosts: NewsPost[] = [
       "Buổi định hướng đầu tiên sẽ được thông báo trong lịch sinh hoạt tháng này.",
     ],
     image: "meeting",
+    photo:
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "chuyen-di-retreat-tro-ve-voi-thien-nhien",
@@ -90,6 +99,8 @@ export const newsPosts: NewsPost[] = [
       "Hội thánh dự kiến sẽ tổ chức thêm những kỳ retreat tương tự trong năm tới.",
     ],
     image: "retreat",
+    photo:
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "podcast-moi-loi-song-moi-ngay",
@@ -105,6 +116,8 @@ export const newsPosts: NewsPost[] = [
       "Các tập đầu tiên sẽ được đăng trên kênh truyền thông của hội thánh.",
     ],
     image: "podcast",
+    photo:
+      "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "lop-kinh-thanh-can-ban-khoa-moi",
@@ -119,6 +132,8 @@ export const newsPosts: NewsPost[] = [
       "Chương trình phù hợp cho người mới tin Chúa, thân hữu đang tìm hiểu và các thành viên muốn ôn lại nền tảng.",
     ],
     image: "book",
+    photo:
+      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1400&q=86",
   },
   {
     slug: "cap-nhat-quy-cau-thay-thang-tu",
@@ -133,5 +148,7 @@ export const newsPosts: NewsPost[] = [
       "Chúng tôi khích lệ mỗi người tiếp tục gửi nhu cầu cầu thay và dành thời gian cầu nguyện cho nhau.",
     ],
     image: "church",
+    photo:
+      "https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1400&q=86",
   },
 ];
