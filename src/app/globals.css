@@ -1,5 +1,6 @@
 /* src/app/globals.css */
 
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "@heroui/styles";
 /* @custom-variant dark (&:is(.dark *)); */
@@ -12,19 +13,469 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Be Vietnam Pro", Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Be Vietnam Pro", Arial, Helvetica, sans-serif;
+}
+
+.liquid-glass,
+.liquid-glass-item {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.84),
+      rgba(242, 248, 255, 0.72) 48%,
+      rgba(255, 255, 255, 0.78)
+    );
+  box-shadow:
+    0 28px 64px rgba(31, 48, 70, 0.16),
+    0 4px 12px rgba(31, 48, 70, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 1px 0 0 rgba(255, 255, 255, 0.62),
+    inset -1px 0 0 rgba(117, 160, 202, 0.13),
+    inset 0 -1px 0 rgba(117, 160, 202, 0.16);
+  backdrop-filter: blur(30px) saturate(125%) brightness(1.04);
+  -webkit-backdrop-filter: blur(30px) saturate(125%) brightness(1.04);
+}
+
+.liquid-glass {
+  border-radius: 24px;
+}
+
+.liquid-glass-item {
+  border-color: rgba(255, 255, 255, 0.86);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(246, 250, 255, 0.78)
+    );
+  box-shadow:
+    0 15px 34px rgba(31, 48, 70, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(117, 160, 202, 0.13);
+  backdrop-filter: blur(18px) saturate(118%) brightness(1.03);
+  -webkit-backdrop-filter: blur(18px) saturate(118%) brightness(1.03);
+}
+
+.liquid-readable {
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 12px 28px rgba(31, 48, 70, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  backdrop-filter: blur(14px) saturate(112%);
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+}
+
+.liquid-glass::before,
+.liquid-glass-item::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      ellipse at 18% 0%,
+      rgba(255, 255, 255, 0.86),
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 92% 108%,
+      rgba(105, 177, 255, 0.16),
+      transparent 38%
+    );
+  opacity: 0.92;
+  transition: opacity 300ms ease, transform 450ms ease;
+}
+
+.liquid-glass::after,
+.liquid-glass-item::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 1px;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    inset 0 14px 24px rgba(255, 255, 255, 0.12);
+  opacity: 0.86;
+}
+
+.liquid-glass > *,
+.liquid-glass-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.liquid-glass:hover::before,
+.liquid-glass-item:hover::before {
+  opacity: 1;
+  transform: translate3d(1%, -1%, 0) scale(1.02);
+}
+
+@media (prefers-contrast: more) {
+  .liquid-glass,
+  .liquid-glass-item {
+    border-color: rgba(74, 93, 115, 0.38);
+    background: rgba(255, 255, 255, 0.88);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass,
+  .liquid-glass-item {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .liquid-glass::before,
+  .liquid-glass-item::before {
+    transition: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px;
+}
+
+.auth-dotted-bg {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    #030405;
+  background-size: 24px 24px;
+}
+
+.auth-tab[data-selected] {
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.hero-sanctuary {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.74) 66%, #000 100%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 220, 160, 0.12), transparent 32%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0 2px,
+      transparent 2px 38px
+    ),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08), transparent 28%),
+    #050505;
+}
+
+.hero-sanctuary::before {
+  content: "";
+  position: absolute;
+  inset: 8% 9% 0;
+  border-radius: 50% 50% 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 90px rgba(0, 0, 0, 0.95),
+    0 -20px 80px rgba(255, 238, 195, 0.05);
+}
+
+.hero-sanctuary::after {
+  content: "";
+  position: absolute;
+  inset: 2% 18% 0;
+  background:
+    linear-gradient(110deg, transparent 0 45%, rgba(255, 230, 185, 0.13) 48%, transparent 52%),
+    linear-gradient(250deg, transparent 0 44%, rgba(255, 230, 185, 0.08) 48%, transparent 53%);
+  opacity: 0.8;
+}
+
+.sermon-book,
+.sermon-worship,
+.sermon-community {
+  background-size: cover;
+  background-position: center;
+}
+
+.sermon-book {
+  background:
+    radial-gradient(circle at 47% 62%, rgba(255, 248, 219, 0.92) 0 10%, transparent 11%),
+    linear-gradient(9deg, transparent 45%, rgba(255, 244, 210, 0.96) 46% 52%, transparent 53%),
+    radial-gradient(circle at 18% 16%, #ffd16b, transparent 10%),
+    radial-gradient(circle at 80% 18%, #f5a742, transparent 11%),
+    linear-gradient(180deg, rgba(10, 7, 3, 0.08), rgba(10, 7, 3, 0.72)),
+    linear-gradient(115deg, #1d1208, #7a471e 55%, #120d09);
+}
+
+.sermon-worship {
+  background:
+    radial-gradient(circle at 25% 100%, rgba(0, 0, 0, 0.98) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 38% 88%, rgba(0, 0, 0, 0.98) 0 4%, transparent 4.4%),
+    radial-gradient(circle at 53% 95%, rgba(0, 0, 0, 0.98) 0 5%, transparent 5.4%),
+    linear-gradient(75deg, transparent 0 35%, rgba(255, 53, 156, 0.84) 45%, transparent 57%),
+    linear-gradient(285deg, transparent 0 35%, rgba(0, 136, 255, 0.82) 45%, transparent 58%),
+    linear-gradient(180deg, #070510, #17122a 70%, #030205);
+}
+
+.sermon-community {
+  background:
+    radial-gradient(circle at 50% 58%, rgba(255, 217, 160, 0.7) 0 4%, transparent 4.6%),
+    radial-gradient(circle at 38% 70%, rgba(255, 217, 160, 0.7) 0 3%, transparent 3.5%),
+    radial-gradient(circle at 62% 70%, rgba(255, 217, 160, 0.7) 0 3%, transparent 3.5%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 238, 204, 0.45), transparent 22%),
+    repeating-radial-gradient(circle at 50% 60%, transparent 0 18px, rgba(255, 255, 255, 0.11) 19px 20px),
+    linear-gradient(180deg, #09110f, #020403);
+}
+
+.about-hero-image {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.88), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.88)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.06) 0 2px,
+      transparent 2px 48px
+    ),
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.16), transparent 22%),
+    linear-gradient(180deg, #1e1e20, #020202);
+}
+
+.about-hero-image::before {
+  content: "";
+  position: absolute;
+  inset: 0 25%;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(ellipse at 50% 68%, rgba(212, 163, 82, 0.18), transparent 9%),
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(255, 255, 255, 0.055) 27px 28px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 45%);
+}
+
+.calendar-hero-image {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent 24%, transparent 76%, rgba(255, 255, 255, 0.6)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.18) 0 2px,
+      transparent 2px 52px
+    ),
+    radial-gradient(ellipse at 50% 48%, rgba(95, 190, 220, 0.24), transparent 32%),
+    radial-gradient(ellipse at 50% 82%, rgba(255, 212, 156, 0.28), transparent 24%),
+    linear-gradient(180deg, #54646c, #d7d9dc 72%, #ffffff);
+}
+
+.calendar-hero-image::before {
+  content: "";
+  position: absolute;
+  inset: 0 18%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 30px, rgba(0, 0, 0, 0.12) 31px 33px),
+    radial-gradient(ellipse at 50% 68%, rgba(255, 231, 188, 0.52), transparent 10%);
+  opacity: 0.38;
+}
+
+.church-community-image,
+.about-gathering-image,
+.map-image,
+.leader-a,
+.leader-b,
+.leader-c,
+.leader-d {
+  background-size: cover;
+  background-position: center;
+}
+
+.calendar-event-worship,
+.calendar-event-workshop,
+.calendar-event-charity,
+.calendar-event-youth {
+  background-size: cover;
+  background-position: center;
+}
+
+.calendar-event-worship {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(255, 196, 88, 0.8), transparent 10%),
+    linear-gradient(120deg, rgba(0, 0, 0, 0.78), transparent 42%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.16) 0 4px, transparent 5px 28px),
+    linear-gradient(135deg, #08090c, #3f2818 58%, #0b0b0d);
+}
+
+.calendar-event-workshop {
+  background:
+    radial-gradient(circle at 34% 35%, rgba(255, 222, 176, 0.92) 0 7%, transparent 7.4%),
+    radial-gradient(circle at 58% 42%, rgba(255, 222, 176, 0.84) 0 7%, transparent 7.4%),
+    radial-gradient(circle at 73% 35%, rgba(255, 222, 176, 0.76) 0 7%, transparent 7.4%),
+    linear-gradient(90deg, #101112 0 28%, transparent 28%),
+    linear-gradient(135deg, #171717, #70513b 64%, #111);
+}
+
+.calendar-event-charity {
+  background:
+    radial-gradient(circle at 52% 58%, rgba(255, 238, 205, 0.88), transparent 13%),
+    radial-gradient(circle at 20% 20%, rgba(255, 190, 92, 0.58), transparent 16%),
+    linear-gradient(145deg, #22130a, #80613a 58%, #120c08);
+}
+
+.calendar-event-youth {
+  background:
+    radial-gradient(circle at 28% 80%, rgba(0, 102, 204, 0.75), transparent 18%),
+    radial-gradient(circle at 70% 22%, rgba(255, 255, 255, 0.42), transparent 12%),
+    linear-gradient(135deg, #111827, #20263a 55%, #080a0e);
+}
+
+.news-hero-image {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.95), transparent 42%, rgba(0, 0, 0, 0.72)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 62px),
+    radial-gradient(ellipse at 50% 35%, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, #111315, #020202);
+}
+
+.news-hero-image::before {
+  content: "";
+  position: absolute;
+  inset: 0 26%;
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(255, 255, 255, 0.28), transparent 13%),
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, 0.08) 35px 37px);
+}
+
+.news-image-church,
+.news-image-table,
+.news-image-book,
+.news-image-meeting,
+.news-image-retreat,
+.news-image-podcast {
+  background-size: cover;
+  background-position: center;
+}
+
+.news-image-church {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(255, 220, 160, 0.68), transparent 24%),
+    linear-gradient(90deg, transparent 46%, rgba(255, 224, 170, 0.9) 47% 53%, transparent 54%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.42)),
+    linear-gradient(135deg, #18324b, #d6a45a 58%, #0c1117);
+}
+
+.news-image-table {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(13, 18, 24, 0.98) 0 8%, transparent 8.4%),
+    radial-gradient(circle at 50% 34%, rgba(13, 18, 24, 0.98) 0 8%, transparent 8.4%),
+    radial-gradient(circle at 65% 28%, rgba(13, 18, 24, 0.98) 0 8%, transparent 8.4%),
+    linear-gradient(90deg, transparent 0 48%, rgba(173, 101, 43, 0.88) 49% 51%, transparent 52%),
+    linear-gradient(135deg, #0c1014, #8d6643 55%, #0c1014);
+}
+
+.news-image-book {
+  background:
+    radial-gradient(ellipse at 50% 62%, rgba(255, 250, 220, 0.92) 0 14%, transparent 15%),
+    linear-gradient(9deg, transparent 45%, rgba(255, 247, 220, 0.9) 46% 52%, transparent 53%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.48), transparent 24%),
+    linear-gradient(180deg, #081013, #291c13 70%, #07090b);
+}
+
+.news-image-meeting {
+  background:
+    radial-gradient(circle at 40% 54%, rgba(255, 225, 185, 0.86) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 56% 50%, rgba(255, 225, 185, 0.82) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 72% 56%, rgba(255, 225, 185, 0.74) 0 5%, transparent 5.4%),
+    repeating-linear-gradient(90deg, transparent 0 62px, rgba(255, 255, 255, 0.16) 63px 65px),
+    linear-gradient(135deg, #0b1520, #2e5f74 58%, #0a0d12);
+}
+
+.news-image-retreat {
+  background:
+    radial-gradient(ellipse at 50% 52%, rgba(255, 210, 130, 0.88), transparent 16%),
+    linear-gradient(180deg, #0e2936, #f0b162 54%, #1b2c35);
+}
+
+.news-image-podcast {
+  background:
+    radial-gradient(ellipse at 78% 20%, rgba(0, 102, 204, 0.55), transparent 20%),
+    linear-gradient(90deg, transparent 44%, rgba(255, 255, 255, 0.24) 45% 47%, transparent 48%),
+    radial-gradient(ellipse at 55% 56%, #242424 0 16%, transparent 17%),
+    linear-gradient(135deg, #07131f, #1d3342 55%, #05080d);
+}
+
+.dashboard-avatar {
+  background:
+    radial-gradient(circle at 50% 34%, #efc29b 0 20%, transparent 20.5%),
+    radial-gradient(ellipse at 50% 28%, #171719 0 29%, transparent 29.5%),
+    radial-gradient(ellipse at 50% 108%, #f4f4f5 0 52%, transparent 52.5%),
+    linear-gradient(135deg, #22252c, #d8dde5);
+  background-size: cover;
+  background-position: center;
+}
+
+.church-community-image {
+  background:
+    radial-gradient(circle at 35% 38%, rgba(255, 218, 164, 0.9) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 54% 42%, rgba(255, 218, 164, 0.86) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 70% 36%, rgba(255, 218, 164, 0.76) 0 5%, transparent 5.4%),
+    linear-gradient(90deg, #0f1112 0 30%, transparent 30% 100%),
+    repeating-linear-gradient(90deg, transparent 0 54px, rgba(255, 255, 255, 0.1) 55px 56px),
+    linear-gradient(135deg, #161311, #6b4a31 58%, #111);
+}
+
+.about-gathering-image {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0 29%, transparent 29%),
+    radial-gradient(circle at 48% 50%, rgba(249, 208, 154, 0.95) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 61% 54%, rgba(249, 208, 154, 0.95) 0 5%, transparent 5.4%),
+    radial-gradient(circle at 74% 49%, rgba(249, 208, 154, 0.95) 0 5%, transparent 5.4%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 44%),
+    linear-gradient(130deg, #151515, #705038 60%, #101010);
+}
+
+.map-image {
+  background:
+    radial-gradient(circle at 54% 54%, rgba(255, 255, 255, 0.9), transparent 7%),
+    radial-gradient(circle at 54% 54%, rgba(255, 255, 255, 0.34), transparent 18%),
+    repeating-linear-gradient(28deg, transparent 0 42px, rgba(255, 255, 255, 0.08) 43px 44px),
+    repeating-linear-gradient(122deg, transparent 0 58px, rgba(255, 255, 255, 0.06) 59px 60px),
+    #101113;
+}
+
+.leader-a {
+  background:
+    radial-gradient(circle at 50% 30%, #f0c28a 0 18%, transparent 18.5%),
+    linear-gradient(90deg, transparent 38%, #111 38% 62%, transparent 62%),
+    radial-gradient(circle at 50% 100%, #2d2d2f 0 35%, transparent 35.5%),
+    linear-gradient(135deg, #2f2417, #0a0a0b);
+}
+
+.leader-b {
+  background:
+    radial-gradient(circle at 50% 31%, #f1b98d 0 18%, transparent 18.5%),
+    radial-gradient(circle at 50% 100%, #172c35 0 36%, transparent 36.5%),
+    linear-gradient(135deg, #0b2f2f, #051112);
+}
+
+.leader-c {
+  background:
+    radial-gradient(circle at 50% 31%, #d99f78 0 18%, transparent 18.5%),
+    radial-gradient(circle at 50% 96%, #101f3f 0 36%, transparent 36.5%),
+    radial-gradient(circle at 70% 30%, rgba(0, 102, 204, 0.58), transparent 22%),
+    linear-gradient(135deg, #0f1630, #08080a);
+}
+
+.leader-d {
+  background:
+    radial-gradient(circle at 50% 31%, #e4ad86 0 18%, transparent 18.5%),
+    radial-gradient(circle at 50% 96%, #1a2930 0 36%, transparent 36.5%),
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.24), transparent 18%),
+    linear-gradient(135deg, #13252c, #08080a);
 }
