@@ -1,9 +1,13 @@
 import Image from "next/image";
 import NextLink from "next/link";
+import { redirect } from "next/navigation";
 import AuthBackdrop from "@/com/auth/AuthBackdrop";
 import AuthTabs from "@/com/auth/AuthTabs";
+import { getCurrentUser } from "@/lib/supabase/auth";
 
-export default function AuthPage() {
+export default async function AuthPage() {
+  if (await getCurrentUser()) redirect("/dashboard");
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent px-4 py-14 text-[#1d1d1f] md:px-6 md:py-16">
       <AuthBackdrop />

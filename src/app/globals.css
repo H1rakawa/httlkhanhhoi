@@ -179,6 +179,24 @@ html {
   color: #68686d;
 }
 
+.account-menu-item {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.account-menu-item:hover,
+.account-menu-item:focus,
+.account-menu-item[data-focused] {
+  background: #f1f5f9;
+}
+
 .hero-sanctuary {
   background:
     linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.74) 66%, #000 100%),
@@ -422,15 +440,6 @@ html {
     linear-gradient(135deg, #07131f, #1d3342 55%, #05080d);
 }
 
-.dashboard-avatar {
-  background:
-    radial-gradient(circle at 50% 34%, #efc29b 0 20%, transparent 20.5%),
-    radial-gradient(ellipse at 50% 28%, #171719 0 29%, transparent 29.5%),
-    radial-gradient(ellipse at 50% 108%, #f4f4f5 0 52%, transparent 52.5%),
-    linear-gradient(135deg, #22252c, #d8dde5);
-  background-size: cover;
-  background-position: center;
-}
 
 .church-community-image {
   background:

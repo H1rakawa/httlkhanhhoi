@@ -10,7 +10,7 @@ export default function QuickStats() {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`rounded-[12px] border border-[#e4e4e7] border-b-2 ${stat.color} bg-white p-5`}
+          className={`liquid-glass-item border-b-[3px] ${stat.color} p-5`}
         >
           <p className="text-sm text-[#8a8a8f]">{stat.label}</p>
           <p

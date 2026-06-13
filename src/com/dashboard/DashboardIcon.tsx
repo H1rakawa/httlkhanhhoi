@@ -75,6 +75,25 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "dashboard") {
+    return (
+      <svg {...commonProps}>
+        <rect x="4" y="4" width="6" height="6" />
+        <rect x="14" y="4" width="6" height="6" />
+        <rect x="4" y="14" width="6" height="6" />
+        <rect x="14" y="14" width="6" height="6" />
+      </svg>
+    );
+  }
+
+  if (name === "logout") {
+    return (
+      <svg {...commonProps}>
+        <path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10" />
+      </svg>
+    );
+  }
+
   return (
     <svg {...commonProps}>
       <path d="M12 3v18M3 12h18" />

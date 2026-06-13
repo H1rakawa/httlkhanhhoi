@@ -1,11 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Tabs } from "@heroui/react";
+import { FormEvent, useState } from "react";
+import { Button, Tabs, toast } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { ClockIcon } from "@/com/shared/Icons";
 
 type AuthView = "forms" | "forgot";
 type AuthTab = "login" | "register";
+
+type FormMessage = {
+  type: "success" | "error";
+  text: string;
+} | null;
+
+async function postAuth(path: string, body: Record<string, string>) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = (await response.json()) as {
+    error?: string;
+    message?: string;
+    requiresEmailConfirmation?: boolean;
+  };
+
+  if (!response.ok) throw new Error(data.error || "Đã có lỗi xảy ra.");
+  return data;
+}
+
+function Message({ message }: { message: FormMessage }) {
+  if (!message) return null;
+
+  return (
+    <p
+      className={[
+        "mt-6 rounded-[14px] px-4 py-3 text-sm font-medium",
+        message.type === "success"
+          ? "bg-[#e8f7ee] text-[#117a36]"
+          : "bg-[#fff0ef] text-[#b42318]",
+      ].join(" ")}
+      role="status"
+    >
+      {message.text}
+    </p>
+  );
+}
 
 function Field({
   label,
@@ -90,13 +130,7 @@ function PasswordInput({
   );
 }
 
-function PasswordField({
-  label,
-  name,
-}: {
-  label: string;
-  name: string;
-}) {
+function PasswordField({ label, name }: { label: string; name: string }) {
   return (
     <label className="grid gap-3 text-base font-medium text-[#252525]">
       {label}
@@ -136,8 +170,39 @@ function SocialActions() {
 }
 
 function LoginForm({ onForgot }: { onForgot: () => void }) {
+  const router = useRouter();
+  const [message, setMessage] = useState<FormMessage>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setMessage(null);
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      await postAuth("/api/auth/login", {
+        email: String(formData.get("identity") || "").trim(),
+        password: String(formData.get("password") || ""),
+      });
+      toast.success("Đăng nhập thành công", {
+        description: "Chào mừng bạn trở lại.",
+        timeout: 3500,
+      });
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Đăng nhập thất bại.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form className="mt-9">
+    <form className="mt-9" onSubmit={handleSubmit}>
       <div className="grid gap-7">
         <Field
           label="Email hoặc Tên đăng nhập"
@@ -160,12 +225,14 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
           <PasswordInput id="login-password" name="password" />
         </div>
       </div>
+      <Message message={message} />
 
       <Button
         type="submit"
+        isDisabled={isSubmitting}
         className="mt-7 h-14 w-full rounded-full bg-[#0a7bea] text-base font-semibold text-white shadow-[0_14px_24px_rgba(0,102,204,0.18)]"
       >
-        Đăng nhập
+        {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
       </Button>
 
       <SocialActions />
@@ -174,8 +241,61 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
 }
 
 function RegisterForm() {
+  const router = useRouter();
+  const [message, setMessage] = useState<FormMessage>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setMessage(null);
+    const formData = new FormData(event.currentTarget);
+    const password = String(formData.get("password") || "");
+    const confirmPassword = String(formData.get("confirmPassword") || "");
+
+    if (password !== confirmPassword) {
+      setMessage({ type: "error", text: "Mật khẩu xác nhận chưa khớp." });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const data = await postAuth("/api/auth/register", {
+        fullName: String(formData.get("fullName") || "").trim(),
+        email: String(formData.get("email") || "").trim(),
+        phone: String(formData.get("phone") || "").trim(),
+        password,
+      });
+
+      if (data.requiresEmailConfirmation) {
+        toast.success("Đăng ký thành công", {
+          description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
+          timeout: 3500,
+        });
+        setMessage({
+          type: "success",
+          text: "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận.",
+        });
+      } else {
+        toast.success("Đăng ký thành công", {
+          description: "Tài khoản của bạn đã sẵn sàng.",
+          timeout: 3500,
+        });
+        router.replace("/dashboard");
+        router.refresh();
+      }
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Đăng ký thất bại.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form className="mt-9">
+    <form className="mt-9" onSubmit={handleSubmit}>
       <div className="grid gap-5">
         <Field label="Họ và tên" name="fullName" placeholder="Nguyễn Văn A" />
         <div className="grid gap-5 md:grid-cols-2">
@@ -195,12 +315,14 @@ function RegisterForm() {
         <PasswordField label="Mật khẩu" name="password" />
         <PasswordField label="Xác nhận mật khẩu" name="confirmPassword" />
       </div>
+      <Message message={message} />
 
       <Button
         type="submit"
+        isDisabled={isSubmitting}
         className="mt-7 h-14 w-full rounded-full bg-[#0a7bea] text-base font-semibold text-white shadow-[0_14px_24px_rgba(0,102,204,0.18)]"
       >
-        Đăng ký
+        {isSubmitting ? "Đang tạo tài khoản..." : "Đăng ký"}
       </Button>
 
       <SocialActions />
@@ -209,8 +331,38 @@ function RegisterForm() {
 }
 
 function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
+  const [message, setMessage] = useState<FormMessage>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setMessage(null);
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      const data = await postAuth("/api/auth/forgot-password", {
+        email: String(formData.get("resetEmail") || "").trim(),
+      });
+      setMessage({
+        type: "success",
+        text: data.message || "Liên kết khôi phục đã được gửi.",
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Không thể gửi liên kết khôi phục.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="liquid-glass w-full max-w-[560px] p-7 text-[#1d1d1f] md:p-12">
+    <div className="liquid-glass w-full max-w-140 p-7 text-[#1d1d1f] md:p-12">
       <div className="liquid-readable mx-auto flex h-16 w-16 items-center justify-center rounded-full text-[#0a7bea]">
         <ClockIcon className="h-8 w-8" />
       </div>
@@ -223,18 +375,20 @@ function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
         </p>
       </div>
 
-      <form className="mt-10">
+      <form className="mt-10" onSubmit={handleSubmit}>
         <Field
           label="Địa chỉ Email"
           name="resetEmail"
           type="email"
           placeholder="example@gmail.com"
         />
+        <Message message={message} />
         <Button
           type="submit"
+          isDisabled={isSubmitting}
           className="mt-7 h-14 w-full rounded-full bg-[#0a7bea] text-base font-semibold text-white shadow-[0_14px_24px_rgba(0,102,204,0.18)]"
         >
-          Gửi liên kết khôi phục
+          {isSubmitting ? "Đang gửi..." : "Gửi liên kết khôi phục"}
         </Button>
       </form>
 
@@ -266,7 +420,7 @@ export default function AuthTabs() {
   }
 
   return (
-    <div className="liquid-glass w-full max-w-[620px] p-7 text-[#1d1d1f] md:p-12">
+    <div className="liquid-glass w-full max-w-155 p-7 text-[#1d1d1f] md:p-12">
       <Tabs
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(String(key) as AuthTab)}
@@ -277,18 +431,17 @@ export default function AuthTabs() {
         <Tabs.List className="liquid-readable grid w-full grid-cols-2 p-1">
           <Tabs.Tab
             id="login"
-            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73]"
+            className="auth-tab h-11 rounded-3xl text-base font-semibold text-[#6e6e73]"
           >
             Đăng nhập
           </Tabs.Tab>
           <Tabs.Tab
             id="register"
-            className="auth-tab h-11 rounded-[12px] text-base font-semibold text-[#6e6e73]"
+            className="auth-tab h-11 rounded-3xl text-base font-semibold text-[#6e6e73]"
           >
             Đăng ký
           </Tabs.Tab>
         </Tabs.List>
-
       </Tabs>
 
       {activeTab === "login" ? (

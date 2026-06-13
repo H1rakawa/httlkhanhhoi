@@ -3,7 +3,7 @@ import { assignments } from "@/com/dashboard/dashboardData";
 
 export default function UpcomingAssignments() {
   return (
-    <section>
+    <section className="liquid-readable p-5 md:p-6">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Bài tập sắp tới</h2>
         <button type="button" className="text-sm font-medium text-[#0066cc] hover:underline">
@@ -15,7 +15,7 @@ export default function UpcomingAssignments() {
           <article
             key={assignment.id}
             className={[
-              "flex items-center gap-4 rounded-[12px] border border-[#e4e4e7] bg-white p-4",
+              "liquid-glass-item flex flex-col items-start gap-4 border-2 border-white/80 p-4 sm:flex-row sm:items-center",
               assignment.status === "Đã nộp"
                 ? "border-l-4 border-l-[#0066cc]"
                 : "border-l-4 border-l-[#cfd8e4]",
@@ -30,7 +30,7 @@ export default function UpcomingAssignments() {
             </div>
             <span
               className={[
-                "shrink-0 rounded-full px-4 py-2 text-xs font-semibold",
+                "shrink-0 self-start rounded-full px-4 py-2 text-xs font-semibold sm:self-auto",
                 assignment.status === "Đã nộp"
                   ? "bg-[#eef5ff] text-[#0066cc]"
                   : "bg-[#f1f1f4] text-[#6e6e73]",

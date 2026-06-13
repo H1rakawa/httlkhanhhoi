@@ -7,9 +7,9 @@ export default function RecentNotifications() {
   const [readIds, setReadIds] = useState<string[]>([]);
 
   return (
-    <section>
+    <section className="liquid-readable p-5 md:p-6">
       <h2 className="mb-5 text-lg font-semibold">Thông báo mới nhất</h2>
-      <div className="overflow-hidden rounded-[14px] border border-[#e4e4e7] bg-white">
+      <div className="overflow-hidden rounded-[14px] border border-white/80 bg-white/46">
         {notifications.map((notification) => {
           const isUnread = notification.unread && !readIds.includes(notification.id);
 
@@ -24,7 +24,7 @@ export default function RecentNotifications() {
                     : [...current, notification.id],
                 )
               }
-              className="flex w-full gap-4 border-b border-[#ececee] p-5 text-left last:border-b-0 hover:bg-[#fafafa]"
+              className="flex w-full gap-4 border-b border-white/70 p-5 text-left last:border-b-0 hover:bg-white/48"
             >
               <span
                 className={[

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import NextLink from "next/link";
 import { useEffect, useRef, useState } from "react";
+import HeaderAccountMenu from "@/com/auth/HeaderAccountMenu";
 import { navItems } from "@/com/shared/data";
 
 type HeaderProps = {
@@ -114,12 +115,7 @@ export default function Header({
           })}
         </div>
 
-        <NextLink
-          href="/auth"
-          className="flex h-8 items-center rounded-full bg-[#0066cc] px-4 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#0077ee]"
-        >
-          Đăng nhập / Đăng ký
-        </NextLink>
+        <HeaderAccountMenu />
       </nav>
     </header>
   );

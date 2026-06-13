@@ -10,26 +10,29 @@ const shortcuts = [
 
 export default function ShortcutsPanel() {
   return (
-    <section>
+    <section className="liquid-readable p-5 md:p-6">
       <h2 className="mb-5 text-lg font-semibold">Truy cập nhanh</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {shortcuts.map((shortcut) => (
           <Link
             key={shortcut.label}
             href={shortcut.href}
             className={[
-              "flex aspect-square flex-col items-center justify-center gap-5 rounded-[14px] border no-underline",
+              "flex aspect-square min-h-32 flex-col items-center justify-center gap-4 rounded-[16px] border-2 px-2 text-center no-underline shadow-[0_18px_40px_rgba(31,38,48,0.12)]",
               shortcut.primary
                 ? "border-[#0066cc] bg-[#0066cc] text-white"
-                : "border-[#e4e4e7] bg-white text-[#0066cc]",
+                : "liquid-glass-item border-white/80 text-[#0066cc]",
             ].join(" ")}
           >
-            <DashboardIcon name={shortcut.icon} className="h-7 w-7" />
+            <DashboardIcon
+              name={shortcut.icon}
+              className="relative z-10 h-7 w-7"
+            />
             <span
               className={
                 shortcut.primary
-                  ? "font-semibold text-white"
-                  : "font-semibold text-[#1d1d1f]"
+                  ? "relative z-10 font-semibold text-white"
+                  : "relative z-10 font-semibold text-[#1d1d1f]"
               }
             >
               {shortcut.label}
@@ -38,7 +41,7 @@ export default function ShortcutsPanel() {
         ))}
       </div>
 
-      <div className="mt-8 rounded-[16px] bg-[linear-gradient(135deg,#0066cc,#273ca8)] p-8 text-white">
+      <div className="mt-8 rounded-[16px] border border-white/80 bg-[linear-gradient(135deg,rgba(0,102,204,0.94),rgba(39,60,168,0.92))] p-8 text-white shadow-[0_18px_36px_rgba(0,102,204,0.22)]">
         <p className="text-xl font-semibold">Vững bước hành trình</p>
         <p className="mt-4 text-sm italic leading-7 text-white/82">
           “Sự kiên trì sẽ dẫn lối bạn đến bến bờ trưởng thành.”
