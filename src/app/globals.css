@@ -127,13 +127,6 @@ body {
   opacity: 1;
 }
 
-* {
-  scroll-behavior: auto !important;
-  transition-duration: 0s !important;
-  animation-duration: 0s !important;
-  animation-delay: 0s !important;
-}
-
 @media (prefers-contrast: more) {
   .liquid-glass,
   .liquid-glass-item {
@@ -194,6 +187,13 @@ html {
 .account-menu-item:hover,
 .account-menu-item:focus,
 .account-menu-item[data-focused] {
+  background: #f1f5f9;
+}
+
+.account-menu-item-active,
+.account-menu-item-active:hover,
+.account-menu-item-active:focus,
+.account-menu-item-active[data-focused] {
   background: #f1f5f9;
 }
 

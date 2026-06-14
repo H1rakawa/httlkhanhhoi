@@ -26,7 +26,7 @@ export default function Footer() {
   return (
     <footer className="rounded-t-[28px] bg-black px-5 py-8 text-white shadow-[0_-1px_4px_rgba(0,0,0,0.16)] md:py-10">
       <div className="mx-auto max-w-7xl px-3 md:px-8">
-        <div className="grid gap-10 md:grid-cols-[1.1fr_0.85fr_0.85fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.1fr_0.85fr_0.85fr_1fr]">
           <div>
             <NextLink
               href="/"

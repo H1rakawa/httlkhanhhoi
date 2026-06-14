@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAuthRequest } from "@/lib/supabase/auth";
 
+const PRODUCTION_SITE_URL = "https://khanhhoiwebnew.vercel.app";
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
@@ -11,9 +13,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const siteUrl = (
+      process.env.NEXT_PUBLIC_SITE_URL || PRODUCTION_SITE_URL
+    ).replace(/\/$/, "");
+
     await supabaseAuthRequest("/recover", {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({
+        email,
+        redirect_to: `${siteUrl}/auth/reset-password`,
+      }),
     });
 
     return NextResponse.json({

@@ -13,7 +13,7 @@ export async function GET() {
 
   try {
     const assignments = await supabaseDataRequest(
-      "assignments?select=id,title,description,week_number,attachment_url,due_date,created_by&order=due_date.asc",
+      "assignments?select=id,title,description,week_number,attachment_url,due_date,created_by,submissions(status,grade)&order=due_date.asc",
       await getAccessToken(),
     );
     return NextResponse.json(assignments);

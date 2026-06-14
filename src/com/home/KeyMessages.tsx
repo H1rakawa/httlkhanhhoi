@@ -19,14 +19,14 @@ export default function KeyMessages() {
           </p>
         </div>
 
-        <MotionGroup className="mt-8 grid gap-5 md:grid-cols-3">
+        <MotionGroup className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {values.map((item) => (
             <MotionItem key={item.title}>
               <Card
                 variant="transparent"
                 className="liquid-glass-item h-full text-center text-[#1d1d1f]"
               >
-                <CardContent className="flex items-center p-6">
+                <CardContent className="flex flex-col items-center p-6">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/90 bg-white/48 text-[#111113] shadow-[0_8px_18px_rgba(31,48,70,0.12)] backdrop-blur-xl">
                     <ValueIcon name={item.icon} />
                   </div>

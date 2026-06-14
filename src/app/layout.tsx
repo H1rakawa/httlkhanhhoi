@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/com/Provider";
+import RecoveryRedirect from "@/com/auth/RecoveryRedirect";
 
 export const metadata: Metadata = {
   title: "HTTL. Khánh Hội",
@@ -22,7 +23,10 @@ export default function RootLayout({
   return (
     <html lang="vi" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <RecoveryRedirect />
+          {children}
+        </Providers>
       </body>
     </html>
   );

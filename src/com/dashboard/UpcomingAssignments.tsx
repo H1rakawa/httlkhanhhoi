@@ -1,14 +1,15 @@
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 import { assignments } from "@/com/dashboard/dashboardData";
+import Link from "next/link";
 
 export default function UpcomingAssignments() {
   return (
     <section className="liquid-readable p-5 md:p-6">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Bài tập sắp tới</h2>
-        <button type="button" className="text-sm font-medium text-[#0066cc] hover:underline">
+        <Link href="/assignment" className="text-sm font-medium text-[#0066cc] hover:underline">
           Xem tất cả
-        </button>
+        </Link>
       </div>
       <div className="grid gap-4">
         {assignments.map((assignment) => (

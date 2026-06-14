@@ -1,7 +1,7 @@
 "use client";
 
 import { Dropdown, toast } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 
@@ -22,16 +22,17 @@ type Account = {
 
 const accountRoutes: Record<string, string> = {
   dashboard: "/dashboard",
-  assignments: "/dashboard#assignments",
-  discussion: "/contact",
-  library: "/news",
+  assignments: "/assignment",
+  library: "/library",
   activity: "/calendar",
 };
 
 export default function HeaderAccountMenu() {
   const router = useRouter();
+  const pathname = usePathname();
   const [account, setAccount] = useState<Account | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -54,6 +55,8 @@ export default function HeaderAccountMenu() {
   }, []);
 
   const handleAction = async (key: React.Key) => {
+    setIsOpen(false);
+
     if (String(key) === "logout") {
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) return;
@@ -72,10 +75,19 @@ export default function HeaderAccountMenu() {
     if (destination) router.push(destination);
   };
 
+  const itemClassName = (key: keyof typeof accountRoutes) =>
+    [
+      "account-menu-item",
+      pathname === accountRoutes[key] ||
+      pathname.startsWith(`${accountRoutes[key]}/`)
+        ? "account-menu-item-active"
+        : "",
+    ].join(" ");
+
   if (isLoading) {
     return (
       <span
-        className="h-9 w-9 rounded-full border border-white/20 bg-white/10"
+        className="h-10 w-[68px] rounded-full border border-white/20 bg-white/10"
         aria-hidden="true"
       />
     );
@@ -87,7 +99,7 @@ export default function HeaderAccountMenu() {
         href="/auth"
         className="flex h-8 items-center rounded-full bg-[#0066cc] px-4 text-sm font-semibold text-white no-underline hover:bg-[#0077ee]"
       >
-        Đăng nhập / Đăng ký
+        Đăng nhập<span className="hidden sm:inline"> / Đăng ký</span>
       </a>
     );
   }
@@ -103,19 +115,37 @@ export default function HeaderAccountMenu() {
   const initial = email.charAt(0).toUpperCase() || name.charAt(0).toUpperCase();
 
   return (
-    <Dropdown>
+    <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
       <Dropdown.Trigger
         aria-label={`Mở menu tài khoản của ${name}`}
-        className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white/75 bg-[#087be8] p-0 text-sm font-bold text-white shadow-[0_6px_18px_rgba(0,0,0,0.22)] outline-none focus-visible:ring-2 focus-visible:ring-[#2997ff]"
+        aria-expanded={isOpen}
+        className="flex h-10 items-center gap-2 rounded-full border border-white/55 bg-white/14 py-1 pl-1 pr-3 text-sm font-bold text-white shadow-[0_6px_18px_rgba(0,0,0,0.22)] outline-none backdrop-blur-xl hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-[#2997ff]"
       >
-        {avatarUrl ? (
-          <span
-            className="block h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: `url("${avatarUrl}")` }}
-          />
-        ) : (
-          <span aria-hidden="true">{initial}</span>
-        )}
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/75 bg-[#087be8] text-xs text-white shadow-[0_3px_10px_rgba(0,0,0,0.2)]">
+          {avatarUrl ? (
+            <span
+              className="block h-full w-full bg-cover bg-center"
+              style={{ backgroundImage: `url("${avatarUrl}")` }}
+            />
+          ) : (
+            <span aria-hidden="true">{initial}</span>
+          )}
+        </span>
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={[
+            "h-4 w-4 text-white/84 transition-transform duration-200",
+            isOpen ? "rotate-180" : "rotate-0",
+          ].join(" ")}
+          aria-hidden="true"
+        >
+          <path d="m5 7.5 5 5 5-5" />
+        </svg>
       </Dropdown.Trigger>
 
       <Dropdown.Popover
@@ -133,23 +163,22 @@ export default function HeaderAccountMenu() {
           onAction={handleAction}
           className="p-3 outline-none"
         >
-          <Dropdown.Item id="dashboard" className="account-menu-item">
+          <Dropdown.Item id="dashboard" className={itemClassName("dashboard")}>
             <DashboardIcon name="dashboard" className="h-5 w-5" />
             <span>Bảng điều khiển</span>
           </Dropdown.Item>
-          <Dropdown.Item id="assignments" className="account-menu-item">
+          <Dropdown.Item
+            id="assignments"
+            className={itemClassName("assignments")}
+          >
             <DashboardIcon name="document" className="h-5 w-5" />
             <span>Danh sách bài tập</span>
           </Dropdown.Item>
-          <Dropdown.Item id="discussion" className="account-menu-item">
-            <DashboardIcon name="community" className="h-5 w-5" />
-            <span>Thảo luận</span>
-          </Dropdown.Item>
-          <Dropdown.Item id="library" className="account-menu-item">
+          <Dropdown.Item id="library" className={itemClassName("library")}>
             <DashboardIcon name="book" className="h-5 w-5" />
             <span>Thư viện</span>
           </Dropdown.Item>
-          <Dropdown.Item id="activity" className="account-menu-item">
+          <Dropdown.Item id="activity" className={itemClassName("activity")}>
             <DashboardIcon name="calendar" className="h-5 w-5" />
             <span>Hoạt động</span>
           </Dropdown.Item>

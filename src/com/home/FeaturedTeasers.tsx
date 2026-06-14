@@ -29,7 +29,7 @@ export default function FeaturedTeasers() {
           </Link>
         </div>
 
-        <MotionGroup className="mt-8 grid gap-5 md:grid-cols-3">
+        <MotionGroup className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {sermons.map((sermon) => (
             <MotionItem key={sermon.title} className="h-full">
               <Card
@@ -129,7 +129,7 @@ export function EventList() {
                   </div>
                   <Link
                     href="/calendar"
-                    className="inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-[#0066cc] px-5 text-xs font-semibold text-white no-underline transition-colors hover:bg-[#0077ee]"
+                    className="inline-flex h-9 w-full shrink-0 items-center justify-center rounded-full bg-[#0066cc] px-5 text-xs font-semibold text-white no-underline transition-colors hover:bg-[#0077ee] sm:w-auto justify-self-center sm:justify-self-auto"
                   >
                     Tìm hiểu thêm
                   </Link>

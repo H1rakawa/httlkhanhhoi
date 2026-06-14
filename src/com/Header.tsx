@@ -16,6 +16,7 @@ export default function Header({
   showNotice = false,
 }: HeaderProps) {
   const [isNoticeVisible, setIsNoticeVisible] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -115,8 +116,57 @@ export default function Header({
           })}
         </div>
 
-        <HeaderAccountMenu />
+        <div className="flex items-center gap-4">
+          <HeaderAccountMenu />
+          <button
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20 focus:outline-none md:hidden"
+            aria-expanded={isMobileMenuOpen}
+            aria-label="Menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile Menu Panel */}
+      <div
+        className={[
+          "overflow-hidden border-t border-white/10 bg-black/95 backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-out md:hidden",
+          isMobileMenuOpen ? "max-h-[320px] opacity-100" : "max-h-0 opacity-0",
+        ].join(" ")}
+      >
+        <div className="flex flex-col gap-1 px-5 py-4">
+          {navItems.map((item) => {
+            const isActive =
+              activePath !== "/" && item.href.split("#")[0] === activePath;
+
+            return (
+              <NextLink
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={[
+                  "block py-3 text-base font-medium no-underline transition-colors border-b border-white/5 last:border-0",
+                  isActive
+                    ? "text-white"
+                    : "text-white/72 hover:text-white",
+                ].join(" ")}
+              >
+                {item.label}
+              </NextLink>
+            );
+          })}
+        </div>
+      </div>
     </header>
   );
 }

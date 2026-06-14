@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <DashboardBackdrop />
       <Header activePath="/dashboard" />
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-20 pt-24 md:px-6 md:pb-28 md:pt-28">
+      <div className="relative z-10 mx-auto max-w-7xl pb-20 pt-24 md:pb-28 md:pt-28">
         <div>
           <WelcomePanel
             displayName={displayName}

@@ -2,8 +2,8 @@ import Link from "next/link";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 
 const shortcuts = [
-  { label: "Nộp bài", href: "#assignments", icon: "upload", primary: true },
-  { label: "Thư viện", href: "/news", icon: "book" },
+  { label: "Nộp bài", href: "/assignment", icon: "upload", primary: true },
+  { label: "Thư viện", href: "/library", icon: "book" },
   { label: "Lịch sự kiện", href: "/calendar", icon: "calendar" },
   { label: "Cộng đồng", href: "/contact", icon: "community" },
 ];
