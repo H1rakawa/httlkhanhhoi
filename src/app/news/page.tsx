@@ -13,7 +13,7 @@ export default function NewsPage() {
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <NewsBackdrop />
       <Header activePath="/news" />
-      <section className="relative z-10 flex min-h-[720px] items-center overflow-hidden px-5 pb-20 pt-28">
+      <section className="relative z-10 flex min-h-180 items-center overflow-hidden px-5 pb-20 pt-28">
         <Image
           src="/images/parallax-background.png"
           alt="Bữa tiệc cưới Ca-na"

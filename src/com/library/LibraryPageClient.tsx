@@ -30,6 +30,12 @@ type ApiResource = {
   } | null;
 };
 
+type YouTubeSermonFeed = {
+  liveEmbedUrl: string;
+  live: LibraryResource;
+  videos: LibraryResource[];
+};
+
 const resourcesPerPage = 6;
 
 const previewDetails: Record<
@@ -77,15 +83,22 @@ export default function LibraryPageClient() {
   const [selected, setSelected] = useState<LibraryResource | null>(null);
 
   useEffect(() => {
-    fetch("/api/resources", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as ApiResource[];
-      })
-      .then((data) => {
-        if (!data?.length) return;
-        setResources(
-          data.map((resource, index) => ({
+    Promise.all([
+      fetch("/api/resources", { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return (await response.json()) as ApiResource[];
+        })
+        .catch(() => null),
+      fetch("/api/youtube/sermons", { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return (await response.json()) as YouTubeSermonFeed;
+        })
+        .catch(() => null),
+    ]).then(([data, youtube]) => {
+      const supabaseResources =
+        data?.map((resource, index) => ({
             id: String(resource.id),
             title: resource.title,
             description:
@@ -99,10 +112,13 @@ export default function LibraryPageClient() {
                 : "") ||
               fallbackResources[index % fallbackResources.length].image,
             createdAt: resource.created_at,
-          })),
-        );
-      })
-      .catch(() => undefined);
+            source: "supabase" as const,
+          })) || [];
+
+      const youtubeVideos = youtube ? [youtube.live, ...youtube.videos] : [];
+      const nextResources = [...youtubeVideos, ...supabaseResources];
+      if (nextResources.length) setResources(nextResources);
+    });
   }, []);
 
   useEffect(() => {
@@ -292,8 +308,18 @@ export default function LibraryPageClient() {
 
             <div className="liquid-glass min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="relative aspect-[16/9] overflow-hidden rounded-[18px] shadow-[0_22px_50px_rgba(7,17,31,0.22)]">
-                <LibraryResourceArtwork resource={selected} sizes="760px" />
-                {(selected.type === "Video" || selected.type === "Âm thanh" || selected.type === "Bài giảng") && (
+                {selected.embedUrl ? (
+                  <iframe
+                    src={selected.embedUrl}
+                    title={selected.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full border-0"
+                  />
+                ) : (
+                  <LibraryResourceArtwork resource={selected} sizes="760px" />
+                )}
+                {!selected.embedUrl && (selected.type === "Video" || selected.type === "Âm thanh" || selected.type === "Bài giảng") && (
                   <button
                     type="button"
                     className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/68 text-[#0066cc] shadow-xl backdrop-blur-xl transition-transform hover:scale-110"

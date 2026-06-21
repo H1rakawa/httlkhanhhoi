@@ -6,6 +6,9 @@ export type LibraryResource = {
   url: string;
   image: string;
   createdAt: string;
+  embedUrl?: string;
+  source?: "supabase" | "youtube" | "fallback";
+  videoId?: string;
 };
 
 export const libraryTypes = [

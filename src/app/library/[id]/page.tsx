@@ -11,6 +11,7 @@ import {
   normalizeResourceType,
 } from "@/com/library/libraryData";
 import { supabaseDataRequest } from "@/lib/supabase/auth";
+import { getYouTubeSermons } from "@/lib/youtube/sermons";
 
 type LibraryDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -58,11 +59,12 @@ const detailContent: Record<
 };
 
 function formatDate(date: string) {
+  const value = date.includes("T") ? new Date(date) : new Date(`${date}T00:00:00`);
   return new Intl.DateTimeFormat("vi-VN", {
     day: "2-digit",
     month: "long",
     year: "numeric",
-  }).format(new Date(`${date}T00:00:00`));
+  }).format(value);
 }
 
 export function generateStaticParams() {
@@ -72,6 +74,16 @@ export function generateStaticParams() {
 async function getResource(id: string) {
   const fallback = fallbackResources.find((item) => item.id === id);
   if (fallback) return fallback;
+
+  if (id.startsWith("youtube-")) {
+    try {
+      const feed = await getYouTubeSermons();
+      if (id === feed.live.id) return feed.live;
+      return feed.videos.find((video) => video.id === id) || null;
+    } catch {
+      return null;
+    }
+  }
 
   try {
     const resources = await supabaseDataRequest<
@@ -147,11 +159,21 @@ export default async function LibraryDetailPage({
           <div className="space-y-6">
             <section className="liquid-glass p-4 sm:p-6">
               <div className="group relative aspect-[16/10] overflow-hidden rounded-[20px] shadow-[0_28px_70px_rgba(7,17,31,0.24)]">
-                <LibraryResourceArtwork resource={resource} sizes="900px" />
+                {resource.embedUrl ? (
+                  <iframe
+                    src={resource.embedUrl}
+                    title={resource.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full border-0"
+                  />
+                ) : (
+                  <LibraryResourceArtwork resource={resource} sizes="900px" />
+                )}
                 <span className="absolute left-5 top-5 rounded-full border border-white/70 bg-[#87620c]/88 px-4 py-2 text-xs font-semibold text-white backdrop-blur-xl">
                   {content.category}
                 </span>
-                {(resource.type === "Video" || resource.type === "Âm thanh" || resource.type === "Bài giảng") && (
+                {!resource.embedUrl && (resource.type === "Video" || resource.type === "Âm thanh" || resource.type === "Bài giảng") && (
                   <span className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/70 text-3xl text-[#0066cc] shadow-2xl backdrop-blur-xl">
                     <span className="ml-1">▶</span>
                   </span>
