@@ -15,14 +15,14 @@ export default function NewsPage() {
       <Header activePath="/news" />
       <section className="relative z-10 flex min-h-[720px] items-center overflow-hidden px-5 pb-20 pt-28">
         <Image
-          src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2400&q=88"
-          alt="Khung cảnh bình an"
+          src="/images/parallax-background.png"
+          alt="Bữa tiệc cưới Ca-na"
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-75"
+          className="object-cover opacity-82"
         />
-        <div className="absolute inset-0 bg-white/12" />
+        <div className="absolute inset-0 bg-white/24 backdrop-blur-[1px]" />
         <div className="liquid-glass relative z-10 mx-auto w-full max-w-7xl px-8 py-14 text-center md:px-16 md:py-16">
           <p className="inline-flex rounded-full bg-[#0066cc] px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
             Tin tiêu điểm

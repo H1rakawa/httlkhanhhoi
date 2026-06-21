@@ -13,7 +13,7 @@ const contactItems = [
   {
     icon: PinIcon,
     title: "Địa chỉ",
-    body: "123 Đường Hòa Bình, Quận 1, TP. Hồ Chí Minh",
+    body: "98 Lê Quốc Hưng, Quận 4, TP. Hồ Chí Minh",
   },
   {
     icon: PhoneIcon,
@@ -27,8 +27,8 @@ const contactItems = [
   },
   {
     icon: ClockIcon,
-    title: "Giờ làm việc",
-    body: "Thứ Hai - Thứ Sáu, 08:30 - 17:30",
+    title: "Thời gian hoạt động",
+    body: "Thứ Hai - Thứ Sáu, 05:30 - 11:30, 13:30 - 21:00",
   },
 ];
 

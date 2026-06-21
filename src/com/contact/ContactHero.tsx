@@ -4,14 +4,14 @@ export default function ContactHero() {
   return (
     <section className="relative z-10 isolate flex min-h-[620px] items-center overflow-hidden bg-[#dce4e5] px-5 pb-12 pt-28 md:min-h-[720px] md:pt-32">
       <Image
-        src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2400&q=90"
-        alt="Mặt hồ yên bình giữa thiên nhiên"
+        src="/images/parallax-background.png"
+        alt="Bữa tiệc cưới Ca-na"
         fill
         priority
         sizes="100vw"
-        className="object-cover"
+        className="object-cover opacity-82"
       />
-      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-white/26 backdrop-blur-[1px]" />
       <div className="liquid-glass relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-6 py-12 text-center text-[#111113] md:px-14 md:py-16">
         <p className="text-sm font-semibold text-[#0066cc]">
           Kết nối với HTTL. Khánh Hội

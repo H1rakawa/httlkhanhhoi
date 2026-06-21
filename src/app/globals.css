@@ -5,6 +5,23 @@
 @import "@heroui/styles";
 /* @custom-variant dark (&:is(.dark *)); */
 
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(32px, 0, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="slideInRight"] {
+    animation: none !important;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

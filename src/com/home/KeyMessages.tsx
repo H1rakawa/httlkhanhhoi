@@ -1,5 +1,9 @@
 import { Card, CardContent } from "@heroui/react";
-import { MotionGroup, MotionItem, MotionSection } from "@/com/shared/MotionSection";
+import {
+  MotionGroup,
+  MotionItem,
+  MotionSection,
+} from "@/com/shared/MotionSection";
 import { ValueIcon } from "@/com/shared/Icons";
 import { values } from "@/com/shared/data";
 
@@ -12,10 +16,10 @@ export default function KeyMessages() {
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <h2 className="text-3xl font-semibold tracking-normal">
-            Tại sao chọn HTTL. Khánh Hội?
+            Những Giá Trị Cốt Lõi
           </h2>
           <p className="mt-2 text-sm text-[#6e6e73]">
-            Những giá trị cốt lõi làm nên cộng đồng của chúng tôi
+            Cộng đồng được xây dựng dựa trên 3 nền tảng
           </p>
         </div>
 

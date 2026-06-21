@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Pagination from "@/com/news/Pagination";
 import LibraryResourceCard, {
@@ -17,10 +18,55 @@ type ApiResource = {
   title: string;
   type: string;
   url: string;
+  thumbnail_url?: string | null;
+  mime_type?: string | null;
+  size_bytes?: number | null;
   created_at: string;
+  media_asset?: {
+    public_url: string;
+    media_kind: string;
+    mime_type: string;
+    size_bytes: number;
+  } | null;
 };
 
 const resourcesPerPage = 6;
+
+const previewDetails: Record<
+  LibraryResource["type"],
+  { eyebrow: string; title: string; facts: string[]; action: string }
+> = {
+  PDF: {
+    eyebrow: "Bản đọc cô đọng",
+    title: "Nội dung chính trong tài liệu",
+    facts: ["Hướng dẫn thực hành từng bước", "Câu hỏi suy ngẫm cuối mỗi phần", "Không gian ghi chú cá nhân"],
+    action: "Tải tài liệu PDF",
+  },
+  Video: {
+    eyebrow: "Xem trước bài giảng",
+    title: "Các phân đoạn nổi bật",
+    facts: ["Mở đầu và bối cảnh", "Thông điệp trọng tâm", "Ứng dụng trong đời sống"],
+    action: "Xem toàn bộ video",
+  },
+  Sách: {
+    eyebrow: "Đọc thử nội dung",
+    title: "Hành trình trong cuốn sách",
+    facts: ["Nền tảng của chủ đề", "Suy ngẫm theo từng chương", "Bài tập áp dụng cuối sách"],
+    action: "Mở bản đọc",
+  },
+  "Bài giảng": {
+    eyebrow: "Dàn ý bài giảng",
+    title: "Thông điệp và câu hỏi suy ngẫm",
+    facts: ["Kinh Thánh nền tảng", "Ba ý chính của bài giảng", "Lời cầu nguyện kết thúc"],
+    action: "Nghe bài giảng",
+  },
+  "Âm thanh": {
+    eyebrow: "Danh sách phát",
+    title: "Không gian cầu nguyện",
+    facts: ["Khởi đầu tĩnh lặng", "Suy ngẫm Lời Chúa", "Cầu nguyện và đáp ứng"],
+    action: "Phát âm thanh",
+  },
+};
 
 export default function LibraryPageClient() {
   const [resources, setResources] = useState(fallbackResources);
@@ -45,14 +91,32 @@ export default function LibraryPageClient() {
             description:
               "Tài liệu được tuyển chọn từ thư viện HTTL. Khánh Hội, hỗ trợ học hỏi và trưởng thành trong đức tin.",
             type: normalizeResourceType(resource.type),
-            url: resource.url,
-            image: fallbackResources[index % fallbackResources.length].image,
+            url: resource.media_asset?.public_url || resource.url,
+            image:
+              resource.thumbnail_url ||
+              (resource.media_asset?.media_kind === "image"
+                ? resource.media_asset.public_url
+                : "") ||
+              fallbackResources[index % fallbackResources.length].image,
             createdAt: resource.created_at,
           })),
         );
       })
       .catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelected(null);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [selected]);
 
   const filteredResources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -199,59 +263,153 @@ export default function LibraryPageClient() {
 
       {selected && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#07111f]/30 px-4 backdrop-blur-md"
+          className="fixed inset-0 z-[70] bg-[#07111f]/26 backdrop-blur-[8px]"
           role="dialog"
           aria-modal="true"
-          aria-label={`Chi tiết ${selected.title}`}
+          aria-label={`Xem trước ${selected.title}`}
           onClick={() => setSelected(null)}
         >
-          <div
-            className="liquid-glass grid w-full max-w-3xl gap-6 p-5 md:grid-cols-[0.9fr_1.1fr] md:p-7"
+          <aside
+            className="absolute inset-y-0 right-0 flex w-full flex-col border-l border-white/80 bg-[linear-gradient(145deg,rgba(250,252,255,0.92),rgba(226,237,247,0.84))] p-4 shadow-[-30px_0_80px_rgba(7,17,31,0.22)] backdrop-blur-[32px] animate-[slideInRight_320ms_cubic-bezier(.22,.8,.3,1)] sm:p-6 md:w-[min(58vw,760px)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="relative min-h-56 overflow-hidden rounded-[16px]">
-              <LibraryResourceArtwork resource={selected} sizes="500px" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0066cc]">
-                    {selected.type}
-                  </p>
-                  <h2 className="mt-3 text-2xl font-semibold">{selected.title}</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelected(null)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white bg-white/70 text-lg"
-                  aria-label="Đóng"
-                >
-                  ×
-                </button>
+            <div className="flex items-center justify-between gap-4 pb-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0066cc]">
+                  Xem trước tài liệu
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[#1d1d1f]">{selected.type}</p>
               </div>
-              <p className="mt-5 text-sm leading-7 text-[#626a75]">
-                {selected.description}
-              </p>
+              <button
+                type="button"
+                onClick={() => setSelected(null)}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/90 bg-white/68 text-[32px] font-light leading-none shadow-sm transition-transform hover:rotate-90"
+                aria-label="Đóng"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="liquid-glass min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-[18px] shadow-[0_22px_50px_rgba(7,17,31,0.22)]">
+                <LibraryResourceArtwork resource={selected} sizes="760px" />
+                {(selected.type === "Video" || selected.type === "Âm thanh" || selected.type === "Bài giảng") && (
+                  <button
+                    type="button"
+                    className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/68 text-[#0066cc] shadow-xl backdrop-blur-xl transition-transform hover:scale-110"
+                    aria-label={`Phát ${selected.title}`}
+                  >
+                    <span className="ml-1 text-2xl">▶</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="px-1 pb-4 pt-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0066cc]">
+                  {previewDetails[selected.type].eyebrow}
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">{selected.title}</h2>
+                <p className="mt-4 text-sm leading-7 text-[#626a75]">{selected.description}</p>
+
+                <div className="mt-6 grid grid-cols-3 gap-2">
+                  {[
+                    ["Định dạng", selected.type],
+                    ["Cập nhật", new Date(selected.createdAt).toLocaleDateString("vi-VN")],
+                    ["Trạng thái", bookmarkedIds.includes(selected.id) ? "Đã lưu" : "Sẵn sàng"],
+                  ].map(([label, value]) => (
+                    <div key={label} className="liquid-readable px-3 py-4 text-center">
+                      <p className="text-[10px] uppercase tracking-wide text-[#7b8490]">{label}</p>
+                      <p className="mt-2 text-xs font-semibold text-[#26313d]">{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-7 rounded-[18px] border border-white/80 bg-white/54 p-5 shadow-[0_16px_38px_rgba(70,93,116,0.1)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0066cc]">
+                    Nội dung xem trước
+                  </p>
+                  <h3 className="mt-3 text-lg font-semibold">{previewDetails[selected.type].title}</h3>
+                  <div className="mt-5 space-y-3">
+                    {previewDetails[selected.type].facts.map((fact, index) => (
+                      <div key={fact} className="flex items-center gap-3 rounded-xl border border-white/75 bg-white/58 px-4 py-3">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0066cc] text-[11px] font-bold text-white">
+                          {index + 1}
+                        </span>
+                        <p className="text-sm font-medium text-[#4e5965]">{fact}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-7">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0066cc]">
+                    Gợi ý suy ngẫm
+                  </p>
+                  <blockquote className="mt-3 border-l-2 border-[#0066cc] pl-4 text-sm italic leading-7 text-[#626a75]">
+                    Sau khi xem tài liệu, hãy ghi lại một điều bạn muốn áp dụng trong tuần này và chia sẻ cùng một người đồng hành.
+                  </blockquote>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-[1fr_auto_auto] gap-2 pt-4">
+              <Link
+                href={`/library/${selected.id}`}
+                className="col-span-3 flex h-12 items-center justify-center rounded-full border border-white/90 bg-white/68 px-6 text-sm font-semibold text-[#0066cc] no-underline shadow-sm transition-colors hover:bg-white/90"
+              >
+                Đi tới trang chi tiết
+                <span className="ml-2" aria-hidden="true">→</span>
+              </Link>
               {selected.url === "#" ? (
                 <button
                   type="button"
-                  onClick={() => setSelected(null)}
-                  className="mt-auto h-12 rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white"
+                  onClick={() => toggleBookmark(selected.id)}
+                  className="h-12 flex-1 rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(0,102,204,0.24)]"
                 >
-                  Đã hiểu
+                  {bookmarkedIds.includes(selected.id) ? "Đã lưu tài liệu" : "Lưu vào thư viện"}
                 </button>
               ) : (
                 <a
                   href={selected.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-auto flex h-12 items-center justify-center rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white no-underline"
+                  className="flex h-12 flex-1 items-center justify-center rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white no-underline shadow-[0_12px_26px_rgba(0,102,204,0.24)]"
                 >
-                  Mở tài liệu
+                  {previewDetails[selected.type].action}
                 </a>
               )}
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/90 bg-white/68 text-xs font-semibold text-[#52606d]"
+                aria-label="In"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                  <path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
+                  <path d="M7 14h10v6H7z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.share) {
+                    void navigator.share({ title: selected.title, url: window.location.href });
+                  } else {
+                    void navigator.clipboard.writeText(window.location.href);
+                  }
+                }}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/90 bg-white/68 text-xs font-semibold text-[#52606d]"
+                aria-label="Chia sẻ"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <path d="m8.7 10.7 6.6-4.3M8.7 13.3l6.6 4.3" />
+                </svg>
+              </button>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </>

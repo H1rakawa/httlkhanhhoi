@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 import {
-  AssignmentItem,
   AssignmentStatus,
   assignmentCategories,
+  assignmentRouteId,
   assignmentStatuses,
   categoryFromWeek,
   fallbackAssignments,
@@ -57,7 +58,6 @@ export default function AssignmentPageClient() {
   const [category, setCategory] = useState("Tất cả");
   const [status, setStatus] = useState("Tất cả trạng thái");
   const [showHistory, setShowHistory] = useState(false);
-  const [selected, setSelected] = useState<AssignmentItem | null>(null);
 
   useEffect(() => {
     fetch("/api/assignments", { cache: "no-store" })
@@ -221,9 +221,11 @@ export default function AssignmentPageClient() {
 
           <div className="divide-y divide-white/48">
             {filteredAssignments.map((assignment) => (
-              <article
+              <Link
                 key={assignment.id}
-                className="grid gap-5 bg-white/18 px-5 py-6 hover:bg-white/34 lg:grid-cols-[0.55fr_2fr_1fr_1fr_1fr_0.55fr] lg:items-center lg:gap-4 lg:px-7"
+                href={`/assignment/${assignmentRouteId(assignment.id)}`}
+                className="grid gap-5 bg-white/18 px-5 py-6 text-[#1d1d1f] no-underline transition-colors hover:bg-white/34 lg:grid-cols-[0.55fr_2fr_1fr_1fr_1fr_0.55fr] lg:items-center lg:gap-4 lg:px-7"
+                aria-label={`Làm bài ${assignment.title}`}
               >
                 <p className="text-sm font-semibold text-[#6e6e73]">#{assignment.id}</p>
                 <div>
@@ -248,15 +250,13 @@ export default function AssignmentPageClient() {
                     </p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelected(assignment)}
+                <span
                   className="flex h-11 w-11 items-center justify-center rounded-full bg-[#07111f] text-white shadow-[0_10px_24px_rgba(7,17,31,0.18)]"
-                  aria-label={`Xem chi tiết ${assignment.title}`}
+                  aria-hidden="true"
                 >
                   <DashboardIcon name="document" className="h-5 w-5" />
-                </button>
-              </article>
+                </span>
+              </Link>
             ))}
           </div>
 
@@ -271,66 +271,6 @@ export default function AssignmentPageClient() {
         </div>
       </section>
 
-      {selected && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#07111f]/30 px-4 backdrop-blur-md"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Chi tiết ${selected.title}`}
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="liquid-glass w-full max-w-xl p-6 md:p-8"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-5">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0066cc]">
-                  #{selected.id} · {selected.category}
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold">{selected.title}</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white bg-white/70 text-lg"
-                aria-label="Đóng"
-              >
-                ×
-              </button>
-            </div>
-            <p className="mt-5 leading-7 text-[#5f6368]">{selected.description}</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <div className="liquid-readable p-4">
-                <p className="text-xs text-[#7b8190]">Trạng thái</p>
-                <p className="mt-2 font-semibold">{selected.status}</p>
-              </div>
-              <div className="liquid-readable p-4">
-                <p className="text-xs text-[#7b8190]">Hạn hoàn thành</p>
-                <p className="mt-2 font-semibold">{formatDate(selected.dueDate)}</p>
-              </div>
-            </div>
-            {selected.attachmentUrl ? (
-              <a
-                href={selected.attachmentUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-7 flex h-12 items-center justify-center rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white no-underline"
-              >
-                Mở tài liệu bài tập
-              </a>
-            ) : (
-              <button
-                type="button"
-                className="mt-7 h-12 w-full rounded-full bg-[#0066cc] px-6 text-sm font-semibold text-white"
-                onClick={() => setSelected(null)}
-              >
-                Đã hiểu
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }
