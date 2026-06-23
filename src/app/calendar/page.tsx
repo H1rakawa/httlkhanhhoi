@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import CalendarBackdrop from "@/com/calendar/CalendarBackdrop";
@@ -8,8 +9,17 @@ export default function CalendarPage() {
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <CalendarBackdrop />
       <Header activePath="/calendar" />
-      <section className="relative z-10 flex min-h-[520px] items-center justify-center px-5 pt-14 text-center">
-        <div className="liquid-glass mx-auto w-full max-w-7xl px-8 py-12 md:px-16 md:py-16">
+      <section className="relative z-10 isolate flex min-h-[560px] items-center justify-center overflow-hidden px-5 pt-14 text-center">
+        <Image
+          src="/images/parallax-background.png"
+          alt="Bữa tiệc cưới Ca-na"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-88"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(244,247,251,0.34)_70%,rgba(244,247,251,0.5)_100%)]" />
+        <div className="liquid-glass relative z-10 mx-auto w-full max-w-7xl px-8 py-12 md:px-16 md:py-16">
           <p className="mx-auto w-fit rounded-full border border-white bg-white/75 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#0066cc]">
             Lịch sinh hoạt
           </p>

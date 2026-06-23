@@ -11,8 +11,8 @@ type SiteParallaxBackdropProps = {
 };
 
 export default function SiteParallaxBackdrop({
-  imageOpacity = "opacity-48",
-  overlayClassName = "bg-white/50 backdrop-blur-[2px]",
+  imageOpacity = "opacity-58",
+  overlayClassName = "bg-white/34 backdrop-blur-[1px]",
   priority = false,
   strength = 0.06,
 }: SiteParallaxBackdropProps) {
@@ -53,7 +53,7 @@ export default function SiteParallaxBackdrop({
         />
       </div>
       <div className={`absolute inset-0 ${overlayClassName}`} />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(246,248,250,0.58))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(246,248,250,0.34))]" />
     </div>
   );
 }

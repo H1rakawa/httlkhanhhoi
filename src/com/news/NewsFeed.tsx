@@ -1,23 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NewsCard from "@/com/news/NewsCard";
 import NewsFilterBar from "@/com/news/NewsFilterBar";
 import Pagination from "@/com/news/Pagination";
 import SermonVideos from "@/com/news/SermonVideos";
-import { newsPosts } from "@/com/news/newsData";
+import { NewsPost, newsPosts } from "@/com/news/newsData";
 
 const postsPerPage = 6;
 
 export default function NewsFeed() {
+  const [posts, setPosts] = useState<NewsPost[]>(newsPosts);
   const [category, setCategory] = useState("Tất cả");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    fetch("/api/news", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return (await response.json()) as NewsPost[];
+      })
+      .then((data) => {
+        if (data?.length) setPosts(data);
+      })
+      .catch(() => undefined);
+  }, []);
+
   const filteredPosts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return newsPosts.filter((post) => {
+    return posts.filter((post) => {
       const matchesCategory = category === "Tất cả" || post.category === category;
       const matchesQuery =
         !normalizedQuery ||
@@ -28,7 +41,7 @@ export default function NewsFeed() {
 
       return matchesCategory && matchesQuery;
     });
-  }, [category, query]);
+  }, [category, posts, query]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / postsPerPage));
   const currentPosts = filteredPosts.slice(

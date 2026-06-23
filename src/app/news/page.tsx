@@ -5,9 +5,13 @@ import Header from "@/com/Header";
 import NewsBackdrop from "@/com/news/NewsBackdrop";
 import NewsFeed from "@/com/news/NewsFeed";
 import { newsPosts } from "@/com/news/newsData";
+import { getPublishedNewsPosts } from "@/lib/news/posts";
 
-export default function NewsPage() {
-  const featuredPost = newsPosts.find((post) => post.featured) || newsPosts[0];
+export default async function NewsPage() {
+  const posts = await getPublishedNewsPosts().catch(() => newsPosts);
+  const availablePosts = posts.length ? posts : newsPosts;
+  const featuredPost =
+    availablePosts.find((post) => post.featured) || availablePosts[0];
 
   return (
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">

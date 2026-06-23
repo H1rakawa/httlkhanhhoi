@@ -1,7 +1,11 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
-import { MotionGroup, MotionItem, MotionSection } from "@/com/shared/MotionSection";
+import {
+  MotionGroup,
+  MotionItem,
+  MotionSection,
+} from "@/com/shared/MotionSection";
 import { ClockIcon, PinIcon } from "@/com/shared/Icons";
 import { events, sermons } from "@/com/shared/data";
 
@@ -36,7 +40,7 @@ export default function FeaturedTeasers() {
                 variant="transparent"
                 className="liquid-glass-item group h-full overflow-hidden border-2 border-white/90"
               >
-                <CardHeader className="relative aspect-[16/9] overflow-hidden p-0">
+                <CardHeader className="relative aspect-video overflow-hidden p-0">
                   <Image
                     src={sermon.image}
                     alt={sermon.title}

@@ -33,6 +33,7 @@ function formatDate(date: string) {
 
 export default function SermonVideos() {
   const [videos, setVideos] = useState<LibraryResource[]>([fallbackVideo]);
+  const [selectedVideo, setSelectedVideo] = useState<LibraryResource | null>(null);
   const [channelUrl, setChannelUrl] = useState("https://www.youtube.com/@httlkhanhhoi4369");
 
   useEffect(() => {
@@ -43,14 +44,24 @@ export default function SermonVideos() {
       })
       .then((feed) => {
         if (!feed) return;
+        const playableVideos = feed.videos.length
+          ? feed.videos
+          : feed.live.embedUrl
+            ? [feed.live]
+            : [];
+
         setChannelUrl(feed.channelUrl);
-        setVideos([feed.live, ...feed.videos].filter(Boolean).slice(0, 5));
+        setVideos(playableVideos.length ? playableVideos.slice(0, 5) : [fallbackVideo]);
+        setSelectedVideo(playableVideos[0] || null);
       })
       .catch(() => undefined);
   }, []);
 
-  const featured = videos[0] || fallbackVideo;
-  const related = videos.slice(1, 5);
+  const featured = selectedVideo || videos[0] || fallbackVideo;
+  const related = videos.filter((video) => video.id !== featured.id).slice(0, 4);
+  const featuredEmbedUrl = featured.embedUrl
+    ? `${featured.embedUrl}${featured.embedUrl.includes("?") ? "&" : "?"}rel=0&modestbranding=1`
+    : "";
 
   return (
     <section className="px-5 pb-6 pt-16 md:pt-20">
@@ -64,7 +75,7 @@ export default function SermonVideos() {
               Lắng nghe Lời Chúa qua YouTube
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#626a75]">
-              Video mới nhất và livestream từ kênh HTTL Khánh Hội được cập nhật tự động.
+              Bài giảng mới nhất từ kênh HTTL Khánh Hội được cập nhật tự động và có thể xem trực tiếp tại đây.
             </p>
           </div>
           <a
@@ -80,9 +91,9 @@ export default function SermonVideos() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.55fr_0.9fr]">
           <article className="liquid-readable overflow-hidden p-3">
             <div className="relative aspect-video overflow-hidden rounded-[18px] bg-[#07111f] shadow-[0_24px_60px_rgba(7,17,31,0.2)]">
-              {featured.embedUrl ? (
+              {featuredEmbedUrl ? (
                 <iframe
-                  src={featured.embedUrl}
+                  src={featuredEmbedUrl}
                   title={featured.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -100,7 +111,7 @@ export default function SermonVideos() {
             </div>
             <div className="px-2 pb-3 pt-5">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#0066cc]">
-                {featured.id === "youtube-live" ? "Livestream" : "Video mới"}
+                {featured.id === "youtube-live" ? "Livestream" : "Bài mới nhất"}
               </p>
               <h3 className="mt-2 text-2xl font-semibold leading-snug">
                 {featured.title}
@@ -121,11 +132,10 @@ export default function SermonVideos() {
             <div className="mt-5 space-y-3">
               {related.length > 0 ? (
                 related.map((video) => (
-                  <a
+                  <button
                     key={video.id}
-                    href={video.url}
-                    target="_blank"
-                    rel="noreferrer"
+                    type="button"
+                    onClick={() => setSelectedVideo(video)}
                     className="group flex gap-3 rounded-[16px] border border-white/80 bg-white/54 p-3 text-[#1d1d1f] no-underline transition-transform hover:-translate-y-1"
                   >
                     <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-[12px] bg-[#dfe8f3]">
@@ -141,10 +151,12 @@ export default function SermonVideos() {
                       </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-sm font-semibold leading-5">{video.title}</p>
+                      <p className="line-clamp-2 text-left text-sm font-semibold leading-5">
+                        {video.title}
+                      </p>
                       <p className="mt-2 text-xs text-[#7b8490]">{formatDate(video.createdAt)}</p>
                     </div>
-                  </a>
+                  </button>
                 ))
               ) : (
                 <p className="rounded-[16px] border border-white/80 bg-white/54 p-5 text-sm leading-7 text-[#626a75]">

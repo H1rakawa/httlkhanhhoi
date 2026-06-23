@@ -8,6 +8,8 @@ import { FacebookIcon, YoutubeIcon } from "@/com/shared/Icons";
 const quickLinks = [
   { label: "Về chúng tôi", href: "/about" },
   { label: "Lịch sinh hoạt", href: "/calendar" },
+  { label: "Cầu thay", href: "/pray" },
+  { label: "Truyền giảng", href: "/preachout" },
   { label: "Tin tức", href: "/news" },
   { label: "Liên hệ", href: "/contact" },
 ];
@@ -26,7 +28,7 @@ export default function Footer() {
   return (
     <footer className="rounded-t-[28px] bg-black px-5 py-8 text-white shadow-[0_-1px_4px_rgba(0,0,0,0.16)] md:py-10">
       <div className="mx-auto max-w-7xl px-3 md:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.1fr_0.85fr_0.85fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <NextLink
               href="/"
@@ -41,10 +43,13 @@ export default function Footer() {
                 className="h-11 w-auto brightness-0 invert"
               />
             </NextLink>
-            <p className="mt-5 max-w-xs text-sm font-medium leading-7 text-white/68">
+            <p className="mt-5 max-w-md text-sm font-medium leading-7 text-white/68">
               Nầy, sự yêu thương của Đức Chúa Trời đã bày tỏ ra trong chúng ta:
-              Đức Chúa Trời đã sai Con một Ngài đến thế gian, đặng chúng ta
-              nhờ Con được sống.
+              Đức Chúa Trời đã sai Con một Ngài đến thế gian, đặng chúng ta nhờ
+              Con được sống.
+            </p>
+            <p className="mt-2 max-w-md text-right text-sm font-semibold text-white/76">
+              I Giăng 4:9
             </p>
           </div>
 

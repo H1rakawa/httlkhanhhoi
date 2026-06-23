@@ -1,9 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import NewsCard from "@/com/news/NewsCard";
 import { newsPosts } from "@/com/news/newsData";
+import {
+  getPublishedNewsPostBySlug,
+  getPublishedNewsPosts,
+} from "@/lib/news/posts";
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -23,11 +28,15 @@ export async function generateStaticParams() {
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const { slug } = await params;
-  const post = newsPosts.find((item) => item.slug === slug);
+  const post =
+    (await getPublishedNewsPostBySlug(slug).catch(() => null)) ||
+    newsPosts.find((item) => item.slug === slug);
 
   if (!post) notFound();
 
-  const relatedPosts = newsPosts
+  const posts = await getPublishedNewsPosts().catch(() => newsPosts);
+  const availablePosts = posts.length ? posts : newsPosts;
+  const relatedPosts = availablePosts
     .filter((item) => item.slug !== post.slug && item.category === post.category)
     .slice(0, 3);
 
@@ -51,7 +60,15 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           <p className="mt-5 text-base text-[#6e6e73]">
             {post.author} · {formatDate(post.date)}
           </p>
-          <div className={`news-image-${post.image} mt-10 min-h-[460px] rounded-[20px]`} />
+          <div className="relative mt-10 min-h-[460px] overflow-hidden rounded-[20px]">
+            <Image
+              src={post.photo}
+              alt={post.title}
+              fill
+              sizes="(min-width: 768px) 896px, 100vw"
+              className="object-cover"
+            />
+          </div>
           <div className="mx-auto mt-12 max-w-3xl space-y-7 text-lg leading-9 text-[#424245]">
             {post.content.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
