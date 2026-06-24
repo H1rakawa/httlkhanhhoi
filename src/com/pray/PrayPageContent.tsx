@@ -12,15 +12,8 @@ export default function PrayPageContent() {
   useEffect(() => {
     if (!selectedRequest) return;
     document.body.style.overflow = "hidden";
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedRequest(null);
-    };
-
-    window.addEventListener("keydown", closeOnEscape);
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener("keydown", closeOnEscape);
     };
   }, [selectedRequest]);
 
@@ -51,6 +44,7 @@ export default function PrayPageContent() {
       </section>
 
       <PrayerRequestDetail
+        key={selectedRequest?.id || "closed"}
         request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
       />

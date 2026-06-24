@@ -8,7 +8,8 @@ import {
 } from "@/com/assignment/assignmentData";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 
-type Answers = Record<string, string>;
+type AnswerValue = string | string[];
+type Answers = Record<string, AnswerValue>;
 
 function formatDateTime(date: string) {
   return new Intl.DateTimeFormat("vi-VN", {
@@ -31,14 +32,41 @@ export default function AssignmentWorkClient({
   const [answers, setAnswers] = useState<Answers>({});
   const [status, setStatus] = useState<"idle" | "draft" | "submitted">("idle");
 
-  const answeredCount = questions.filter(
-    (question) => answers[question.id]?.trim(),
-  ).length;
+  const isAnswered = (id: string) => {
+    const answer = answers[id];
+    if (Array.isArray(answer)) return answer.length > 0;
+    return Boolean(answer?.trim());
+  };
+
+  const answeredCount = questions.filter((question) => isAnswered(question.id)).length;
   const progress = Math.round((answeredCount / questions.length) * 100);
 
   const updateAnswer = (id: string, value: string) => {
     setStatus("idle");
     setAnswers((current) => ({ ...current, [id]: value }));
+  };
+
+  const toggleChoiceAnswer = (id: string, option: string) => {
+    setStatus("idle");
+    setAnswers((current) => {
+      const currentAnswer = current[id];
+      const selectedOptions = Array.isArray(currentAnswer) ? currentAnswer : [];
+      const nextOptions = selectedOptions.includes(option)
+        ? selectedOptions.filter((item) => item !== option)
+        : [...selectedOptions, option];
+
+      return { ...current, [id]: nextOptions };
+    });
+  };
+
+  const isChoiceSelected = (id: string, option: string) => {
+    const answer = answers[id];
+    return Array.isArray(answer) && answer.includes(option);
+  };
+
+  const textAnswer = (id: string) => {
+    const answer = answers[id];
+    return typeof answer === "string" ? answer : "";
   };
 
   return (
@@ -85,23 +113,23 @@ export default function AssignmentWorkClient({
                           key={option}
                           className={[
                             "group flex cursor-pointer items-center gap-3 rounded-[18px] border p-4 transition-transform hover:-translate-y-1",
-                            answers[question.id] === option
+                            isChoiceSelected(question.id, option)
                               ? "border-[#0066cc] bg-[#eaf3ff]/86 shadow-[0_14px_28px_rgba(0,102,204,0.12)]"
                               : "border-white/80 bg-white/48",
                           ].join(" ")}
                         >
                           <input
-                            type="radio"
+                            type="checkbox"
                             name={question.id}
                             value={option}
-                            checked={answers[question.id] === option}
-                            onChange={() => updateAnswer(question.id, option)}
+                            checked={isChoiceSelected(question.id, option)}
+                            onChange={() => toggleChoiceAnswer(question.id, option)}
                             className="sr-only"
                           />
                           <span
                             className={[
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
-                              answers[question.id] === option
+                              isChoiceSelected(question.id, option)
                                 ? "border-[#0066cc] bg-[#0066cc] text-white"
                                 : "border-[#a3adba] bg-white/70 text-[#6e6e73]",
                             ].join(" ")}
@@ -132,7 +160,7 @@ export default function AssignmentWorkClient({
                       {questionIndex + 1}. {question.title}
                     </span>
                     <textarea
-                      value={answers[question.id] || ""}
+                      value={textAnswer(question.id)}
                       onChange={(event) => updateAnswer(question.id, event.target.value)}
                       placeholder={question.placeholder}
                       rows={7}
@@ -159,7 +187,7 @@ export default function AssignmentWorkClient({
 
             <div className="mt-8 space-y-4">
               {questions.map((question, index) => {
-                const completed = Boolean(answers[question.id]?.trim());
+                const completed = isAnswered(question.id);
                 return (
                   <div key={question.id} className="flex items-start gap-3">
                     <span

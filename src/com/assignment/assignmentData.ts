@@ -130,7 +130,14 @@ export function getAssignmentQuestions(
         id: "context",
         type: "choice",
         title: "Bạn đã đọc phân đoạn Kinh Thánh trong tâm thế nào?",
-        options: ["Tập trung và cầu nguyện", "Đọc nhanh để nắm ý", "Cần đọc lại lần nữa", "Chưa sẵn sàng"],
+        options: [
+          "Tập trung và cầu nguyện",
+          "Đọc nhanh để nắm ý",
+          "Cần đọc lại lần nữa",
+          "Chưa sẵn sàng",
+          "Có ghi chú lại",
+          "Đã thảo luận với nhóm",
+        ],
       },
       {
         id: "main-point",
@@ -159,7 +166,14 @@ export function getAssignmentQuestions(
         id: "participation",
         type: "choice",
         title: "Bạn dự định tham gia hoạt động cộng đồng theo cách nào?",
-        options: ["Phục vụ trực tiếp", "Cầu thay", "Mời một người bạn", "Hỗ trợ chuẩn bị"],
+        options: [
+          "Phục vụ trực tiếp",
+          "Cầu thay",
+          "Mời một người bạn",
+          "Hỗ trợ chuẩn bị",
+          "Đóng góp tài chính",
+          "Chia sẻ thông tin chương trình",
+        ],
       },
       {
         id: "attitude",
@@ -188,7 +202,13 @@ export function getAssignmentQuestions(
         id: "readiness",
         type: "choice",
         title: "Bạn đánh giá mức độ sẵn sàng thực hành kỹ năng này ra sao?",
-        options: ["Rất sẵn sàng", "Cần thêm hướng dẫn", "Hơi ngại bắt đầu", "Chưa rõ cách làm"],
+        options: [
+          "Rất sẵn sàng",
+          "Cần thêm hướng dẫn",
+          "Hơi ngại bắt đầu",
+          "Chưa rõ cách làm",
+          "Muốn thực hành cùng người khác",
+        ],
       },
       {
         id: "scenario",
@@ -216,7 +236,13 @@ export function getAssignmentQuestions(
       id: "time",
       type: "choice",
       title: "Bạn đã dành bao nhiêu thời gian cho việc suy ngẫm hôm nay?",
-      options: ["Dưới 10 phút", "10 - 20 phút", "20 - 30 phút", "Trên 30 phút"],
+      options: [
+        "Dưới 10 phút",
+        "10 - 20 phút",
+        "20 - 30 phút",
+        "Trên 30 phút",
+        "Nhiều lần ngắn trong ngày",
+      ],
     },
     {
       id: "state",

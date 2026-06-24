@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import EncouragementBox from "@/com/pray/EncouragementBox";
 import PrivacyIndicator from "@/com/pray/PrivacyIndicator";
 import { PrayerRequest } from "@/com/pray/prayData";
@@ -12,16 +15,54 @@ export default function PrayerRequestDetail({
   request,
   onClose,
 }: PrayerRequestDetailProps) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  const startClose = useCallback(() => {
+    setIsClosing(true);
+    window.setTimeout(onClose, 260);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!request) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") startClose();
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [request, startClose]);
+
   if (!request) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] bg-[#07111f]/22 backdrop-blur-[6px]">
-      <aside className="absolute inset-y-0 right-0 flex w-full flex-col bg-white shadow-[-28px_0_80px_rgba(31,48,70,0.2)] md:w-[min(560px,42vw)]">
+    <div
+      className={[
+        "fixed inset-0 z-[70] bg-[#07111f]/22 backdrop-blur-[6px]",
+        isClosing
+          ? "animate-[fadeOutBackdrop_260ms_ease-in_forwards]"
+          : "animate-[fadeInBackdrop_220ms_ease-out]",
+      ].join(" ")}
+    >
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        aria-label="Đóng chi tiết cầu thay"
+        onClick={startClose}
+      />
+      <aside
+        className={[
+          "absolute inset-y-0 right-0 flex w-full flex-col bg-white shadow-[-28px_0_80px_rgba(31,48,70,0.2)] md:w-[min(560px,42vw)]",
+          isClosing
+            ? "animate-[slideOutRight_260ms_cubic-bezier(.4,0,.2,1)_forwards]"
+            : "animate-[slideInRight_320ms_cubic-bezier(.22,.8,.3,1)]",
+        ].join(" ")}
+      >
         <div className="flex items-center justify-between border-b border-[#ececf0] px-8 py-6">
           <h2 className="text-xl font-semibold">Chi tiết cầu thay</h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={startClose}
             className="flex h-10 w-10 items-center justify-center rounded-full text-3xl font-light transition-colors hover:bg-[#f5f5f7]"
             aria-label="Đóng chi tiết cầu thay"
           >
