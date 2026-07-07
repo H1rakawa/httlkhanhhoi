@@ -4,15 +4,15 @@ import { Dropdown, toast } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import {
+  getUserAvatarUrl,
+  getUserDisplayEmail,
+  getUserDisplayName,
+  type DisplayUser,
+} from "@/lib/supabase/user-display";
 
 type Account = {
-  user: {
-    email?: string;
-    user_metadata?: {
-      full_name?: string;
-      avatar_url?: string;
-    };
-  };
+  user: DisplayUser;
   profile: {
     name: string;
     email: string;
@@ -24,7 +24,7 @@ const accountRoutes: Record<string, string> = {
   dashboard: "/dashboard",
   assignments: "/assignment",
   library: "/library",
-  activity: "/calendar",
+  pray: "/pray",
 };
 
 export default function HeaderAccountMenu() {
@@ -37,22 +37,39 @@ export default function HeaderAccountMenu() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as Account;
-      })
-      .then((data) => {
-        if (isMounted) setAccount(data);
-      })
-      .finally(() => {
+    const loadAccount = () =>
+      fetch("/api/auth/me", { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return (await response.json()) as Account;
+        })
+        .then((data) => {
+          if (isMounted) setAccount(data);
+        })
+        .finally(() => {
+          if (isMounted) setIsLoading(false);
+        });
+
+    loadAccount();
+
+    const handleFocus = () => {
+      loadAccount().catch(() => {
         if (isMounted) setIsLoading(false);
       });
+    };
+
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       isMounted = false;
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
+
+  const email = account ? getUserDisplayEmail(account.user, account.profile) : "";
+  const name = account ? getUserDisplayName(account.user, account.profile) : "";
+  const avatarUrl = account ? getUserAvatarUrl(account.user, account.profile) : null;
+  const initial = (email.charAt(0) || name.charAt(0) || "T").toUpperCase();
 
   const handleAction = async (key: React.Key) => {
     setIsOpen(false);
@@ -103,16 +120,6 @@ export default function HeaderAccountMenu() {
       </a>
     );
   }
-
-  const email = account.profile?.email || account.user.email || "";
-  const name =
-    account.profile?.name ||
-    account.user.user_metadata?.full_name ||
-    email.split("@")[0] ||
-    "Thành viên";
-  const avatarUrl =
-    account.profile?.avatar_url || account.user.user_metadata?.avatar_url;
-  const initial = email.charAt(0).toUpperCase() || name.charAt(0).toUpperCase();
 
   return (
     <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -178,9 +185,9 @@ export default function HeaderAccountMenu() {
             <DashboardIcon name="book" className="h-5 w-5" />
             <span>Thư viện</span>
           </Dropdown.Item>
-          <Dropdown.Item id="activity" className={itemClassName("activity")}>
-            <DashboardIcon name="calendar" className="h-5 w-5" />
-            <span>Hoạt động</span>
+          <Dropdown.Item id="pray" className={itemClassName("pray")}>
+            <DashboardIcon name="community" className="h-5 w-5" />
+            <span>Cầu thay</span>
           </Dropdown.Item>
           <Dropdown.Item
             id="logout"

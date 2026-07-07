@@ -8,7 +8,6 @@ import { FacebookIcon, YoutubeIcon } from "@/com/shared/Icons";
 const quickLinks = [
   { label: "Về chúng tôi", href: "/about" },
   { label: "Lịch sinh hoạt", href: "/calendar" },
-  { label: "Cầu thay", href: "/pray" },
   { label: "Truyền giảng", href: "/preachout" },
   { label: "Tin tức", href: "/news" },
   { label: "Liên hệ", href: "/contact" },

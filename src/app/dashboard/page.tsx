@@ -8,19 +8,18 @@ import UpcomingAssignments from "@/com/dashboard/UpcomingAssignments";
 import WelcomePanel from "@/com/dashboard/WelcomePanel";
 import { redirect } from "next/navigation";
 import { getCurrentAccount } from "@/lib/supabase/auth";
+import {
+  getUserAvatarUrl,
+  getUserDisplayName,
+} from "@/lib/supabase/user-display";
 
 export default async function DashboardPage() {
   const account = await getCurrentAccount();
   if (!account) redirect("/auth");
 
-  const displayName =
-    account.profile?.name ||
-    account.user.user_metadata?.full_name ||
-    account.user.email?.split("@")[0] ||
-    "Thành viên";
+  const displayName = getUserDisplayName(account.user, account.profile);
   const email = account.profile?.email || account.user.email || "";
-  const avatarUrl =
-    account.profile?.avatar_url || account.user.user_metadata?.avatar_url;
+  const avatarUrl = getUserAvatarUrl(account.user, account.profile);
 
   return (
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">

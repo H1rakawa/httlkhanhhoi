@@ -1,7 +1,6 @@
 export const navItems = [
   { href: "/about", label: "Về chúng tôi" },
   { href: "/calendar", label: "Lịch sinh hoạt" },
-  { href: "/pray", label: "Cầu thay" },
   { href: "/preachout", label: "Truyền giảng" },
   { href: "/news", label: "Tin tức" },
   { href: "/contact", label: "Liên hệ" },

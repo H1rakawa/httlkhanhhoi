@@ -28,7 +28,10 @@ export default function AssignmentWorkClient({
 }: {
   assignment: AssignmentItem;
 }) {
-  const questions = useMemo(() => getAssignmentQuestions(assignment), [assignment]);
+  const questions = useMemo(
+    () => getAssignmentQuestions(assignment),
+    [assignment],
+  );
   const [answers, setAnswers] = useState<Answers>({});
   const [status, setStatus] = useState<"idle" | "draft" | "submitted">("idle");
 
@@ -38,7 +41,9 @@ export default function AssignmentWorkClient({
     return Boolean(answer?.trim());
   };
 
-  const answeredCount = questions.filter((question) => isAnswered(question.id)).length;
+  const answeredCount = questions.filter((question) =>
+    isAnswered(question.id),
+  ).length;
   const progress = Math.round((answeredCount / questions.length) * 100);
 
   const updateAnswer = (id: string, value: string) => {
@@ -70,7 +75,7 @@ export default function AssignmentWorkClient({
   };
 
   return (
-    <div className="relative z-10 mx-auto w-[calc(100%_-_2rem)] max-w-7xl pb-28 pt-24 md:pb-32 md:pt-28">
+    <div className="relative z-10 mx-auto w-[calc(100%-2rem)] max-w-7xl pb-28 pt-24 md:pb-32 md:pt-28">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.8fr)]">
         <div className="space-y-6">
           <section className="liquid-glass p-6 md:p-8">
@@ -91,7 +96,8 @@ export default function AssignmentWorkClient({
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[#4f5865]">
               {assignment.description} Hãy đọc kỹ câu hỏi, trả lời trung thực và
-              dùng phần phản chiếu để ghi lại điều bạn học được trong hành trình này.
+              dùng phần phản chiếu để ghi lại điều bạn học được trong hành trình
+              này.
             </p>
           </section>
 
@@ -123,7 +129,9 @@ export default function AssignmentWorkClient({
                             name={question.id}
                             value={option}
                             checked={isChoiceSelected(question.id, option)}
-                            onChange={() => toggleChoiceAnswer(question.id, option)}
+                            onChange={() =>
+                              toggleChoiceAnswer(question.id, option)
+                            }
                             className="sr-only"
                           />
                           <span
@@ -161,7 +169,9 @@ export default function AssignmentWorkClient({
                     </span>
                     <textarea
                       value={textAnswer(question.id)}
-                      onChange={(event) => updateAnswer(question.id, event.target.value)}
+                      onChange={(event) =>
+                        updateAnswer(question.id, event.target.value)
+                      }
                       placeholder={question.placeholder}
                       rows={7}
                       className="mt-4 w-full resize-y rounded-[20px] border border-white/90 bg-white/58 p-5 text-sm leading-7 outline-none transition-colors placeholder:text-[#8a929c] focus:border-[#0066cc] focus:bg-white/78"
@@ -200,8 +210,15 @@ export default function AssignmentWorkClient({
                     >
                       ✓
                     </span>
-                    <p className={completed ? "text-sm text-[#26313d]" : "text-sm text-[#8a929c]"}>
-                      {question.type === "choice" ? "Trắc nghiệm" : "Tự luận"}: Câu {index + 1}
+                    <p
+                      className={
+                        completed
+                          ? "text-sm text-[#26313d]"
+                          : "text-sm text-[#8a929c]"
+                      }
+                    >
+                      {question.type === "choice" ? "Trắc nghiệm" : "Tự luận"}:
+                      Câu {index + 1}
                     </p>
                   </div>
                 );
@@ -214,8 +231,12 @@ export default function AssignmentWorkClient({
                 Gợi ý trao đổi
               </p>
               <div className="mt-5 space-y-4 text-sm leading-7 text-[#4f5865]">
-                <p>“Điều gì khiến bạn thấy khó tập trung nhất khi làm bài này?”</p>
-                <p>“Bạn muốn nhờ nhóm nhỏ cầu thay cho điểm nào trong tuần này?”</p>
+                <p>
+                  “Điều gì khiến bạn thấy khó tập trung nhất khi làm bài này?”
+                </p>
+                <p>
+                  “Bạn muốn nhờ nhóm nhỏ cầu thay cho điểm nào trong tuần này?”
+                </p>
               </div>
               <Link
                 href="/contact"

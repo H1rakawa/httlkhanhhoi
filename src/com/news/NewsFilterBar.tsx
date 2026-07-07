@@ -14,7 +14,7 @@ export default function NewsFilterBar({
   onQueryChange,
 }: NewsFilterBarProps) {
   return (
-    <section className="mx-auto w-[calc(100%_-_2rem)] max-w-7xl">
+    <section className="mx-auto w-[calc(100%_-_2rem)] max-w-7xl pt-12 md:pt-16">
       <div className="liquid-glass flex flex-col gap-5 p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
           {newsCategories.map((category) => (

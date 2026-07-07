@@ -106,17 +106,19 @@ export default function ResetPasswordForm() {
     const recoveryType = params.get("type");
     const errorDescription = params.get("error_description");
 
-    if (token && recoveryType === "recovery") {
-      setAccessToken(token);
-    } else {
-      setMessage({
-        type: "error",
-        text:
-          errorDescription?.replaceAll("+", " ") ||
-          "Liên kết khôi phục không hợp lệ hoặc đã hết hạn.",
-      });
-    }
-    setIsReady(true);
+    queueMicrotask(() => {
+      if (token && recoveryType === "recovery") {
+        setAccessToken(token);
+      } else {
+        setMessage({
+          type: "error",
+          text:
+            errorDescription?.replaceAll("+", " ") ||
+            "Liên kết khôi phục không hợp lệ hoặc đã hết hạn.",
+        });
+      }
+      setIsReady(true);
+    });
   }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

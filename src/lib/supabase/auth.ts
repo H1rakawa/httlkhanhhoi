@@ -10,8 +10,13 @@ export type SupabaseAuthUser = {
   email?: string;
   user_metadata?: {
     full_name?: string;
+    name?: string;
+    display_name?: string;
+    preferred_username?: string;
+    user_name?: string;
     phone?: string;
     avatar_url?: string;
+    picture?: string;
   };
 };
 

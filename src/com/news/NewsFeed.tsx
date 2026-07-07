@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import NewsCard from "@/com/news/NewsCard";
 import NewsFilterBar from "@/com/news/NewsFilterBar";
 import Pagination from "@/com/news/Pagination";
-import SermonVideos from "@/com/news/SermonVideos";
 import { NewsPost, newsPosts } from "@/com/news/newsData";
 
 const postsPerPage = 6;
@@ -85,8 +84,6 @@ export default function NewsFeed() {
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </section>
-
-      <SermonVideos />
 
       <section className="px-5 pb-20 md:pb-24">
         <div className="liquid-glass mx-auto grid max-w-7xl gap-8 p-8 md:grid-cols-[1fr_0.9fr] md:p-10">

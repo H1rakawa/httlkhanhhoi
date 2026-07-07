@@ -43,7 +43,7 @@ export default function FilterSearchBar({
   const monthOptions = buildMonthOptions(month);
 
   return (
-    <section className="mx-auto w-[calc(100%_-_2rem)] max-w-7xl">
+    <section className="mx-auto mt-8 w-[calc(100%_-_2rem)] max-w-7xl md:mt-10">
       <div className="liquid-glass flex flex-col gap-4 p-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
           {eventCategories.map((category) => (

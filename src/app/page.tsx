@@ -6,6 +6,7 @@ import FeaturedTeasers, { EventList } from "@/com/home/FeaturedTeasers";
 import HeroBanner from "@/com/home/HeroBanner";
 import HomeParallaxBackdrop from "@/com/home/HomeParallaxBackdrop";
 import KeyMessages from "@/com/home/KeyMessages";
+import SermonVideos from "@/com/news/SermonVideos";
 
 export default function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default function HomePage() {
       <div className="relative z-10 space-y-16 px-4 py-14 md:space-y-24 md:px-6 md:py-20">
         <AboutSummary />
         <KeyMessages />
+        <SermonVideos />
         <FeaturedTeasers />
         <EventList />
         <CallToAction />

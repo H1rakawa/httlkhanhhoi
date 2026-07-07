@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Button, Tabs, toast } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { ClockIcon } from "@/com/shared/Icons";
+import { IconBrandFacebook, IconBrandGoogle } from "@tabler/icons-react";
 
 type AuthView = "forms" | "forgot";
 type AuthTab = "login" | "register";
@@ -154,14 +155,18 @@ function SocialActions() {
           type="button"
           className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
         >
-          <span className="text-xl tracking-wider">GOOGLE</span>
+          <span className="text-xl tracking-wider">
+            <IconBrandGoogle />
+          </span>
           <span>Google</span>
         </button>
         <button
           type="button"
           className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
         >
-          <span className="text-lg">◎</span>
+          <span className="text-lg">
+            <IconBrandFacebook />
+          </span>
           <span>Facebook</span>
         </button>
       </div>
