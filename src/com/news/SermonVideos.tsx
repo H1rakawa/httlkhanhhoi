@@ -64,14 +64,16 @@ export default function SermonVideos() {
   }, []);
 
   const featured = selectedVideo || videos[0] || fallbackVideo;
+
+  console.log("featured: ", featured);
+
   const related = videos
     .filter((video) => video.id !== featured.id)
     .slice(0, 4);
-  const featuredEmbedUrl = featured.embedUrl
-    ? `${featured.embedUrl}${featured.embedUrl.includes("?") ? "&" : "?"}rel=0&modestbranding=1`
-    : "";
+  const featuredEmbedUrl = featured.embedUrl;
+  //www.youtube.com/embed/FsP6NyGMp34?si=cog68Q-wjgbY8FXD
 
-  return (
+  https: return (
     <section className="px-5 pb-6 pt-16 md:pt-20">
       <div className="liquid-glass mx-auto max-w-7xl p-5 md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -108,10 +110,11 @@ export default function SermonVideos() {
                 //   allowFullScreen
                 //   className="absolute inset-0 h-full w-full border-0"
                 // />
+
                 <iframe
-                  width="560"
-                  height="315"
-                  src="https://www.youtube.com/embed/FsP6NyGMp34?si=cog68Q-wjgbY8FXD"
+                  width="100%"
+                  height="100%"
+                  src={featuredEmbedUrl}
                   title="YouTube video player"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
