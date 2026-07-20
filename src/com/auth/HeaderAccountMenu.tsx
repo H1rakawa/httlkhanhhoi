@@ -17,10 +17,13 @@ type Account = {
     name: string;
     email: string;
     avatar_url: string | null;
+    role?: string;
+    status?: string;
   } | null;
 };
 
 const accountRoutes: Record<string, string> = {
+  admin: "/admin",
   dashboard: "/dashboard",
   assignments: "/assignment",
   library: "/library",
@@ -170,6 +173,12 @@ export default function HeaderAccountMenu() {
           onAction={handleAction}
           className="p-3 outline-none"
         >
+          {account.profile?.role === "admin" && (
+            <Dropdown.Item id="admin" className={itemClassName("admin")}>
+              <DashboardIcon name="settings" className="h-5 w-5" />
+              <span>Quản trị</span>
+            </Dropdown.Item>
+          )}
           <Dropdown.Item id="dashboard" className={itemClassName("dashboard")}>
             <DashboardIcon name="dashboard" className="h-5 w-5" />
             <span>Bảng điều khiển</span>

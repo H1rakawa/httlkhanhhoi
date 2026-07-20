@@ -64,16 +64,12 @@ export default function SermonVideos() {
   }, []);
 
   const featured = selectedVideo || videos[0] || fallbackVideo;
-
-  console.log("featured: ", featured);
-
   const related = videos
     .filter((video) => video.id !== featured.id)
     .slice(0, 4);
   const featuredEmbedUrl = featured.embedUrl;
-  //www.youtube.com/embed/FsP6NyGMp34?si=cog68Q-wjgbY8FXD
 
-  https: return (
+  return (
     <section className="px-5 pb-6 pt-16 md:pt-20">
       <div className="liquid-glass mx-auto max-w-7xl p-5 md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -103,14 +99,6 @@ export default function SermonVideos() {
           <article className="liquid-readable overflow-hidden p-3">
             <div className="relative aspect-video overflow-hidden rounded-[18px] bg-[#07111f] shadow-[0_24px_60px_rgba(7,17,31,0.2)]">
               {featuredEmbedUrl ? (
-                // <iframe
-                //   src={featuredEmbedUrl}
-                //   title={featured.title}
-                //   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                //   allowFullScreen
-                //   className="absolute inset-0 h-full w-full border-0"
-                // />
-
                 <iframe
                   width="100%"
                   height="100%"
@@ -161,9 +149,9 @@ export default function SermonVideos() {
                     key={video.id}
                     type="button"
                     onClick={() => setSelectedVideo(video)}
-                    className="group flex gap-3 rounded-[16px] border border-white/80 bg-white/54 p-3 text-[#1d1d1f] no-underline transition-transform hover:-translate-y-1"
+                    className="group flex gap-3 rounded-4xl border border-white/80 bg-white/54 p-3 text-[#1d1d1f] no-underline transition-transform hover:-translate-y-1"
                   >
-                    <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-[12px] bg-[#dfe8f3]">
+                    <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-3xl bg-[#dfe8f3]">
                       <Image
                         src={video.image}
                         alt={video.title}
@@ -186,7 +174,7 @@ export default function SermonVideos() {
                   </button>
                 ))
               ) : (
-                <p className="rounded-[16px] border border-white/80 bg-white/54 p-5 text-sm leading-7 text-[#626a75]">
+                <p className="rounded-4xl border border-white/80 bg-white/54 p-5 text-sm leading-7 text-[#626a75]">
                   Chưa tải được danh sách video. Bạn vẫn có thể mở kênh YouTube
                   để xem trực tiếp.
                 </p>
