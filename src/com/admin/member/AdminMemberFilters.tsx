@@ -104,7 +104,7 @@ function FilterDropdown<T extends string>({
         ref={buttonRef}
         type="button"
         onClick={() => onOpenChange(isOpen ? null : openKey)}
-        className="flex h-12 min-w-[150px] items-center justify-between gap-3 rounded-[16px] bg-white px-5 text-sm font-extrabold text-[#3f4750] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(31,48,70,0.08)] outline-none transition hover:bg-white/95"
+        className="flex h-12 w-full min-w-0 items-center justify-between gap-3 rounded-[16px] bg-white px-5 text-sm font-extrabold text-[#3f4750] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(31,48,70,0.08)] outline-none transition hover:bg-white/95 sm:min-w-[150px]"
         aria-label={ariaLabel}
         aria-expanded={isOpen}
       >
@@ -176,8 +176,8 @@ export default function AdminMemberFilters({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   return (
-    <section className="liquid-glass mt-8 grid gap-3 rounded-[24px] p-3 md:grid-cols-[minmax(0,1fr)_auto_auto]">
-      <label className="flex h-12 items-center gap-3 rounded-[16px] bg-white/58 px-4 text-[#6b7280] shadow-inner">
+    <section className="liquid-glass mt-6 grid gap-3 rounded-[22px] p-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:rounded-[24px]">
+      <label className="flex h-12 items-center gap-3 rounded-[16px] bg-white/58 px-4 text-[#6b7280] shadow-inner sm:col-span-2 lg:col-span-1">
         <svg
           viewBox="0 0 24 24"
           fill="none"

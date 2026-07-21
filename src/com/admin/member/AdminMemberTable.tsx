@@ -314,6 +314,120 @@ function ActionMenu({
   );
 }
 
+function MemberMobileCard({
+  member,
+  isSelected,
+  isActionOpen,
+  presence,
+  onToggleMember,
+  onOpenDetail,
+  onToggleAction,
+  onChangeRole,
+  onDelete,
+}: {
+  member: AdminMember;
+  isSelected: boolean;
+  isActionOpen: boolean;
+  presence: ReturnType<typeof getPresenceLabel>;
+  onToggleMember: () => void;
+  onOpenDetail: () => void;
+  onToggleAction: () => void;
+  onChangeRole: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <article
+      className={[
+        "rounded-[22px] border px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_34px_rgba(31,48,70,0.08)]",
+        isSelected
+          ? "border-[#0066cc]/30 bg-[#eaf4ff]/58"
+          : "border-white/64 bg-white/42",
+      ].join(" ")}
+    >
+      <div className="flex items-start gap-3">
+        <div className="pt-1">
+          <Checkbox
+            checked={isSelected}
+            label={isSelected ? `Bỏ chọn ${member.name}` : `Chọn ${member.name}`}
+            onClick={onToggleMember}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpenDetail}
+          className="min-w-0 flex-1 text-left"
+        >
+          <span className="block truncate text-base font-extrabold text-[#17202a]">
+            {member.name}
+          </span>
+          <span className="mt-1 block truncate text-sm font-bold text-[#65717c]">
+            {member.email}
+          </span>
+        </button>
+
+        <ActionMenu
+          member={member}
+          isOpen={isActionOpen}
+          onToggle={onToggleAction}
+          onChangeRole={onChangeRole}
+          onDelete={onDelete}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={onOpenDetail}
+        className="mt-4 grid w-full grid-cols-2 gap-2 text-left text-xs font-extrabold text-[#4c5662] min-[520px]:grid-cols-4"
+      >
+        <span className="rounded-2xl bg-white/58 px-3 py-2">
+          Vai trò
+          <span
+            className={[
+              "mt-1 block w-fit rounded-full px-2.5 py-1",
+              roleClassName[member.role],
+            ].join(" ")}
+          >
+            {roleLabels[member.role]}
+          </span>
+        </span>
+        <span className="rounded-2xl bg-white/58 px-3 py-2">
+          Hiện diện
+          <span
+            className={[
+              "mt-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1",
+              presence.className,
+            ].join(" ")}
+            aria-label={presence.ariaLabel}
+          >
+            <span
+              className={["h-1.5 w-1.5 rounded-full", presence.dotClassName].join(
+                " ",
+              )}
+            />
+            {presence.label}
+          </span>
+        </span>
+        <span className="rounded-2xl bg-white/58 px-3 py-2">
+          Tài khoản
+          <span
+            className={[
+              "mt-1 block w-fit rounded-full px-2.5 py-1",
+              statusClassName[member.status],
+            ].join(" ")}
+          >
+            {statusLabels[member.status]}
+          </span>
+        </span>
+        <span className="rounded-2xl bg-white/58 px-3 py-2">
+          Ngày tham gia
+          <span className="mt-1 block text-[#65717c]">{member.joinedAt}</span>
+        </span>
+      </button>
+    </article>
+  );
+}
+
 function MemberDetailModal({
   member,
   onClose,
@@ -539,8 +653,50 @@ export default function AdminMemberTable({
   }, []);
 
   return (
-    <section className="liquid-glass mt-7 rounded-[28px]">
-      <div className="overflow-x-visible">
+    <section className="liquid-glass mt-6 rounded-[24px] lg:mt-7 lg:rounded-[28px]">
+      <div className="grid gap-3 p-3 lg:hidden">
+        <div className="flex items-center justify-between gap-3 rounded-[18px] bg-white/42 px-3 py-3 text-sm font-extrabold text-[#3d4650]">
+          <span>Chọn tất cả trang này</span>
+          <Checkbox
+            checked={isAllSelected}
+            mixed={hasSelection && !isAllSelected}
+            label={isAllSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+            onClick={onToggleAll}
+          />
+        </div>
+
+        {members.map((member) => {
+          const isSelected = selectedIds.includes(member.id);
+          const presence = getPresenceLabel(member, now);
+
+          return (
+            <MemberMobileCard
+              key={member.id}
+              member={member}
+              isSelected={isSelected}
+              isActionOpen={openActionId === member.id}
+              presence={presence}
+              onToggleMember={() => onToggleMember(member.id)}
+              onOpenDetail={() => setActiveMember(member)}
+              onToggleAction={() =>
+                setOpenActionId((currentId) =>
+                  currentId === member.id ? null : member.id,
+                )
+              }
+              onChangeRole={() => {
+                setOpenActionId(null);
+                onChangeRole([member.id]);
+              }}
+              onDelete={() => {
+                setOpenActionId(null);
+                onDeleteMember([member.id]);
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-visible lg:block">
         <table className="w-full min-w-full table-fixed border-collapse text-left">
           <thead>
             <tr className="border-b border-[#dbe3ea]/70 bg-white/34 text-xs font-extrabold text-[#202832]">

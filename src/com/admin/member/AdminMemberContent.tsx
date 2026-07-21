@@ -166,7 +166,7 @@ export default function AdminMemberContent({
   };
 
   return (
-    <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] gap-5 px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:grid-cols-[244px_minmax(0,1fr)] xl:grid-cols-[268px_minmax(0,1fr)]">
+    <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:gap-5 md:px-5 md:py-5 lg:grid-cols-[244px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6 xl:grid-cols-[268px_minmax(0,1fr)]">
       <AdminSidebar
         adminId={adminId}
         displayName={displayName}
@@ -175,7 +175,7 @@ export default function AdminMemberContent({
       />
 
       <section className="min-w-0">
-        <div className="relative min-h-[calc(100svh-2rem)] overflow-hidden rounded-[30px] border border-white/72 bg-[rgba(244,248,255,0.46)] p-5 shadow-[0_34px_120px_rgba(15,23,42,0.14)] backdrop-blur-[10px] md:min-h-[calc(100svh-3rem)] md:p-8 xl:p-9">
+        <div className="relative min-h-[calc(100svh-1.5rem)] overflow-hidden rounded-[24px] border border-white/72 bg-[rgba(244,248,255,0.46)] p-3 shadow-[0_34px_120px_rgba(15,23,42,0.14)] backdrop-blur-[10px] sm:rounded-[28px] sm:p-4 md:min-h-[calc(100svh-2.5rem)] md:p-6 lg:min-h-[calc(100svh-3rem)] lg:rounded-[30px] lg:p-8 xl:p-9">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(220,230,255,0.56),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(255,247,219,0.52),transparent_24%)]" />
           <div className="relative z-10">
             <AdminMemberHeader onMemberCreated={() => loadMembers()} />
@@ -202,7 +202,7 @@ export default function AdminMemberContent({
               </div>
             )}
             {isLoading ? (
-              <div className="liquid-glass mt-7 rounded-[28px] p-10 text-center text-sm font-extrabold text-[#64748b]">
+              <div className="liquid-glass mt-6 rounded-[24px] p-8 text-center text-sm font-extrabold text-[#64748b] lg:mt-7 lg:rounded-[28px] lg:p-10">
                 Đang tải danh sách thành viên...
               </div>
             ) : (

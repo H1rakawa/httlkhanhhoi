@@ -6,8 +6,8 @@ export default function AdminMemberHeader({
   onMemberCreated?: () => void;
 }) {
   return (
-    <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-      <div>
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:gap-5">
+      <div className="min-w-0">
         <p className="text-sm font-extrabold text-[#0f172a]">
           Quản lý thành viên
         </p>

@@ -21,6 +21,8 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log("getPasswordResetRedirectUrl: ", getPasswordResetRedirectUrl());
+
     await supabaseAuthRequest("/recover", {
       method: "POST",
       body: JSON.stringify({
