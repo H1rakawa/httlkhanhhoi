@@ -70,8 +70,7 @@ export default function SermonVideos() {
   const featuredEmbedUrl = featured.embedUrl;
 
   return (
-    <section className="px-5 pb-6 pt-16 md:pt-20">
-      <div className="liquid-glass mx-auto max-w-7xl p-5 md:p-8">
+    <section className="liquid-glass mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0066cc]">
@@ -182,7 +181,6 @@ export default function SermonVideos() {
             </div>
           </div>
         </div>
-      </div>
     </section>
   );
 }

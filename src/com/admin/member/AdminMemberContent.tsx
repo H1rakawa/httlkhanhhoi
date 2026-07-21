@@ -171,7 +171,7 @@ export default function AdminMemberContent({
         <div className="relative min-h-[calc(100svh-2rem)] overflow-hidden rounded-[30px] border border-white/72 bg-[rgba(244,248,255,0.46)] p-5 shadow-[0_34px_120px_rgba(15,23,42,0.14)] backdrop-blur-[10px] md:min-h-[calc(100svh-3rem)] md:p-8 xl:p-9">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(220,230,255,0.56),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(255,247,219,0.52),transparent_24%)]" />
           <div className="relative z-10">
-            <AdminMemberHeader />
+            <AdminMemberHeader onMemberCreated={() => loadMembers()} />
             <AdminMemberFilters
               query={query}
               role={role}

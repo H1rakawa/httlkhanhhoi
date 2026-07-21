@@ -10,3 +10,15 @@ export function getSupabaseConfig() {
 
   return { url: url.replace(/\/$/, ""), publishableKey };
 }
+
+export function getSupabaseServiceRoleKey() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "Thiếu SUPABASE_SERVICE_ROLE_KEY. Vui lòng thêm service role key vào .env.local và biến môi trường deploy.",
+    );
+  }
+
+  return serviceRoleKey;
+}

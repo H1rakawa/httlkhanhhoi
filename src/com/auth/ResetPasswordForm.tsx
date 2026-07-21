@@ -107,7 +107,7 @@ export default function ResetPasswordForm() {
     const errorDescription = params.get("error_description");
 
     queueMicrotask(() => {
-      if (token && recoveryType === "recovery") {
+      if (token && (recoveryType === "recovery" || recoveryType === "invite")) {
         setAccessToken(token);
       } else {
         setMessage({

@@ -5,6 +5,7 @@ export type AdminMember = {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   role: MemberRole;
   status: MemberStatus;
   joinedAt: string;
@@ -58,6 +59,7 @@ export function mapProfileToAdminMember(
     id: profile.id,
     name: profile.name || profile.email,
     email: profile.email,
+    phone: profile.phone,
     role: profile.role,
     status: profile.status,
     joinedAt: formatMemberDate(profile.created_at),

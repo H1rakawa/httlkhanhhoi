@@ -22,6 +22,26 @@ type Account = {
   } | null;
 };
 
+function normalizeRole(role?: string | null) {
+  return (role || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function isAdminAccount(account: Account | null) {
+  const metadata = account?.user.user_metadata as
+    | ({ role?: string } & NonNullable<DisplayUser["user_metadata"]>)
+    | undefined;
+  const profileRole = normalizeRole(account?.profile?.role);
+  const metadataRole = normalizeRole(metadata?.role || metadata?.display_name);
+
+  return [profileRole, metadataRole].some((role) =>
+    ["admin", "administrator", "quan_tri", "quan_tri_vien"].includes(role),
+  );
+}
+
 const accountRoutes: Record<string, string> = {
   admin: "/admin",
   dashboard: "/dashboard",
@@ -73,6 +93,7 @@ export default function HeaderAccountMenu() {
   const name = account ? getUserDisplayName(account.user, account.profile) : "";
   const avatarUrl = account ? getUserAvatarUrl(account.user, account.profile) : null;
   const initial = (email.charAt(0) || name.charAt(0) || "T").toUpperCase();
+  const canOpenAdmin = isAdminAccount(account);
 
   const handleAction = async (key: React.Key) => {
     setIsOpen(false);
@@ -173,10 +194,10 @@ export default function HeaderAccountMenu() {
           onAction={handleAction}
           className="p-3 outline-none"
         >
-          {account.profile?.role === "admin" && (
+          {canOpenAdmin && (
             <Dropdown.Item id="admin" className={itemClassName("admin")}>
               <DashboardIcon name="settings" className="h-5 w-5" />
-              <span>Quản trị</span>
+              <span>Admin</span>
             </Dropdown.Item>
           )}
           <Dropdown.Item id="dashboard" className={itemClassName("dashboard")}>

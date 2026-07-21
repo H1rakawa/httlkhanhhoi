@@ -1,17 +1,32 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import {
-  getAccessToken,
-  getCurrentAccount,
-} from "@/lib/supabase/auth";
-import { getSupabaseConfig } from "@/lib/supabase/config";
+  getSupabaseConfig,
+  getSupabaseServiceRoleKey,
+} from "@/lib/supabase/config";
 
 const validRoles = new Set(["member", "teacher", "admin"]);
 const validStatuses = new Set(["active", "inactive", "blocked"]);
+const creatableStatuses = new Set(["active", "inactive"]);
+const profileSelectColumns =
+  "id,name,email,phone,avatar_url,role,status,created_at,updated_at";
 
 type MemberPatchBody = {
   ids?: string[];
   role?: string;
   status?: string;
+};
+
+type CreateMemberPayload = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  status?: string;
+  team?: string;
+  ministry?: string;
+  isWorker?: boolean;
 };
 
 type ProfileRow = {
@@ -56,6 +71,34 @@ function sanitizeIds(ids?: string[]) {
         ),
       )
     : [];
+}
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeEmail(value: unknown) {
+  return normalizeText(value).toLowerCase();
+}
+
+function getRedirectUrl(request: Request) {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const origin =
+    request.headers.get("origin") || new URL(request.url).origin.replace(/\/$/, "");
+
+  return `${configuredUrl || origin}/auth/create-password`;
+}
+
+function createSupabaseAdminClient() {
+  const { url } = getSupabaseConfig();
+  const serviceRoleKey = getSupabaseServiceRoleKey();
+
+  return createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
 async function supabaseProfilesRequest<T>(
@@ -143,6 +186,128 @@ export async function GET(request: Request) {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    const admin = await requireAdmin();
+    if ("error" in admin) return admin.error;
+
+    const payload = (await request.json().catch(() => null)) as
+      | CreateMemberPayload
+      | null;
+
+    const name = normalizeText(payload?.name);
+    const email = normalizeEmail(payload?.email);
+    const phone = normalizeText(payload?.phone);
+    const role = validRoles.has(payload?.role || "") ? payload?.role || "member" : "";
+    const status = creatableStatuses.has(payload?.status || "")
+      ? payload?.status || "active"
+      : "";
+    const ministry = normalizeText(payload?.ministry || payload?.team);
+    const isWorker = Boolean(payload?.isWorker);
+
+    if (!name) {
+      return NextResponse.json({ error: "Vui lòng nhập họ và tên." }, { status: 400 });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { error: "Email chưa đúng định dạng." },
+        { status: 400 },
+      );
+    }
+
+    if (!role || !status) {
+      return NextResponse.json(
+        { error: "Vai trò hoặc trạng thái tài khoản không hợp lệ." },
+        { status: 400 },
+      );
+    }
+
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      email,
+      {
+        data: {
+          full_name: name,
+          name,
+          phone,
+          role,
+          team: ministry,
+          ministry,
+          is_worker: isWorker,
+        },
+        redirectTo: getRedirectUrl(request),
+      },
+    );
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || "Không thể gửi email mời thành viên." },
+        { status: 400 },
+      );
+    }
+
+    const invitedUser = data.user;
+
+    if (!invitedUser?.id) {
+      return NextResponse.json(
+        { error: "Supabase chưa trả về thông tin người dùng vừa tạo." },
+        { status: 502 },
+      );
+    }
+
+    const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
+      {
+        id: invitedUser.id,
+        name,
+        email,
+        phone: phone || null,
+        role,
+        status,
+        avatar_url: null,
+      },
+      { onConflict: "id" },
+    );
+
+    if (profileError) {
+      return NextResponse.json(
+        {
+          error:
+            profileError.message ||
+            "Đã gửi email mời nhưng chưa thể cập nhật hồ sơ thành viên.",
+        },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      message: "Đã tạo thành viên và gửi email tạo mật khẩu.",
+      member: {
+        id: invitedUser.id,
+        name,
+        email,
+        phone,
+        role,
+        status,
+        team: ministry,
+        ministry,
+        isWorker,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Không thể tạo thành viên mới.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
 export async function PATCH(request: Request) {
   try {
     const admin = await requireAdmin();
@@ -201,16 +366,20 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const idFilter = ids.join(",");
-    const { data } = await supabaseProfilesRequest<ProfileRow[]>(
-      `profiles?id=in.(${idFilter})&select=id,name,email,phone,avatar_url,role,status,created_at,updated_at&order=created_at.desc`,
-      admin.accessToken,
-      {
-        method: "PATCH",
-        headers: { Prefer: "return=representation" },
-        body: JSON.stringify(updates),
-      },
-    );
+    const supabaseAdmin = createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .update(updates)
+      .in("id", ids)
+      .select(profileSelectColumns)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || "Không thể cập nhật thành viên." },
+        { status: 400 },
+      );
+    }
 
     return NextResponse.json({ members: data });
   } catch (error) {
@@ -248,19 +417,23 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const idFilter = ids.join(",");
-    const { data } = await supabaseProfilesRequest<ProfileRow[]>(
-      `profiles?id=in.(${idFilter})&select=id,name,email,phone,avatar_url,role,status,created_at,updated_at&order=created_at.desc`,
-      admin.accessToken,
-      {
-        method: "PATCH",
-        headers: { Prefer: "return=representation" },
-        body: JSON.stringify({
-          status: "inactive",
-          updated_at: new Date().toISOString(),
-        }),
-      },
-    );
+    const supabaseAdmin = createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        status: "inactive",
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", ids)
+      .select(profileSelectColumns)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || "Không thể xóa thành viên." },
+        { status: 400 },
+      );
+    }
 
     return NextResponse.json({ members: data });
   } catch (error) {

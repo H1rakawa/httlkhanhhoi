@@ -20,6 +20,12 @@ const statusClassName: Record<AdminMember["status"], string> = {
   blocked: "bg-[#ffe9e7] text-[#e56a63]",
 };
 
+type TooltipState = {
+  text: string;
+  top: number;
+  left: number;
+} | null;
+
 function Checkbox({
   checked = false,
   mixed = false,
@@ -62,6 +68,74 @@ function Checkbox({
         <span className="h-0.5 w-2.5 rounded-full bg-current" aria-hidden="true" />
       )}
     </button>
+  );
+}
+
+function TruncatedInfoButton({
+  text,
+  className = "",
+  onClick,
+}: {
+  text: string;
+  className?: string;
+  onClick: () => void;
+}) {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [tooltip, setTooltip] = useState<TooltipState>(null);
+
+  const showTooltip = () => {
+    const element = textRef.current;
+    if (!element || element.scrollWidth <= element.clientWidth) {
+      setTooltip(null);
+      return;
+    }
+
+    const rect = element.getBoundingClientRect();
+    const tooltipWidth = 300;
+    setTooltip({
+      text,
+      top: rect.top - 10,
+      left: Math.min(
+        Math.max(12, rect.left),
+        window.innerWidth - tooltipWidth - 12,
+      ),
+    });
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        onMouseEnter={showTooltip}
+        onMouseLeave={() => setTooltip(null)}
+        onFocus={showTooltip}
+        onBlur={() => setTooltip(null)}
+        className={[
+          "block w-full min-w-0 text-left leading-5 outline-none",
+          className,
+        ].join(" ")}
+        aria-label={text}
+      >
+        <span ref={textRef} className="block truncate">
+          {text}
+        </span>
+      </button>
+
+      {tooltip &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[150] max-w-[300px] -translate-y-full rounded-[14px] border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-extrabold leading-5 text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.2)] backdrop-blur-xl"
+            style={{
+              top: tooltip.top,
+              left: tooltip.left,
+            }}
+          >
+            {tooltip.text}
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
@@ -192,6 +266,187 @@ function ActionMenu({
   );
 }
 
+function MemberDetailModal({
+  member,
+  onClose,
+  onEdit,
+}: {
+  member: AdminMember;
+  onClose: () => void;
+  onEdit: () => void;
+}) {
+  const initial = member.name.charAt(0).toUpperCase();
+
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-white/38 px-4 py-8 backdrop-blur-[10px]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="member-detail-title"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <article
+        className="liquid-glass relative w-full max-w-[640px] overflow-hidden rounded-[28px] border-white/80 bg-white/74 text-[#141922] shadow-[0_34px_120px_rgba(31,48,70,0.2)]"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(244,248,255,0.86)),url('/images/parallax-background.png')] bg-cover bg-center" />
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/72 text-[#303943] shadow-[0_10px_24px_rgba(31,48,70,0.12)] transition hover:bg-white"
+          aria-label="Đóng chi tiết thành viên"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+
+        <div className="relative px-8 pb-8">
+          <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#101614] text-3xl font-extrabold text-white shadow-[0_18px_40px_rgba(31,48,70,0.2)]">
+              {member.avatar ? (
+                <span
+                  className="h-full w-full bg-cover bg-center"
+                  style={{ backgroundImage: `url("${member.avatar}")` }}
+                />
+              ) : (
+                initial
+              )}
+            </div>
+            <div className="pb-1">
+              <h2
+                id="member-detail-title"
+                className="text-2xl font-extrabold tracking-[-0.04em]"
+              >
+                {member.name}
+              </h2>
+              <span
+                className={[
+                  "mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold",
+                  statusClassName[member.status],
+                ].join(" ")}
+              >
+                <span className="h-2 w-2 rounded-full bg-current" />
+                Thành viên {statusLabels[member.status].toLowerCase()}
+              </span>
+            </div>
+          </div>
+
+          <dl className="mt-9 grid gap-8 sm:grid-cols-2">
+            <div>
+              <dt className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+                Họ và tên
+              </dt>
+              <dd className="mt-3 text-base font-extrabold">{member.name}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+                Địa chỉ email
+              </dt>
+              <dd className="mt-3 break-all text-base font-extrabold">
+                {member.email}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+                Số điện thoại
+              </dt>
+              <dd className="mt-3 text-base font-extrabold">
+                {member.phone || "Chưa cập nhật"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+                Ngày tham gia
+              </dt>
+              <dd className="mt-3 text-base font-extrabold">{member.joinedAt}</dd>
+            </div>
+          </dl>
+
+          <section className="mt-8 rounded-[22px] border-l-4 border-[#a78bfa] bg-white/42 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+              Nhóm đang tham gia
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[roleLabels[member.role], "Hội đồng lãnh đạo", "+2 khác"].map(
+                (group) => (
+                  <span
+                    key={group}
+                    className="rounded-full border border-[#dfe5ee] bg-white/72 px-3 py-1.5 text-xs font-bold text-[#2f3740]"
+                  >
+                    {group}
+                  </span>
+                ),
+              )}
+            </div>
+          </section>
+
+          <section className="mt-8">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+              Tiểu sử tâm linh
+            </p>
+            <p className="mt-3 text-sm font-semibold leading-7 text-[#39434d]">
+              {member.name} là một thành viên trong cộng đồng, đang đồng hành
+              trong các hoạt động học tập, cầu thay và phục vụ của hội thánh.
+            </p>
+          </section>
+
+          <div className="mt-9 flex items-center justify-between border-t border-[#dfe6ef]/80 pt-5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full px-5 py-3 text-sm font-extrabold text-[#475467] transition hover:bg-white/58"
+            >
+              Đóng
+            </button>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="flex items-center gap-2 rounded-[14px] bg-[#111614] px-6 py-3 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(17,22,20,0.22)]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Chỉnh sửa
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>,
+    document.body,
+  );
+}
+
 export default function AdminMemberTable({
   members,
   selectedIds,
@@ -216,6 +471,7 @@ export default function AdminMemberTable({
   onPageChange: (page: number) => void;
 }) {
   const [openActionId, setOpenActionId] = useState<string | null>(null);
+  const [activeMember, setActiveMember] = useState<AdminMember | null>(null);
   const totalPages = Math.ceil(total / pageSize);
   const shouldShowPagination = totalPages > 1;
   const visiblePages = Array.from(
@@ -271,30 +527,34 @@ export default function AdminMemberTable({
                     />
                   </td>
                   <td className="px-3 py-5">
-                    <span
-                      className="block truncate leading-5"
-                      title={member.name}
-                    >
-                      {member.name}
-                    </span>
+                    <TruncatedInfoButton
+                      text={member.name}
+                      onClick={() => setActiveMember(member)}
+                    />
                   </td>
                   <td className="px-3 py-5 text-[#65717c]">
-                    <span className="block truncate" title={member.email}>
-                      {member.email}
-                    </span>
+                    <TruncatedInfoButton
+                      text={member.email}
+                      onClick={() => setActiveMember(member)}
+                      className="text-[#65717c]"
+                    />
                   </td>
                   <td className="px-3 py-5">
-                    <span
+                    <button
+                      type="button"
+                      onClick={() => setActiveMember(member)}
                       className={[
                         "inline-flex max-w-full justify-center rounded-full px-3 py-2 text-xs font-extrabold",
                         roleClassName[member.role],
                       ].join(" ")}
                     >
                       {roleLabels[member.role]}
-                    </span>
+                    </button>
                   </td>
                   <td className="px-3 py-5">
-                    <span
+                    <button
+                      type="button"
+                      onClick={() => setActiveMember(member)}
                       className={[
                         "inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-extrabold",
                         statusClassName[member.status],
@@ -302,10 +562,16 @@ export default function AdminMemberTable({
                     >
                       <span className="h-2 w-2 rounded-full bg-current" />
                       {statusLabels[member.status]}
-                    </span>
+                    </button>
                   </td>
                   <td className="px-3 py-5 text-[#65717c]">
-                    {member.joinedAt}
+                    <button
+                      type="button"
+                      onClick={() => setActiveMember(member)}
+                      className="text-left"
+                    >
+                      {member.joinedAt}
+                    </button>
                   </td>
                   <td className="w-[72px] px-3 py-5">
                     <ActionMenu
@@ -382,6 +648,16 @@ export default function AdminMemberTable({
             &gt;
           </button>
         </div>
+      )}
+      {activeMember && (
+        <MemberDetailModal
+          member={activeMember}
+          onClose={() => setActiveMember(null)}
+          onEdit={() => {
+            setActiveMember(null);
+            onChangeRole([activeMember.id]);
+          }}
+        />
       )}
     </section>
   );
