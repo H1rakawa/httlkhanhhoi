@@ -20,11 +20,50 @@ const statusClassName: Record<AdminMember["status"], string> = {
   blocked: "bg-[#ffe9e7] text-[#e56a63]",
 };
 
+const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
+const LONG_OFFLINE_THRESHOLD_MINUTES = 10;
+
 type TooltipState = {
   text: string;
   top: number;
   left: number;
 } | null;
+
+function getPresenceLabel(member: AdminMember, now: number) {
+  if (!member.lastSeenAt) {
+    return {
+      label: "Offline hơn 10 phút",
+      className: "bg-[#eef0f2] text-[#626b75]",
+      dotClassName: "bg-current",
+    };
+  }
+
+  const lastSeenTime = new Date(member.lastSeenAt).getTime();
+  const diffMinutes = Math.max(0, Math.floor((now - lastSeenTime) / 60_000));
+  const isOnline = member.isOnline && now - lastSeenTime <= ONLINE_THRESHOLD_MS;
+
+  if (isOnline) {
+    return {
+      label: "Online",
+      className: "bg-[#e8f8ee] text-[#1f9d55]",
+      dotClassName: "bg-[#22c55e]",
+    };
+  }
+
+  if (diffMinutes > LONG_OFFLINE_THRESHOLD_MINUTES) {
+    return {
+      label: "Offline hơn 10 phút",
+      className: "bg-[#eef0f2] text-[#626b75]",
+      dotClassName: "bg-current",
+    };
+  }
+
+  return {
+    label: `Offline cách đây ${diffMinutes} phút`,
+    className: "bg-[#fff4df] text-[#9a650f]",
+    dotClassName: "bg-current",
+  };
+}
 
 function Checkbox({
   checked = false,
@@ -472,6 +511,7 @@ export default function AdminMemberTable({
 }) {
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [activeMember, setActiveMember] = useState<AdminMember | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const totalPages = Math.ceil(total / pageSize);
   const shouldShowPagination = totalPages > 1;
   const visiblePages = Array.from(
@@ -480,6 +520,11 @@ export default function AdminMemberTable({
   );
   const isAllSelected = members.length > 0 && selectedIds.length === members.length;
   const hasSelection = selectedIds.length > 0;
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <section className="liquid-glass mt-7 rounded-[28px]">
@@ -506,6 +551,7 @@ export default function AdminMemberTable({
           <tbody>
             {members.map((member) => {
               const isSelected = selectedIds.includes(member.id);
+              const presence = getPresenceLabel(member, now);
 
               return (
                 <tr
@@ -557,11 +603,16 @@ export default function AdminMemberTable({
                       onClick={() => setActiveMember(member)}
                       className={[
                         "inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-extrabold",
-                        statusClassName[member.status],
+                        presence.className,
                       ].join(" ")}
                     >
-                      <span className="h-2 w-2 rounded-full bg-current" />
-                      {statusLabels[member.status]}
+                      <span
+                        className={[
+                          "h-2 w-2 rounded-full",
+                          presence.dotClassName,
+                        ].join(" ")}
+                      />
+                      {presence.label}
                     </button>
                   </td>
                   <td className="px-3 py-5 text-[#65717c]">

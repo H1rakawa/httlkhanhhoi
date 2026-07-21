@@ -130,6 +130,13 @@ export default function AdminMemberContent({
   const deleteMembers = async (ids: string[]) => {
     if (!ids.length) return;
 
+    const confirmed = window.confirm(
+      ids.length === 1
+        ? "Bạn chắc chắn muốn xóa vĩnh viễn thành viên này khỏi database?"
+        : `Bạn chắc chắn muốn xóa vĩnh viễn ${ids.length} thành viên khỏi database?`,
+    );
+    if (!confirmed) return;
+
     const response = await fetch("/api/admin/members", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
