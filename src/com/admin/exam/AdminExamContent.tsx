@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import Pagination from "@/com/lib/Pagination";
 import {
-  adminExamItems,
   adminExamStatusLabels,
   adminExamStatusOptions,
   adminExamWeekOptions,
+  type AdminExamsResponse,
   type AdminExamItem,
   type AdminExamStatus,
 } from "@/com/admin/exam/adminExamData";
@@ -19,6 +20,8 @@ type AdminExamContentProps = {
 };
 
 type StatusFilter = "all" | AdminExamStatus;
+
+const PAGE_SIZE = 4;
 
 const statusClassName: Record<AdminExamStatus, string> = {
   ongoing: "bg-[#e8f8ee] text-[#2d8f58]",
@@ -187,7 +190,19 @@ function AdminExamActionButton({ item }: { item: AdminExamItem }) {
   );
 }
 
-function AdminExamTable({ items }: { items: AdminExamItem[] }) {
+function AdminExamTable({
+  items,
+  page,
+  pageSize,
+  total,
+  onPageChange,
+}: {
+  items: AdminExamItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}) {
   return (
     <section className="liquid-glass mt-6 overflow-hidden rounded-[28px]">
       <div className="hidden lg:block">
@@ -296,37 +311,20 @@ function AdminExamTable({ items }: { items: AdminExamItem[] }) {
       </div>
 
       <div className="flex flex-col gap-4 border-t border-white/36 bg-white/20 px-5 py-4 text-sm font-extrabold text-[#526579] sm:flex-row sm:items-center sm:justify-between">
-        <span>Hiển thị 1 - {items.length} của 12 bài tập</span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/48 text-[#98a2b3]"
-            aria-label="Trang trước"
-          >
-            ‹
-          </button>
-          {[1, 2, 3].map((pageNumber) => (
-            <button
-              key={pageNumber}
-              type="button"
-              className={[
-                "flex h-9 w-9 items-center justify-center rounded-full transition",
-                pageNumber === 1
-                  ? "bg-white text-[#111827] shadow-[0_10px_24px_rgba(31,48,70,0.12)]"
-                  : "text-[#526579] hover:bg-white/54",
-              ].join(" ")}
-            >
-              {pageNumber}
-            </button>
-          ))}
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/48 text-[#526579]"
-            aria-label="Trang sau"
-          >
-            ›
-          </button>
-        </div>
+        <span>
+          {total > 0
+            ? `Hiển thị ${(page - 1) * pageSize + 1} - ${
+                (page - 1) * pageSize + items.length
+              } của ${total} bài tập`
+            : "Hiển thị 0 bài tập"}
+        </span>
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          className="justify-start gap-2 p-0 sm:justify-center"
+          onPageChange={onPageChange}
+        />
       </div>
     </section>
   );
@@ -337,24 +335,66 @@ export default function AdminExamContent({
   displayName,
   avatarUrl,
 }: AdminExamContentProps) {
+  const [items, setItems] = useState<AdminExamItem[]>([]);
   const [query, setQuery] = useState("");
   const [week, setWeek] = useState("all");
   const [status, setStatus] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  const loadExams = useCallback(async (signal?: AbortSignal) => {
+    setIsLoading(true);
+    setError("");
 
-    return adminExamItems.filter((item) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        item.title.toLowerCase().includes(normalizedQuery) ||
-        item.description.toLowerCase().includes(normalizedQuery);
-      const matchesWeek = week === "all" || item.week === week;
-      const matchesStatus = status === "all" || item.status === status;
-
-      return matchesQuery && matchesWeek && matchesStatus;
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(PAGE_SIZE),
+      week,
+      status,
     });
-  }, [query, status, week]);
+    if (query.trim()) params.set("q", query.trim());
+
+    try {
+      const response = await fetch(`/api/admin/exams?${params.toString()}`, {
+        cache: "no-store",
+        signal,
+      });
+      const data = (await response.json()) as AdminExamsResponse & {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Không thể tải danh sách bài tập.");
+      }
+
+      setItems(data.exams);
+      setTotal(data.total);
+    } catch (fetchError) {
+      if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
+        return;
+      }
+
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Không thể tải danh sách bài tập.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, query, status, week]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => loadExams(controller.signal), 180);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [loadExams]);
 
   return (
     <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:gap-5 md:px-5 md:py-5 lg:grid-cols-[244px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6 xl:grid-cols-[268px_minmax(0,1fr)]">
@@ -374,11 +414,37 @@ export default function AdminExamContent({
               query={query}
               week={week}
               status={status}
-              onQueryChange={setQuery}
-              onWeekChange={setWeek}
-              onStatusChange={setStatus}
+              onQueryChange={(value) => {
+                setPage(1);
+                setQuery(value);
+              }}
+              onWeekChange={(value) => {
+                setPage(1);
+                setWeek(value);
+              }}
+              onStatusChange={(value) => {
+                setPage(1);
+                setStatus(value);
+              }}
             />
-            <AdminExamTable items={filteredItems} />
+            {error && (
+              <div className="mt-5 rounded-2xl border border-[#fecaca] bg-[#fff1f0]/70 px-5 py-4 text-sm font-bold text-[#dc2626]">
+                {error}
+              </div>
+            )}
+            {isLoading ? (
+              <div className="liquid-glass mt-6 rounded-[24px] p-8 text-center text-sm font-extrabold text-[#64748b] lg:rounded-[28px] lg:p-10">
+                Đang tải danh sách bài tập...
+              </div>
+            ) : (
+              <AdminExamTable
+                items={items}
+                page={page}
+                pageSize={PAGE_SIZE}
+                total={total}
+                onPageChange={setPage}
+              />
+            )}
           </div>
         </div>
       </section>

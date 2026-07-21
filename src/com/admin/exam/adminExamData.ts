@@ -5,11 +5,19 @@ export type AdminExamItem = {
   title: string;
   description: string;
   week: string;
+  weekValue: string;
   dueDate: string;
   status: AdminExamStatus;
   participants: number;
   completed: number;
   iconTone: "blue" | "gold" | "dark";
+};
+
+export type AdminExamsResponse = {
+  exams: AdminExamItem[];
+  page: number;
+  pageSize: number;
+  total: number;
 };
 
 export const adminExamStatusLabels: Record<AdminExamStatus, string> = {
@@ -29,9 +37,9 @@ export const adminExamStatusOptions = [
 
 export const adminExamWeekOptions = [
   { value: "all", label: "Tất cả tuần" },
-  { value: "Tuần 01", label: "Tuần 01" },
-  { value: "Tuần 02", label: "Tuần 02" },
-  { value: "Tuần 03", label: "Tuần 03" },
+  { value: "week-1", label: "Tuần 01" },
+  { value: "week-2", label: "Tuần 02" },
+  { value: "week-3", label: "Tuần 03" },
 ] as const;
 
 export const adminExamItems: AdminExamItem[] = [
@@ -40,6 +48,7 @@ export const adminExamItems: AdminExamItem[] = [
     title: "Thiền định buổi sáng - Cấp độ 1",
     description: "24 học viên tham gia",
     week: "Tuần 01",
+    weekValue: "week-1",
     dueDate: "20/12/2024",
     status: "ongoing",
     participants: 24,
@@ -51,6 +60,7 @@ export const adminExamItems: AdminExamItem[] = [
     title: "Bài viết về chánh niệm",
     description: "Chưa bắt đầu",
     week: "Tuần 02",
+    weekValue: "week-2",
     dueDate: "25/12/2024",
     status: "upcoming",
     participants: 16,
@@ -62,6 +72,7 @@ export const adminExamItems: AdminExamItem[] = [
     title: "Phân tích hành vi tự thân",
     description: "42 học viên đã hoàn thành",
     week: "Tuần 01",
+    weekValue: "week-1",
     dueDate: "15/12/2024",
     status: "ended",
     participants: 42,
@@ -73,6 +84,7 @@ export const adminExamItems: AdminExamItem[] = [
     title: "Thiền quán tưởng cơ bản",
     description: "18 học viên tham gia",
     week: "Tuần 03",
+    weekValue: "week-3",
     dueDate: "30/12/2024",
     status: "ongoing",
     participants: 18,

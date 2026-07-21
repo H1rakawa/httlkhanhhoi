@@ -1,5 +1,6 @@
 import Image from "next/image";
 import AdminSidebar from "@/com/admin/AdminSidebar";
+import AdminPasswordSecurity from "@/com/admin/AdminPasswordSecurity";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 
 type AdminProfileContentProps = {
@@ -169,32 +170,8 @@ export default function AdminProfileContent({
                     Bảo mật
                   </h2>
 
-                  <div className="grid gap-5">
-                    <Field label="Mật khẩu hiện tại" value="••••••••" />
-                    <Field label="Mật khẩu mới" value="" />
-                    <Field label="Nhập lại mật khẩu mới" value="" />
-                  </div>
+                  <AdminPasswordSecurity />
 
-                  <button
-                    type="button"
-                    className="mt-6 h-12 w-full rounded-[12px] border border-[#dc2626] bg-white/44 text-sm font-extrabold text-[#dc2626] transition-colors hover:bg-[#fff1f0]"
-                  >
-                    Đổi mật khẩu
-                  </button>
-
-                  <div className="mt-8 flex items-center justify-between gap-5">
-                    <p className="text-sm font-bold leading-5 text-[#111827]">
-                      Xác thực 2 yếu tố
-                      <span className="block">(2FA)</span>
-                    </p>
-                    <button
-                      type="button"
-                      className="relative h-6 w-11 rounded-full bg-[#d9e6ff] p-1"
-                      aria-label="Bật xác thực 2 yếu tố"
-                    >
-                      <span className="block h-4 w-4 rounded-full bg-white shadow" />
-                    </button>
-                  </div>
                 </section>
 
                 <section className="rounded-[24px] border border-white/72 bg-white/30 p-6 shadow-[0_20px_54px_rgba(31,48,70,0.1)] backdrop-blur-2xl">

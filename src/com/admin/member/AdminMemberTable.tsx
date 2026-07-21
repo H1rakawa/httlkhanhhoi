@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Pagination from "@/com/lib/Pagination";
 import {
   roleLabels,
   statusLabels,
@@ -648,12 +649,6 @@ export default function AdminMemberTable({
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [activeMember, setActiveMember] = useState<AdminMember | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const totalPages = Math.ceil(total / pageSize);
-  const shouldShowPagination = totalPages > 1;
-  const visiblePages = Array.from(
-    { length: Math.min(totalPages, 5) },
-    (_, index) => index + 1,
-  );
   const isAllSelected =
     members.length > 0 && selectedIds.length === members.length;
   const hasSelection = selectedIds.length > 0;
@@ -830,56 +825,12 @@ export default function AdminMemberTable({
         </table>
       </div>
 
-      {shouldShowPagination && (
-        <div className="flex items-center justify-center gap-4 px-6 py-5 text-sm font-extrabold text-[#2d343c]">
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={page === 1}
-            onClick={() => onPageChange(Math.max(page - 1, 1))}
-          >
-            &lt;
-          </button>
-          {visiblePages.map((pageNumber) => (
-            <button
-              key={pageNumber}
-              type="button"
-              onClick={() => onPageChange(pageNumber)}
-              className={[
-                "flex h-9 w-9 items-center justify-center rounded-full transition-colors",
-                pageNumber === page
-                  ? "bg-[#0066cc] text-white shadow-[0_10px_22px_rgba(0,102,204,0.22)]"
-                  : "text-[#2d343c] hover:bg-white/64",
-              ].join(" ")}
-            >
-              {pageNumber}
-            </button>
-          ))}
-          {totalPages > visiblePages.length && (
-            <>
-              <span>...</span>
-              <button
-                type="button"
-                onClick={() => onPageChange(totalPages)}
-                className={[
-                  "rounded-full px-2 py-1",
-                  totalPages === page ? "text-[#0066cc]" : "",
-                ].join(" ")}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={page === totalPages}
-            onClick={() => onPageChange(Math.min(page + 1, totalPages))}
-          >
-            &gt;
-          </button>
-        </div>
-      )}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={onPageChange}
+      />
       {activeMember && (
         <MemberDetailModal
           member={activeMember}
