@@ -9,12 +9,13 @@ export type AssignmentItem = {
   id: string;
   title: string;
   description: string;
-  category: "Kinh Thánh" | "Suy ngẫm" | "Cộng đồng" | "Kỹ năng";
+  category: string;
   dueDate: string;
   weekNumber?: number | null;
   attachmentUrl?: string | null;
   status: AssignmentStatus;
   grade?: number | null;
+  questions?: AssignmentQuestion[];
 };
 
 export type AssignmentQuestion = {
@@ -22,6 +23,9 @@ export type AssignmentQuestion = {
   type: "choice" | "textarea";
   title: string;
   options?: string[];
+  allowMultiple?: boolean;
+  scriptureReference?: string | null;
+  answerHint?: string | null;
   placeholder?: string;
 };
 
@@ -101,7 +105,7 @@ export const fallbackAssignments: AssignmentItem[] = [
 ];
 
 export function categoryFromWeek(weekNumber?: number | null) {
-  const categories: AssignmentItem["category"][] = [
+  const categories = [
     "Kinh Thánh",
     "Suy ngẫm",
     "Cộng đồng",

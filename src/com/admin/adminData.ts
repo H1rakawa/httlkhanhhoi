@@ -39,7 +39,7 @@ export const adminSidebarItems = [
 
 export const adminQuickActions = [
   { label: "Thêm Thành Viên", icon: "community", primary: true },
-  { label: "Tạo Bài Tập", icon: "document", primary: false },
+  { label: "Tạo Bài Tập", icon: "document", primary: false, href: "/admin/exam/new" },
   { label: "Đăng Sự Kiện", icon: "calendar", primary: false },
 ];
 

@@ -27,7 +27,10 @@ export default function AssignmentWorkClient({
   assignment: AssignmentItem;
 }) {
   const questions = useMemo(
-    () => getAssignmentQuestions(assignment),
+    () =>
+      assignment.questions && assignment.questions.length > 0
+        ? assignment.questions
+        : getAssignmentQuestions(assignment),
     [assignment],
   );
   const [answers, setAnswers] = useState<Answers>({});

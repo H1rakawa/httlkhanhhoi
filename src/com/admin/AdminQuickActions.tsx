@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import AdminAddMemberButton from "@/com/admin/AdminAddMemberButton";
 import { adminQuickActions } from "@/com/admin/adminData";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
@@ -15,16 +16,30 @@ export default function AdminQuickActions() {
         />
         {adminQuickActions
           .filter((action) => !action.primary)
-          .map((action) => (
-            <button
-              key={action.label}
-              className="flex h-11 items-center gap-2 rounded-full border border-white/76 bg-white/76 px-6 text-sm font-extrabold text-[#3d454d] shadow-[0_14px_30px_rgba(31,48,70,0.12)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5"
-              type="button"
-            >
-              <DashboardIcon name={action.icon} className="h-5 w-5" />
-              {action.label}
-            </button>
-          ))}
+          .map((action) => {
+            const className =
+              "flex h-11 items-center gap-2 rounded-full border border-white/76 bg-white/76 px-6 text-sm font-extrabold text-[#3d454d] no-underline shadow-[0_14px_30px_rgba(31,48,70,0.12)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5";
+            const content = (
+              <>
+                <DashboardIcon name={action.icon} className="h-5 w-5" />
+                {action.label}
+              </>
+            );
+
+            if ("href" in action && action.href) {
+              return (
+                <Link key={action.label} href={action.href} className={className}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button key={action.label} className={className} type="button">
+                {content}
+              </button>
+            );
+          })}
       </div>
     </section>
   );

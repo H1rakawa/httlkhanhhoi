@@ -3,6 +3,7 @@ import AssignmentBackdrop from "@/com/assignment/AssignmentBackdrop";
 import AssignmentWorkClient from "@/com/assignment/AssignmentWorkClient";
 import {
   AssignmentItem,
+  AssignmentQuestion,
   AssignmentStatus,
   assignmentRawId,
   assignmentRouteId,
@@ -25,6 +26,7 @@ type ApiAssignment = {
   id: number;
   title: string;
   description: string | null;
+  category: string | null;
   week_number: number | null;
   attachment_url: string | null;
   due_date: string | null;
@@ -40,6 +42,20 @@ type ApiAssignment = {
     status: "draft" | "submitted" | "graded";
     grade: number | null;
   }>;
+  assignment_questions?: Array<{
+    id: number;
+    question_type: "multiple_choice" | "essay";
+    prompt: string;
+    scripture_reference: string | null;
+    answer_hint: string | null;
+    allow_multiple: boolean;
+    sort_order: number;
+    assignment_question_options?: Array<{
+      option_text: string;
+      is_correct: boolean;
+      sort_order: number;
+    }>;
+  }>;
 };
 
 function statusFromApi(assignment: ApiAssignment): AssignmentStatus {
@@ -51,6 +67,31 @@ function statusFromApi(assignment: ApiAssignment): AssignmentStatus {
     return "Trễ hạn";
   }
   return "Chưa bắt đầu";
+}
+
+function mapQuestions(assignment: ApiAssignment): AssignmentQuestion[] {
+  return (assignment.assignment_questions ?? [])
+    .slice()
+    .sort((first, second) => first.sort_order - second.sort_order)
+    .map((question) => ({
+      id: `db-${question.id}`,
+      type: question.question_type === "essay" ? "textarea" : "choice",
+      title: question.prompt,
+      options:
+        question.question_type === "multiple_choice"
+          ? (question.assignment_question_options ?? [])
+              .slice()
+              .sort((first, second) => first.sort_order - second.sort_order)
+              .map((option) => option.option_text)
+          : undefined,
+      allowMultiple: question.allow_multiple,
+      scriptureReference: question.scripture_reference,
+      answerHint: question.answer_hint,
+      placeholder:
+        question.question_type === "essay"
+          ? "Viết câu trả lời của bạn tại đây..."
+          : undefined,
+    }));
 }
 
 export function generateStaticParams() {
@@ -66,7 +107,7 @@ async function getAssignment(id: string) {
   try {
     const rawId = assignmentRawId(id);
     const assignments = await supabaseDataRequest<ApiAssignment[]>(
-      `assignments?id=eq.${encodeURIComponent(rawId)}&select=id,title,description,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url,media_kind,mime_type,size_bytes),submissions(status,grade)&limit=1`,
+      `assignments?id=eq.${encodeURIComponent(rawId)}&select=id,title,description,category,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url,media_kind,mime_type,size_bytes),submissions(status,grade),assignment_questions(id,question_type,prompt,scripture_reference,answer_hint,allow_multiple,sort_order,assignment_question_options(option_text,is_correct,sort_order))&limit=1`,
       await getAccessToken(),
     );
     const assignment = assignments[0];
@@ -76,12 +117,13 @@ async function getAssignment(id: string) {
       id: assignmentRouteId(assignment.id),
       title: assignment.title,
       description: assignment.description || "Bài tập học tập và rèn luyện.",
-      category: categoryFromWeek(assignment.week_number),
+      category: assignment.category || categoryFromWeek(assignment.week_number),
       dueDate: assignment.due_date || new Date().toISOString().slice(0, 10),
       weekNumber: assignment.week_number,
       attachmentUrl: assignment.media_asset?.public_url || assignment.attachment_url,
       status: statusFromApi(assignment),
       grade: assignment.submissions?.[0]?.grade,
+      questions: mapQuestions(assignment),
     } satisfies AssignmentItem;
   } catch {
     return null;

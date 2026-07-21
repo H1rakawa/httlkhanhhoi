@@ -16,6 +16,7 @@ type ApiAssignment = {
   id: number;
   title: string;
   description: string | null;
+  category: string | null;
   week_number: number | null;
   attachment_url: string | null;
   due_date: string | null;
@@ -72,7 +73,7 @@ export default function AssignmentPageClient() {
             id: `HW-${String(assignment.id).padStart(3, "0")}`,
             title: assignment.title,
             description: assignment.description || "Bài tập học tập và rèn luyện.",
-            category: categoryFromWeek(assignment.week_number),
+            category: assignment.category || categoryFromWeek(assignment.week_number),
             dueDate: assignment.due_date || new Date().toISOString().slice(0, 10),
             weekNumber: assignment.week_number,
             attachmentUrl: assignment.attachment_url,
