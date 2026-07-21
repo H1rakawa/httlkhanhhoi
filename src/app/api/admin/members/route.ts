@@ -10,7 +10,7 @@ const validRoles = new Set(["member", "teacher", "admin"]);
 const validStatuses = new Set(["active", "inactive", "blocked"]);
 const creatableStatuses = new Set(["active", "inactive"]);
 const profileSelectColumns =
-  "id,name,email,phone,avatar_url,role,status,created_at,updated_at";
+  "id,name,email,phone,avatar_url,role,status,is_online,last_seen_at,created_at,updated_at";
 
 type MemberPatchBody = {
   ids?: string[];
@@ -37,6 +37,8 @@ type ProfileRow = {
   avatar_url: string | null;
   role: string;
   status: string;
+  is_online: boolean;
+  last_seen_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -145,7 +147,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status")?.trim();
 
     const query = new URLSearchParams({
-      select: "id,name,email,phone,avatar_url,role,status,created_at,updated_at",
+      select: profileSelectColumns,
       order: "created_at.desc",
       limit: String(pageSize),
       offset: String(offset),
@@ -418,24 +420,43 @@ export async function DELETE(request: Request) {
     }
 
     const supabaseAdmin = createSupabaseAdminClient();
-    const { data, error } = await supabaseAdmin
-      .from("profiles")
-      .update({
-        status: "inactive",
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", ids)
-      .select(profileSelectColumns)
-      .order("created_at", { ascending: false });
+    const deleteErrors: string[] = [];
 
-    if (error) {
+    for (const id of ids) {
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+      if (error) {
+        deleteErrors.push(error.message || `Không thể xóa thành viên ${id}.`);
+      }
+    }
+
+    if (deleteErrors.length) {
       return NextResponse.json(
-        { error: error.message || "Không thể xóa thành viên." },
+        {
+          error:
+            deleteErrors[0] ||
+            "Không thể xóa thành viên. Có thể tài khoản đang được liên kết với dữ liệu khác.",
+        },
         { status: 400 },
       );
     }
 
-    return NextResponse.json({ members: data });
+    const { error: profileDeleteError } = await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .in("id", ids);
+
+    if (profileDeleteError) {
+      return NextResponse.json(
+        {
+          error:
+            profileDeleteError.message ||
+            "Đã xóa tài khoản Auth nhưng chưa thể xóa hồ sơ thành viên.",
+        },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({ deletedIds: ids });
   } catch (error) {
     return NextResponse.json(
       {
