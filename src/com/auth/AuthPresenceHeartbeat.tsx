@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const HEARTBEAT_INTERVAL_MS = 60_000;
+const HEARTBEAT_INTERVAL_MS = 30_000;
 
 function sendPresence(state: "online" | "offline") {
   const path = `/api/auth/presence?state=${state}`;
@@ -23,9 +23,7 @@ export default function AuthPresenceHeartbeat() {
     sendPresence("online");
 
     const intervalId = window.setInterval(() => {
-      if (document.visibilityState === "visible") {
-        sendPresence("online");
-      }
+      sendPresence("online");
     }, HEARTBEAT_INTERVAL_MS);
 
     const handleVisibilityChange = () => {

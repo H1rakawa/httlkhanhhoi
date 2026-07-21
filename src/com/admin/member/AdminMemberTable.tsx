@@ -20,7 +20,7 @@ const statusClassName: Record<AdminMember["status"], string> = {
   blocked: "bg-[#ffe9e7] text-[#e56a63]",
 };
 
-const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
+const ONLINE_THRESHOLD_MS = 90 * 1000;
 const LONG_OFFLINE_THRESHOLD_MINUTES = 10;
 
 type TooltipState = {
@@ -32,14 +32,15 @@ type TooltipState = {
 function getPresenceLabel(member: AdminMember, now: number) {
   if (!member.lastSeenAt) {
     return {
-      label: "Offline hơn 10 phút",
+      label: "+10m",
       className: "bg-[#eef0f2] text-[#626b75]",
       dotClassName: "bg-current",
+      ariaLabel: "Offline hơn 10 phút",
     };
   }
 
   const lastSeenTime = new Date(member.lastSeenAt).getTime();
-  const diffMinutes = Math.max(0, Math.floor((now - lastSeenTime) / 60_000));
+  const diffMinutes = Math.max(1, Math.floor((now - lastSeenTime) / 60_000));
   const isOnline = member.isOnline && now - lastSeenTime <= ONLINE_THRESHOLD_MS;
 
   if (isOnline) {
@@ -47,21 +48,24 @@ function getPresenceLabel(member: AdminMember, now: number) {
       label: "Online",
       className: "bg-[#e8f8ee] text-[#1f9d55]",
       dotClassName: "bg-[#22c55e]",
+      ariaLabel: "Online",
     };
   }
 
-  if (diffMinutes > LONG_OFFLINE_THRESHOLD_MINUTES) {
+  if (diffMinutes >= LONG_OFFLINE_THRESHOLD_MINUTES) {
     return {
-      label: "Offline hơn 10 phút",
+      label: "+10m",
       className: "bg-[#eef0f2] text-[#626b75]",
       dotClassName: "bg-current",
+      ariaLabel: "Offline hơn 10 phút",
     };
   }
 
   return {
-    label: `Offline cách đây ${diffMinutes} phút`,
+    label: `${diffMinutes}m`,
     className: "bg-[#fff4df] text-[#9a650f]",
     dotClassName: "bg-current",
+    ariaLabel: `Offline cách đây ${diffMinutes} phút`,
   };
 }
 
@@ -104,7 +108,10 @@ function Checkbox({
         </svg>
       )}
       {mixed && !checked && (
-        <span className="h-0.5 w-2.5 rounded-full bg-current" aria-hidden="true" />
+        <span
+          className="h-0.5 w-2.5 rounded-full bg-current"
+          aria-hidden="true"
+        />
       )}
     </button>
   );
@@ -164,7 +171,7 @@ function TruncatedInfoButton({
       {tooltip &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[150] max-w-[300px] -translate-y-full rounded-[14px] border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-extrabold leading-5 text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.2)] backdrop-blur-xl"
+            className="pointer-events-none fixed z-150 max-w-75 -translate-y-full rounded-[14px] border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-extrabold leading-5 text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.2)] backdrop-blur-xl"
             style={{
               top: tooltip.top,
               left: tooltip.left,
@@ -230,7 +237,9 @@ function ActionMenu({
         onClick={onToggle}
         className={[
           "flex h-9 w-9 items-center justify-center rounded-full text-[#6b7280] transition-colors",
-          isOpen ? "bg-white text-[#111827]" : "hover:bg-white/72 hover:text-[#111827]",
+          isOpen
+            ? "bg-white text-[#111827]"
+            : "hover:bg-white/72 hover:text-[#111827]",
         ].join(" ")}
         aria-label={`Mở thao tác cho ${member.name}`}
         aria-expanded={isOpen}
@@ -249,58 +258,58 @@ function ActionMenu({
 
       {isOpen &&
         createPortal(
-        <div
-          className="fixed z-[100] w-44 overflow-hidden rounded-[16px] border border-white/80 bg-white/92 p-2 text-sm font-extrabold text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.18)] backdrop-blur-xl"
-          style={{
-            top: menuPosition.top,
-            left: menuPosition.left,
-          }}
-        >
-          <button
-            type="button"
-            onClick={onChangeRole}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#f1f5f9]"
+          <div
+            className="fixed z-100 w-44 overflow-hidden rounded-4xl border border-white/80 bg-white/92 p-2 text-sm font-extrabold text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.18)] backdrop-blur-xl"
+            style={{
+              top: menuPosition.top,
+              left: menuPosition.left,
+            }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
+            <button
+              type="button"
+              onClick={onChangeRole}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#f1f5f9]"
             >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-            </svg>
-            Đổi vai trò
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[#ef4444] hover:bg-[#fff1f0]"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Đổi vai trò
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[#ef4444] hover:bg-[#fff1f0]"
             >
-              <path d="M4 7h16" />
-              <path d="M10 11v6M14 11v6" />
-              <path d="M6 7l1 14h10l1-14" />
-              <path d="M9 7V4h6v3" />
-            </svg>
-            Xóa
-          </button>
-        </div>,
-        document.body,
-      )}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M4 7h16" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M6 7l1 14h10l1-14" />
+                <path d="M9 7V4h6v3" />
+              </svg>
+              Xóa
+            </button>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -327,7 +336,7 @@ function MemberDetailModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-white/38 px-4 py-8 backdrop-blur-[10px]"
+      className="fixed inset-0 z-110 flex items-center justify-center bg-white/38 px-4 py-8 backdrop-blur-[10px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="member-detail-title"
@@ -336,7 +345,7 @@ function MemberDetailModal({
       }}
     >
       <article
-        className="liquid-glass relative w-full max-w-[640px] overflow-hidden rounded-[28px] border-white/80 bg-white/74 text-[#141922] shadow-[0_34px_120px_rgba(31,48,70,0.2)]"
+        className="liquid-glass relative w-full max-w-160 overflow-hidden rounded-[28px] border-white/80 bg-white/74 text-[#141922] shadow-[0_34px_120px_rgba(31,48,70,0.2)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(244,248,255,0.86)),url('/images/parallax-background.png')] bg-cover bg-center" />
@@ -418,7 +427,9 @@ function MemberDetailModal({
               <dt className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
                 Ngày tham gia
               </dt>
-              <dd className="mt-3 text-base font-extrabold">{member.joinedAt}</dd>
+              <dd className="mt-3 text-base font-extrabold">
+                {member.joinedAt}
+              </dd>
             </div>
           </dl>
 
@@ -518,7 +529,8 @@ export default function AdminMemberTable({
     { length: Math.min(totalPages, 5) },
     (_, index) => index + 1,
   );
-  const isAllSelected = members.length > 0 && selectedIds.length === members.length;
+  const isAllSelected =
+    members.length > 0 && selectedIds.length === members.length;
   const hasSelection = selectedIds.length > 0;
 
   useEffect(() => {
@@ -532,7 +544,7 @@ export default function AdminMemberTable({
         <table className="w-full min-w-full table-fixed border-collapse text-left">
           <thead>
             <tr className="border-b border-[#dbe3ea]/70 bg-white/34 text-xs font-extrabold text-[#202832]">
-              <th className="w-[44px] px-4 py-5">
+              <th className="w-11 px-4 py-5">
                 <Checkbox
                   checked={isAllSelected}
                   mixed={hasSelection && !isAllSelected}
@@ -545,7 +557,7 @@ export default function AdminMemberTable({
               <th className="w-[13%] px-3 py-5">Vai trò</th>
               <th className="w-[15%] px-3 py-5">Trạng thái</th>
               <th className="w-[15%] px-3 py-5">Ngày tham gia</th>
-              <th className="w-[72px] px-3 py-5 text-center">Thao tác</th>
+              <th className="w-18 px-3 py-5 text-center">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -561,7 +573,7 @@ export default function AdminMemberTable({
                     isSelected ? "bg-[#eaf4ff]/42" : "bg-white/20",
                   ].join(" ")}
                 >
-                  <td className="w-[44px] px-4 py-5">
+                  <td className="w-11 px-4 py-5">
                     <Checkbox
                       checked={isSelected}
                       label={
@@ -601,6 +613,7 @@ export default function AdminMemberTable({
                     <button
                       type="button"
                       onClick={() => setActiveMember(member)}
+                      aria-label={presence.ariaLabel}
                       className={[
                         "inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-extrabold",
                         presence.className,
@@ -624,7 +637,7 @@ export default function AdminMemberTable({
                       {member.joinedAt}
                     </button>
                   </td>
-                  <td className="w-[72px] px-3 py-5">
+                  <td className="w-18 px-3 py-5">
                     <ActionMenu
                       member={member}
                       isOpen={openActionId === member.id}
