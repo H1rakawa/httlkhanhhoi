@@ -41,7 +41,7 @@ export default function AdminProfileContent({
   const initial = (displayName.charAt(0) || email.charAt(0) || "A").toUpperCase();
 
   return (
-    <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] gap-5 px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:grid-cols-[244px_minmax(0,1fr)] xl:grid-cols-[268px_minmax(0,1fr)]">
+    <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:gap-5 md:px-5 md:py-5 lg:grid-cols-[244px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6 xl:grid-cols-[268px_minmax(0,1fr)]">
       <AdminSidebar
         adminId={adminId}
         displayName={displayName}

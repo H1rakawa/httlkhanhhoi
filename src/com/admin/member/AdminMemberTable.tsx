@@ -348,7 +348,9 @@ function MemberMobileCard({
         <div className="pt-1">
           <Checkbox
             checked={isSelected}
-            label={isSelected ? `Bỏ chọn ${member.name}` : `Chọn ${member.name}`}
+            label={
+              isSelected ? `Bỏ chọn ${member.name}` : `Chọn ${member.name}`
+            }
             onClick={onToggleMember}
           />
         </div>
@@ -401,9 +403,10 @@ function MemberMobileCard({
             aria-label={presence.ariaLabel}
           >
             <span
-              className={["h-1.5 w-1.5 rounded-full", presence.dotClassName].join(
-                " ",
-              )}
+              className={[
+                "h-1.5 w-1.5 rounded-full",
+                presence.dotClassName,
+              ].join(" ")}
             />
             {presence.label}
           </span>
@@ -442,11 +445,19 @@ function MemberDetailModal({
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [onClose]);
 
   return createPortal(
     <div
@@ -466,7 +477,7 @@ function MemberDetailModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/72 text-[#303943] shadow-[0_10px_24px_rgba(31,48,70,0.12)] transition hover:bg-white"
+          className="absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/82 text-[#303943] shadow-[0_14px_32px_rgba(31,48,70,0.18)] backdrop-blur-xl transition hover:bg-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#0066cc]"
           aria-label="Đóng chi tiết thành viên"
         >
           <svg
