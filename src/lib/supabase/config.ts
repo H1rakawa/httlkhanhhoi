@@ -1,18 +1,37 @@
-export function getSupabaseConfig() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+function normalizeEnvValue(value?: string) {
+  return value?.trim().replace(/^['"]|['"]$/g, "");
+}
 
-  if (!url || !publishableKey) {
+export function getSupabaseUrl() {
+  const url = normalizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+  if (!url) {
     throw new Error(
-      "Supabase chưa được cấu hình. Vui lòng cập nhật NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY trong .env.local.",
+      "Supabase chưa được cấu hình. Vui lòng cập nhật NEXT_PUBLIC_SUPABASE_URL trong biến môi trường.",
     );
   }
 
-  return { url: url.replace(/\/$/, ""), publishableKey };
+  return url.replace(/\/$/, "");
+}
+
+export function getSupabaseConfig() {
+  const url = getSupabaseUrl();
+  const publishableKey = normalizeEnvValue(
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+
+  if (!url || !publishableKey) {
+    throw new Error(
+      "Supabase chưa được cấu hình. Vui lòng cập nhật NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY trong biến môi trường.",
+    );
+  }
+
+  return { url, publishableKey };
 }
 
 export function getSupabaseServiceRoleKey() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = normalizeEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!serviceRoleKey) {
     throw new Error(

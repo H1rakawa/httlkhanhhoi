@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import {
   getSupabaseConfig,
+  getSupabaseUrl,
   getSupabaseServiceRoleKey,
 } from "@/lib/supabase/config";
 
@@ -92,7 +93,7 @@ function getRedirectUrl(request: Request) {
 }
 
 function createSupabaseAdminClient() {
-  const { url } = getSupabaseConfig();
+  const url = getSupabaseUrl();
   const serviceRoleKey = getSupabaseServiceRoleKey();
 
   return createClient(url, serviceRoleKey, {

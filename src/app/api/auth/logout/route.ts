@@ -7,12 +7,12 @@ import {
   type SupabaseAuthUser,
 } from "@/lib/supabase/auth";
 import {
-  getSupabaseConfig,
+  getSupabaseUrl,
   getSupabaseServiceRoleKey,
 } from "@/lib/supabase/config";
 
 function createSupabaseAdminClient() {
-  const { url } = getSupabaseConfig();
+  const url = getSupabaseUrl();
   const serviceRoleKey = getSupabaseServiceRoleKey();
 
   return createClient(url, serviceRoleKey, {

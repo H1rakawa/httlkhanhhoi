@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAccount } from "@/lib/supabase/auth";
 import {
-  getSupabaseConfig,
+  getSupabaseUrl,
   getSupabaseServiceRoleKey,
 } from "@/lib/supabase/config";
 
@@ -45,7 +45,7 @@ type CreateExamPayload = {
 };
 
 function createSupabaseAdminClient() {
-  const { url } = getSupabaseConfig();
+  const url = getSupabaseUrl();
   const serviceRoleKey = getSupabaseServiceRoleKey();
 
   return createClient(url, serviceRoleKey, {

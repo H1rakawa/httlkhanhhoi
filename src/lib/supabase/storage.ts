@@ -1,4 +1,4 @@
-import { getSupabaseConfig } from "@/lib/supabase/config";
+import { getSupabaseConfig, getSupabaseUrl } from "@/lib/supabase/config";
 
 export type MediaKind = "image" | "video" | "audio" | "document";
 
@@ -26,7 +26,7 @@ export function sanitizeFileName(name: string) {
 }
 
 export function publicStorageUrl(bucket: string, objectPath: string) {
-  const { url } = getSupabaseConfig();
+  const url = getSupabaseUrl();
   return `${url}/storage/v1/object/public/${bucket}/${objectPath}`;
 }
 
