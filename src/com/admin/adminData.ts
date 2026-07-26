@@ -2,44 +2,49 @@ export const adminStats = [
   {
     icon: "community",
     title: "Tổng thành viên",
-    value: "1,284",
-    delta: "+12%",
+    key: "totalMembers",
+    fallbackValue: "0",
+    delta: "Đang hoạt động",
     tone: "success",
   },
   {
     icon: "document",
-    title: "Bài tập đã nộp",
-    value: "452",
-    delta: "+5%",
+    title: "Số bài tập",
+    key: "assignments",
+    fallbackValue: "0",
+    delta: "Tổng hiện có",
     tone: "success",
+  },
+  {
+    icon: "book",
+    title: "Tài liệu thư viện",
+    key: "libraryResources",
+    fallbackValue: "0",
+    delta: "Trong thư viện",
+    tone: "neutral",
   },
   {
     icon: "calendar",
     title: "Sự kiện sắp tới",
-    value: "08",
-    delta: "Tuần này",
+    key: "upcomingEvents",
+    fallbackValue: "0",
+    delta: "Từ hôm nay",
     tone: "neutral",
   },
-  {
-    icon: "bell",
-    title: "Báo cáo mới",
-    value: "03",
-    delta: "Cần xử lý",
-    tone: "danger",
-  },
-];
+] as const;
 
 export const adminSidebarItems = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/member", label: "Thành viên", icon: "community" },
+  { href: "/admin/assignment", label: "Bài tập", icon: "document" },
+  { href: "/admin/pray", label: "Cầu thay", icon: "hands" },
   { href: "/admin/pray", label: "Sự kiện", icon: "calendar" },
   { href: "/admin/library", label: "Thư viện", icon: "book" },
-  { href: "/admin/exam", label: "Bài tập", icon: "document" },
 ];
 
 export const adminQuickActions = [
   { label: "Thêm Thành Viên", icon: "community", primary: true },
-  { label: "Tạo Bài Tập", icon: "document", primary: false, href: "/admin/exam/new" },
+  { label: "Tạo Bài Tập", icon: "document", primary: false, href: "/admin/assignment/new" },
   { label: "Đăng Sự Kiện", icon: "calendar", primary: false },
 ];
 

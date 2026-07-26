@@ -1,5 +1,4 @@
 export type MemberRole = "member" | "teacher" | "admin";
-export type MemberStatus = "active" | "inactive" | "blocked";
 
 export type AdminMember = {
   id: string;
@@ -7,9 +6,6 @@ export type AdminMember = {
   email: string;
   phone: string | null;
   role: MemberRole;
-  status: MemberStatus;
-  isOnline: boolean;
-  lastSeenAt: string | null;
   joinedAt: string;
   selected?: boolean;
   avatar: string | null;
@@ -22,9 +18,6 @@ export type AdminMemberApiProfile = {
   phone: string | null;
   avatar_url: string | null;
   role: MemberRole;
-  status: MemberStatus;
-  is_online: boolean;
-  last_seen_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -40,12 +33,6 @@ export const roleLabels: Record<MemberRole, string> = {
   admin: "Quản trị viên",
   teacher: "Giáo viên",
   member: "Thành viên",
-};
-
-export const statusLabels: Record<MemberStatus, string> = {
-  active: "Hoạt động",
-  inactive: "Không hoạt động",
-  blocked: "Đã khóa",
 };
 
 export function formatMemberDate(value: string) {
@@ -65,9 +52,6 @@ export function mapProfileToAdminMember(
     email: profile.email,
     phone: profile.phone,
     role: profile.role,
-    status: profile.status,
-    isOnline: profile.is_online,
-    lastSeenAt: profile.last_seen_at,
     joinedAt: formatMemberDate(profile.created_at),
     avatar: profile.avatar_url,
   };

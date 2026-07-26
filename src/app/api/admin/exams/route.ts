@@ -151,6 +151,25 @@ export async function GET(request: Request) {
     if ("error" in admin) return admin.error;
 
     const { searchParams } = new URL(request.url);
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    if (searchParams.get("stats") === "1") {
+      const { count, error } = await supabaseAdmin
+        .from("assignments")
+        .select("id", { count: "exact", head: true });
+
+      if (error) {
+        return NextResponse.json(
+          { error: error.message || "Không thể tải thống kê bài tập." },
+          { status: 400 },
+        );
+      }
+
+      return NextResponse.json({
+        assignments: count ?? 0,
+      });
+    }
+
     const page = Math.max(Number(searchParams.get("page") || "1"), 1);
     const pageSize = Math.min(
       Math.max(Number(searchParams.get("pageSize") || "4"), 1),
@@ -160,7 +179,6 @@ export async function GET(request: Request) {
     const week = searchParams.get("week")?.trim();
     const status = searchParams.get("status")?.trim();
     const offset = (page - 1) * pageSize;
-    const supabaseAdmin = createSupabaseAdminClient();
 
     let query = supabaseAdmin
       .from("assignments")

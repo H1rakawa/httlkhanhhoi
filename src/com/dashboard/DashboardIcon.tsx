@@ -57,6 +57,18 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "hands") {
+    return (
+      <svg {...commonProps}>
+        <path d="M8.5 13.5 11 11a2.1 2.1 0 0 1 3 0l.5.5" />
+        <path d="m14 14.5 1.6-1.6a2 2 0 0 1 2.8 0l.1.1a2 2 0 0 1 0 2.8l-4 4a4 4 0 0 1-5.6 0l-3.4-3.4" />
+        <path d="M4.5 10.5 8 7a3.4 3.4 0 0 1 4.8 0l.2.2" />
+        <path d="M15 7.5h4v4" />
+        <path d="m19 7.5-5.5 5.5" />
+      </svg>
+    );
+  }
+
   if (name === "bell") {
     return (
       <svg {...commonProps}>

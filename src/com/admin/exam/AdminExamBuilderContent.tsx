@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
@@ -80,7 +80,7 @@ function AdminExamBuilderHeader({
     <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-extrabold text-[#667085]">
-          <Link href="/admin/exam" className="transition hover:text-[#0066cc]">
+          <Link href="/admin/assignment" className="transition hover:text-[#0066cc]">
             Quản lý bài tập
           </Link>
           <span>/</span>
@@ -196,6 +196,141 @@ function IconTooltipButton({
   );
 }
 
+function CategoryDropdown({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [menuRect, setMenuRect] = useState({
+    left: 0,
+    top: 0,
+    width: 0,
+  });
+
+  const syncPosition = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const menuWidth = Math.max(rect.width, 220);
+    setMenuRect({
+      left: Math.min(Math.max(12, rect.left), window.innerWidth - menuWidth - 12),
+      top: rect.bottom + 8,
+      width: menuWidth,
+    });
+  };
+
+  const toggleDropdown = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+
+    syncPosition();
+    setIsOpen(true);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    syncPosition();
+    window.addEventListener("resize", syncPosition);
+    window.addEventListener("scroll", syncPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", syncPosition);
+      window.removeEventListener("scroll", syncPosition, true);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="relative overflow-visible">
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={toggleDropdown}
+        className="flex h-12 w-full items-center justify-between gap-3 rounded-[14px] border border-[#dce3ed] bg-white/95 px-4 text-left text-sm font-extrabold text-[#101828] outline-none transition hover:bg-white focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span className="truncate">{value}</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={[
+            "h-4 w-4 shrink-0 text-[#667085] transition-transform",
+            isOpen ? "rotate-180" : "",
+          ].join(" ")}
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {isOpen
+        ? createPortal(
+            <div
+              className="fixed z-[100000] overflow-hidden rounded-[16px] border border-[#dfe7ef] bg-white p-1.5 shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
+              role="listbox"
+              style={{
+                left: menuRect.left,
+                top: menuRect.top,
+                width: menuRect.width,
+              }}
+            >
+              {categories.map((category) => {
+                const isActive = category === value;
+
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => {
+                      onChange(category);
+                      setIsOpen(false);
+                    }}
+                    className={[
+                      "flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-left text-sm font-extrabold transition",
+                      isActive
+                        ? "bg-[#e8f2ff] text-[#0066cc]"
+                        : "text-[#344054] hover:bg-[#f3f7fb]",
+                    ].join(" ")}
+                    role="option"
+                    aria-selected={isActive}
+                  >
+                    <span>{category}</span>
+                    {isActive && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      >
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
+}
+
 function InfoPanel({
   title,
   setTitle,
@@ -203,8 +338,6 @@ function InfoPanel({
   setCode,
   category,
   setCategory,
-  dueDate,
-  setDueDate,
   description,
   setDescription,
 }: {
@@ -214,8 +347,6 @@ function InfoPanel({
   setCode: (value: string) => void;
   category: string;
   setCategory: (value: string) => void;
-  dueDate: string;
-  setDueDate: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
 }) {
@@ -251,25 +382,9 @@ function InfoPanel({
         </div>
         <div className="grid gap-2">
           <FieldLabel>Danh mục</FieldLabel>
-          <select
+          <CategoryDropdown
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="h-12 rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 text-sm font-bold text-[#101828] outline-none transition focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10"
-          >
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="grid gap-2">
-          <FieldLabel>Hạn chót</FieldLabel>
-          <input
-            type="datetime-local"
-            value={dueDate}
-            onChange={(event) => setDueDate(event.target.value)}
-            className="h-12 rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 text-sm font-bold text-[#101828] outline-none transition focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10"
+            onChange={setCategory}
           />
         </div>
         <div className="grid gap-2 md:col-span-2">
@@ -584,8 +699,8 @@ function QuestionCard({
                 ],
               })
             }
-            wrapperClassName="ml-8 w-fit justify-self-start overflow-visible"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0066cc] text-white shadow-[0_12px_24px_rgba(0,102,204,0.22)] transition hover:bg-[#0057ad]"
+            wrapperClassName="w-full overflow-visible"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0066cc] px-4 py-3 text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(0,102,204,0.24)] transition hover:bg-[#0057ad]"
           >
             <svg
               viewBox="0 0 24 24"
@@ -600,6 +715,7 @@ function QuestionCard({
               <path d="M12 5v14" />
               <path d="M5 12h14" />
             </svg>
+            Thêm đáp án
           </IconTooltipButton>
         </div>
       ) : (
@@ -609,15 +725,24 @@ function QuestionCard({
         </div>
       )}
 
-      <div className="mt-5 border-t border-[#e7edf4] pt-4">
-        <input
-          value={question.scriptureReference}
-          onChange={(event) =>
-            onChange({ ...question, scriptureReference: event.target.value })
-          }
-          placeholder="Kinh thánh tham khảo..."
-          className="h-11 w-full rounded-[13px] border border-[#dce3ed] bg-white/78 px-4 text-sm font-bold outline-none focus:border-[#0066cc]"
-        />
+      <div className="mt-4 border-t border-[#e7edf4] pt-4">
+        <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
+          <label
+            htmlFor={`scripture-reference-${question.id}`}
+            className="text-sm font-extrabold text-[#101828]"
+          >
+            Kinh thánh:
+          </label>
+          <input
+            id={`scripture-reference-${question.id}`}
+            value={question.scriptureReference}
+            onChange={(event) =>
+              onChange({ ...question, scriptureReference: event.target.value })
+            }
+            placeholder="Ví dụ: Giăng 1:1,..."
+            className="h-8 w-full border-0 border-b border-dashed border-[#101828]/55 bg-transparent px-2 text-sm font-semibold text-[#101828] outline-none placeholder:text-[#8c95a3] focus:border-[#0066cc]"
+          />
+        </div>
       </div>
     </article>
   );
@@ -632,24 +757,9 @@ export default function AdminExamBuilderContent({
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
   const [category, setCategory] = useState(categories[0]);
-  const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<QuestionDraft[]>([
-    {
-      ...createQuestion("multiple_choice"),
-      options: [
-        { id: createId("option"), text: "Đức tin là gì?", isCorrect: false },
-        {
-          id: createId("option"),
-          text: "Ý nghĩa của lòng vị tha.",
-          isCorrect: true,
-        },
-      ],
-    },
-    {
-      ...createQuestion("essay"),
-      prompt: "Trình bày suy nghĩ của bạn về ý nghĩa của lòng vị tha.",
-    },
+    createQuestion("multiple_choice"),
   ]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -679,7 +789,7 @@ export default function AdminExamBuilderContent({
           title,
           code,
           category,
-          dueDate: dueDate ? dueDate.slice(0, 10) : "",
+          dueDate: "",
           description,
           questions: questions.map((question) => ({
             type: question.type,
@@ -707,7 +817,7 @@ export default function AdminExamBuilderContent({
           ? "Đã lưu nháp bài tập."
           : "Đã đăng bài tập thành công.",
       );
-      router.push("/admin/exam");
+      router.push("/admin/assignment");
       router.refresh();
     } catch (saveError) {
       setError(
@@ -724,7 +834,7 @@ export default function AdminExamBuilderContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
-        activeHref="/admin/exam"
+        activeHref="/admin/assignment"
       />
 
       <section className="min-w-0">
@@ -758,8 +868,6 @@ export default function AdminExamBuilderContent({
               setCode={setCode}
               category={category}
               setCategory={setCategory}
-              dueDate={dueDate}
-              setDueDate={setDueDate}
               description={description}
               setDescription={setDescription}
             />

@@ -11,7 +11,6 @@ import {
   type AdminMember,
   type AdminMembersResponse,
   type MemberRole,
-  type MemberStatus,
 } from "@/com/admin/member/memberData";
 
 type AdminMemberContentProps = {
@@ -31,7 +30,6 @@ export default function AdminMemberContent({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<"" | MemberRole>("");
-  const [status, setStatus] = useState<"" | MemberStatus>("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +45,6 @@ export default function AdminMemberContent({
     });
     if (query.trim()) params.set("q", query.trim());
     if (role) params.set("role", role);
-    if (status) params.set("status", status);
 
     try {
       const response = await fetch(`/api/admin/members?${params.toString()}`, {
@@ -77,7 +74,7 @@ export default function AdminMemberContent({
     } finally {
       setIsLoading(false);
     }
-  }, [page, query, role, status]);
+  }, [page, query, role]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -110,7 +107,7 @@ export default function AdminMemberContent({
 
   const patchMembers = async (
     ids: string[],
-    payload: { role?: MemberRole; status?: MemberStatus },
+    payload: { role?: MemberRole },
   ) => {
     if (!ids.length) return;
 
@@ -182,7 +179,6 @@ export default function AdminMemberContent({
             <AdminMemberFilters
               query={query}
               role={role}
-              status={status}
               onQueryChange={(value) => {
                 setPage(1);
                 setQuery(value);
@@ -190,10 +186,6 @@ export default function AdminMemberContent({
               onRoleChange={(value) => {
                 setPage(1);
                 setRole(value);
-              }}
-              onStatusChange={(value) => {
-                setPage(1);
-                setStatus(value);
               }}
             />
             {error && (
@@ -221,12 +213,7 @@ export default function AdminMemberContent({
             )}
             <AdminMemberBulkBar
               selectedCount={selectedIds.length}
-              total={total}
-              showingCount={members.length}
-              showingFrom={members.length ? (page - 1) * PAGE_SIZE + 1 : 0}
-              showingTo={(page - 1) * PAGE_SIZE + members.length}
               onChangeRole={() => changeRole(selectedIds)}
-              onLock={() => patchMembers(selectedIds, { status: "blocked" })}
               onDelete={() => deleteMembers(selectedIds)}
             />
           </div>

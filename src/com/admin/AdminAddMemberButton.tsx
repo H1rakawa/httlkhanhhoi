@@ -241,7 +241,6 @@ export default function AdminAddMemberButton({
           team: form.ministry,
           ministry: form.ministry,
           isWorker: form.isWorker,
-          status: "active",
         }),
       });
       const data = (await response.json()) as {

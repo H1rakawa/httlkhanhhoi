@@ -37,6 +37,9 @@ export default function AssignmentWorkClient({
   const [scriptureRefs, setScriptureRefs] = useState<TextValues>({});
   const [flaggedNotes, setFlaggedNotes] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState<"idle" | "draft" | "submitted">("idle");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const isAnswered = (id: string) => {
     const answer = answers[id];
@@ -51,11 +54,15 @@ export default function AssignmentWorkClient({
 
   const updateAnswer = (id: string, value: string) => {
     setStatus("idle");
+    setMessage("");
+    setError("");
     setAnswers((current) => ({ ...current, [id]: value }));
   };
 
   const toggleChoiceAnswer = (id: string, option: string) => {
     setStatus("idle");
+    setMessage("");
+    setError("");
     setAnswers((current) => {
       const currentAnswer = current[id];
       const selectedOptions = Array.isArray(currentAnswer)
@@ -84,6 +91,8 @@ export default function AssignmentWorkClient({
 
   const updateScriptureRef = (id: string, value: string) => {
     setStatus("idle");
+    setMessage("");
+    setError("");
     setScriptureRefs((current) => ({ ...current, [id]: value }));
   };
 
@@ -94,6 +103,47 @@ export default function AssignmentWorkClient({
   const relatedAssignments = fallbackAssignments
     .filter((item) => item.id !== assignment.id)
     .slice(0, 2);
+
+  const saveSubmission = async (nextStatus: "draft" | "submitted") => {
+    setIsSaving(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/assignments/${encodeURIComponent(assignment.id)}/submissions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: nextStatus,
+            answers,
+            scriptureRefs,
+          }),
+        },
+      );
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        warning?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Không thể lưu bài làm.");
+      }
+
+      setStatus(nextStatus);
+      setMessage(
+        data.warning ||
+          (nextStatus === "submitted" ? "Đã nộp bài thành công." : "Đã lưu nháp."),
+      );
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error ? saveError.message : "Không thể lưu bài làm.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="relative z-10 mx-auto w-[calc(100%-2rem)] max-w-7xl pb-28 pt-24 md:pb-32 md:pt-28">
@@ -176,13 +226,16 @@ export default function AssignmentWorkClient({
 
                     {question.type === "choice" ? (
                       <div className="mt-8 grid gap-3">
-                        {question.options?.map((option) => (
+                        {question.options?.map((option, optionIndex) => {
+                          const optionLetter = String.fromCharCode(97 + optionIndex);
+
+                          return (
                           <label
                             key={option}
                             className={[
-                              "group flex min-h-18 cursor-pointer items-center gap-4 rounded-[10px] border px-6 py-4 transition-colors",
+                              "group flex min-h-13 cursor-pointer items-center gap-3 rounded-[8px] border px-4 py-3 transition-colors",
                               isChoiceSelected(question.id, option)
-                                ? "border-[#8a6110] bg-white/72 shadow-[0_14px_30px_rgba(138,97,16,0.1)]"
+                                ? "border-[#8a6110] bg-white/76 shadow-[0_10px_22px_rgba(138,97,16,0.08)]"
                                 : "border-[#cfd6e0] bg-white/38 hover:border-[#8a6110]/60 hover:bg-white/58",
                             ].join(" ")}
                           >
@@ -196,26 +249,20 @@ export default function AssignmentWorkClient({
                             />
                             <span
                               className={[
-                                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold uppercase",
                                 isChoiceSelected(question.id, option)
-                                  ? "border-[#8a6110]"
-                                  : "border-[#8993a1] bg-white/52",
+                                  ? "border-[#8a6110] bg-[#8a6110] text-white"
+                                  : "border-[#8993a1] bg-white/52 text-[#526174]",
                               ].join(" ")}
                             >
-                              <span
-                                className={[
-                                  "h-2.5 w-2.5 rounded-full",
-                                  isChoiceSelected(question.id, option)
-                                    ? "bg-[#8a6110]"
-                                    : "bg-transparent",
-                                ].join(" ")}
-                              />
+                              {optionLetter}
                             </span>
-                            <span className="text-base leading-6 text-[#26313d]">
+                            <span className="text-sm font-semibold leading-5 text-[#26313d]">
                               {option}
                             </span>
                           </label>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <label className="mt-8 block">
@@ -354,19 +401,41 @@ export default function AssignmentWorkClient({
             Quay lại
           </Link>
           <div className="flex flex-col gap-3 sm:flex-row">
+            {(message || error) && (
+              <p
+                className={[
+                  "flex min-h-12 items-center rounded-[14px] px-4 text-sm font-semibold",
+                  error
+                    ? "bg-[#fff1f0] text-[#b42318]"
+                    : "bg-[#ecfdf3] text-[#15803d]",
+                ].join(" ")}
+              >
+                {error || message}
+              </p>
+            )}
             <button
               type="button"
-              onClick={() => setStatus("submitted")}
-              className="h-12 rounded-[14px] bg-[#07111f] px-8 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,17,31,0.2)]"
+              onClick={() => saveSubmission("submitted")}
+              disabled={isSaving}
+              className="h-12 rounded-[14px] bg-[#07111f] px-8 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,17,31,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === "submitted" ? "Đã nộp bài" : "Nộp bài ngay"}
+              {isSaving && status !== "draft"
+                ? "Đang lưu..."
+                : status === "submitted"
+                  ? "Đã nộp bài"
+                  : "Nộp bài ngay"}
             </button>
             <button
               type="button"
-              onClick={() => setStatus("draft")}
-              className="h-12 rounded-[14px] border border-[#b9cdf2] bg-[#dfeaff] px-8 text-sm font-semibold text-[#07111f]"
+              onClick={() => saveSubmission("draft")}
+              disabled={isSaving}
+              className="h-12 rounded-[14px] border border-[#b9cdf2] bg-[#dfeaff] px-8 text-sm font-semibold text-[#07111f] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === "draft" ? "Đã lưu nháp" : "Lưu nháp"}
+              {isSaving && status !== "submitted"
+                ? "Đang lưu..."
+                : status === "draft"
+                  ? "Đã lưu nháp"
+                  : "Lưu nháp"}
             </button>
           </div>
         </div>

@@ -8,15 +8,12 @@ import {
 } from "@/lib/supabase/config";
 
 const validRoles = new Set(["member", "teacher", "admin"]);
-const validStatuses = new Set(["active", "inactive", "blocked"]);
-const creatableStatuses = new Set(["active", "inactive"]);
 const profileSelectColumns =
-  "id,name,email,phone,avatar_url,role,status,is_online,last_seen_at,created_at,updated_at";
+  "id,name,email,phone,avatar_url,role,created_at,updated_at";
 
 type MemberPatchBody = {
   ids?: string[];
   role?: string;
-  status?: string;
 };
 
 type CreateMemberPayload = {
@@ -24,7 +21,6 @@ type CreateMemberPayload = {
   email?: string;
   phone?: string;
   role?: string;
-  status?: string;
   team?: string;
   ministry?: string;
   isWorker?: boolean;
@@ -37,9 +33,6 @@ type ProfileRow = {
   phone: string | null;
   avatar_url: string | null;
   role: string;
-  status: string;
-  is_online: boolean;
-  last_seen_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -145,7 +138,6 @@ export async function GET(request: Request) {
     const offset = (page - 1) * pageSize;
     const q = searchParams.get("q")?.trim();
     const role = searchParams.get("role")?.trim();
-    const status = searchParams.get("status")?.trim();
 
     const query = new URLSearchParams({
       select: profileSelectColumns,
@@ -155,7 +147,6 @@ export async function GET(request: Request) {
     });
 
     if (role && validRoles.has(role)) query.set("role", `eq.${role}`);
-    if (status && validStatuses.has(status)) query.set("status", `eq.${status}`);
     if (q) query.set("or", `(name.ilike.*${q}*,email.ilike.*${q}*)`);
 
     const { data, response } = await supabaseProfilesRequest<ProfileRow[]>(
@@ -202,9 +193,6 @@ export async function POST(request: Request) {
     const email = normalizeEmail(payload?.email);
     const phone = normalizeText(payload?.phone);
     const role = validRoles.has(payload?.role || "") ? payload?.role || "member" : "";
-    const status = creatableStatuses.has(payload?.status || "")
-      ? payload?.status || "active"
-      : "";
     const ministry = normalizeText(payload?.ministry || payload?.team);
     const isWorker = Boolean(payload?.isWorker);
 
@@ -219,9 +207,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!role || !status) {
+    if (!role) {
       return NextResponse.json(
-        { error: "Vai trò hoặc trạng thái tài khoản không hợp lệ." },
+        { error: "Vai trò không hợp lệ." },
         { status: 400 },
       );
     }
@@ -267,7 +255,7 @@ export async function POST(request: Request) {
         email,
         phone: phone || null,
         role,
-        status,
+        status: "active",
         avatar_url: null,
       },
       { onConflict: "id" },
@@ -292,7 +280,6 @@ export async function POST(request: Request) {
         email,
         phone,
         role,
-        status,
         team: ministry,
         ministry,
         isWorker,
@@ -318,7 +305,7 @@ export async function PATCH(request: Request) {
 
     const body = (await request.json()) as MemberPatchBody;
     const ids = sanitizeIds(body.ids);
-    const updates: { role?: string; status?: string; updated_at: string } = {
+    const updates: { role?: string; updated_at: string } = {
       updated_at: new Date().toISOString(),
     };
 
@@ -339,17 +326,7 @@ export async function PATCH(request: Request) {
       updates.role = body.role;
     }
 
-    if (body.status) {
-      if (!validStatuses.has(body.status)) {
-        return NextResponse.json(
-          { error: "Trạng thái không hợp lệ." },
-          { status: 400 },
-        );
-      }
-      updates.status = body.status;
-    }
-
-    if (!updates.role && !updates.status) {
+    if (!updates.role) {
       return NextResponse.json(
         { error: "Chưa có thay đổi để cập nhật." },
         { status: 400 },
@@ -358,13 +335,10 @@ export async function PATCH(request: Request) {
 
     if (
       ids.includes(admin.account.user.id) &&
-      (updates.role === "member" ||
-        updates.role === "teacher" ||
-        updates.status === "inactive" ||
-        updates.status === "blocked")
+      (updates.role === "member" || updates.role === "teacher")
     ) {
       return NextResponse.json(
-        { error: "Không thể tự hạ quyền hoặc khóa tài khoản quản trị hiện tại." },
+        { error: "Không thể tự hạ quyền tài khoản quản trị hiện tại." },
         { status: 400 },
       );
     }

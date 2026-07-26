@@ -76,12 +76,16 @@ export default function AdminSidebar({
           </div>
 
           <nav className="grid grid-cols-1 gap-2 overflow-y-auto pr-0.5">
-            {adminSidebarItems.map((item) => {
-              const isActive = activeHref === item.href;
+            {adminSidebarItems.map((item, index) => {
+              const isActive =
+                activeHref === item.href &&
+                adminSidebarItems.findIndex(
+                  (sidebarItem) => sidebarItem.href === activeHref,
+                ) === index;
 
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-${item.label}`}
                   href={item.href}
                   className={[
                     "flex h-11 items-center rounded-[12px] text-sm font-extrabold no-underline transition-all duration-300 lg:h-12 lg:justify-start lg:gap-3 lg:px-4",

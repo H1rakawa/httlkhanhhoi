@@ -4,18 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   roleLabels,
-  statusLabels,
   type MemberRole,
-  type MemberStatus,
 } from "@/com/admin/member/memberData";
 
 type AdminMemberFiltersProps = {
   query: string;
   role: "" | MemberRole;
-  status: "" | MemberStatus;
   onQueryChange: (value: string) => void;
   onRoleChange: (value: "" | MemberRole) => void;
-  onStatusChange: (value: "" | MemberStatus) => void;
 };
 
 type FilterOption<T extends string> = {
@@ -158,25 +154,16 @@ const roleOptions: Array<FilterOption<"" | MemberRole>> = [
   { value: "member", label: roleLabels.member },
 ];
 
-const statusOptions: Array<FilterOption<"" | MemberStatus>> = [
-  { value: "", label: "Trạng thái" },
-  { value: "active", label: statusLabels.active },
-  { value: "inactive", label: statusLabels.inactive },
-  { value: "blocked", label: statusLabels.blocked },
-];
-
 export default function AdminMemberFilters({
   query,
   role,
-  status,
   onQueryChange,
   onRoleChange,
-  onStatusChange,
 }: AdminMemberFiltersProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   return (
-    <section className="liquid-glass mt-6 grid gap-3 rounded-[22px] p-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:rounded-[24px]">
+    <section className="liquid-glass mt-6 grid gap-3 rounded-[22px] p-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:rounded-[24px]">
       <label className="flex h-12 items-center gap-3 rounded-[16px] bg-white/58 px-4 text-[#6b7280] shadow-inner sm:col-span-2 lg:col-span-1">
         <svg
           viewBox="0 0 24 24"
@@ -208,16 +195,6 @@ export default function AdminMemberFilters({
         activeKey={activeDropdown}
         onOpenChange={setActiveDropdown}
         onChange={onRoleChange}
-      />
-
-      <FilterDropdown
-        value={status}
-        options={statusOptions}
-        ariaLabel="Lọc theo trạng thái"
-        openKey="status"
-        activeKey={activeDropdown}
-        onOpenChange={setActiveDropdown}
-        onChange={onStatusChange}
       />
     </section>
   );

@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import Pagination from "@/com/lib/Pagination";
 import {
   roleLabels,
-  statusLabels,
   type AdminMember,
 } from "@/com/admin/member/memberData";
 
@@ -15,60 +14,11 @@ const roleClassName: Record<AdminMember["role"], string> = {
   teacher: "bg-[#dff3ff] text-[#0d7490]",
 };
 
-const statusClassName: Record<AdminMember["status"], string> = {
-  active: "bg-[#e8f8ee] text-[#299f5a]",
-  inactive: "bg-[#eef0f2] text-[#626b75]",
-  blocked: "bg-[#ffe9e7] text-[#e56a63]",
-};
-
-const ONLINE_THRESHOLD_MS = 90 * 1000;
-const LONG_OFFLINE_THRESHOLD_MINUTES = 10;
-
 type TooltipState = {
   text: string;
   top: number;
   left: number;
 } | null;
-
-function getPresenceLabel(member: AdminMember, now: number) {
-  if (!member.lastSeenAt) {
-    return {
-      label: "+10m",
-      className: "bg-[#eef0f2] text-[#626b75]",
-      dotClassName: "bg-current",
-      ariaLabel: "Offline hơn 10 phút",
-    };
-  }
-
-  const lastSeenTime = new Date(member.lastSeenAt).getTime();
-  const diffMinutes = Math.max(1, Math.floor((now - lastSeenTime) / 60_000));
-  const isOnline = member.isOnline && now - lastSeenTime <= ONLINE_THRESHOLD_MS;
-
-  if (isOnline) {
-    return {
-      label: "Online",
-      className: "bg-[#e8f8ee] text-[#1f9d55]",
-      dotClassName: "bg-[#22c55e]",
-      ariaLabel: "Online",
-    };
-  }
-
-  if (diffMinutes >= LONG_OFFLINE_THRESHOLD_MINUTES) {
-    return {
-      label: "+10m",
-      className: "bg-[#eef0f2] text-[#626b75]",
-      dotClassName: "bg-current",
-      ariaLabel: "Offline hơn 10 phút",
-    };
-  }
-
-  return {
-    label: `${diffMinutes}m`,
-    className: "bg-[#fff4df] text-[#9a650f]",
-    dotClassName: "bg-current",
-    ariaLabel: `Offline cách đây ${diffMinutes} phút`,
-  };
-}
 
 function Checkbox({
   checked = false,
@@ -319,7 +269,6 @@ function MemberMobileCard({
   member,
   isSelected,
   isActionOpen,
-  presence,
   onToggleMember,
   onOpenDetail,
   onToggleAction,
@@ -329,7 +278,6 @@ function MemberMobileCard({
   member: AdminMember;
   isSelected: boolean;
   isActionOpen: boolean;
-  presence: ReturnType<typeof getPresenceLabel>;
   onToggleMember: () => void;
   onOpenDetail: () => void;
   onToggleAction: () => void;
@@ -381,7 +329,7 @@ function MemberMobileCard({
       <button
         type="button"
         onClick={onOpenDetail}
-        className="mt-4 grid w-full grid-cols-2 gap-2 text-left text-xs font-extrabold text-[#4c5662] min-[520px]:grid-cols-4"
+        className="mt-4 grid w-full grid-cols-2 gap-2 text-left text-xs font-extrabold text-[#4c5662]"
       >
         <span className="rounded-2xl bg-white/58 px-3 py-2">
           Vai trò
@@ -392,35 +340,6 @@ function MemberMobileCard({
             ].join(" ")}
           >
             {roleLabels[member.role]}
-          </span>
-        </span>
-        <span className="rounded-2xl bg-white/58 px-3 py-2">
-          Hiện diện
-          <span
-            className={[
-              "mt-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1",
-              presence.className,
-            ].join(" ")}
-            aria-label={presence.ariaLabel}
-          >
-            <span
-              className={[
-                "h-1.5 w-1.5 rounded-full",
-                presence.dotClassName,
-              ].join(" ")}
-            />
-            {presence.label}
-          </span>
-        </span>
-        <span className="rounded-2xl bg-white/58 px-3 py-2">
-          Tài khoản
-          <span
-            className={[
-              "mt-1 block w-fit rounded-full px-2.5 py-1",
-              statusClassName[member.status],
-            ].join(" ")}
-          >
-            {statusLabels[member.status]}
           </span>
         </span>
         <span className="rounded-2xl bg-white/58 px-3 py-2">
@@ -475,10 +394,19 @@ function MemberDetailModal({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(244,248,255,0.86)),url('/images/parallax-background.png')] bg-cover bg-center" />
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/82 text-[#303943] shadow-[0_14px_32px_rgba(31,48,70,0.18)] backdrop-blur-xl transition hover:bg-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#0066cc]"
+          <button
+            type="button"
+            onMouseDown={(event) => {
+              event.preventDefault();
+            event.stopPropagation();
+            onClose();
+          }}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onClose();
+          }}
+          className="absolute right-5 top-5 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/92 text-[#303943] shadow-[0_14px_32px_rgba(31,48,70,0.18)] backdrop-blur-xl transition hover:bg-white hover:text-[#0066cc] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#0066cc]"
           aria-label="Đóng chi tiết thành viên"
         >
           <svg
@@ -514,15 +442,6 @@ function MemberDetailModal({
               >
                 {member.name}
               </h2>
-              <span
-                className={[
-                  "mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold",
-                  statusClassName[member.status],
-                ].join(" ")}
-              >
-                <span className="h-2 w-2 rounded-full bg-current" />
-                Thành viên {statusLabels[member.status].toLowerCase()}
-              </span>
             </div>
           </div>
 
@@ -587,14 +506,7 @@ function MemberDetailModal({
             </p>
           </section>
 
-          <div className="mt-9 flex items-center justify-between border-t border-[#dfe6ef]/80 pt-5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full px-5 py-3 text-sm font-extrabold text-[#475467] transition hover:bg-white/58"
-            >
-              Đóng
-            </button>
+          <div className="mt-9 flex items-center justify-end border-t border-[#dfe6ef]/80 pt-5">
             <button
               type="button"
               onClick={onEdit}
@@ -648,15 +560,10 @@ export default function AdminMemberTable({
 }) {
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [activeMember, setActiveMember] = useState<AdminMember | null>(null);
-  const [now, setNow] = useState(() => Date.now());
   const isAllSelected =
     members.length > 0 && selectedIds.length === members.length;
   const hasSelection = selectedIds.length > 0;
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(intervalId);
-  }, []);
+  const showingLabel = `Hiển thị ${members.length}/${total} thành viên`;
 
   return (
     <section className="liquid-glass mt-6 rounded-[24px] lg:mt-7 lg:rounded-[28px]">
@@ -673,7 +580,6 @@ export default function AdminMemberTable({
 
         {members.map((member) => {
           const isSelected = selectedIds.includes(member.id);
-          const presence = getPresenceLabel(member, now);
 
           return (
             <MemberMobileCard
@@ -681,7 +587,6 @@ export default function AdminMemberTable({
               member={member}
               isSelected={isSelected}
               isActionOpen={openActionId === member.id}
-              presence={presence}
               onToggleMember={() => onToggleMember(member.id)}
               onOpenDetail={() => setActiveMember(member)}
               onToggleAction={() =>
@@ -714,18 +619,16 @@ export default function AdminMemberTable({
                   onClick={onToggleAll}
                 />
               </th>
-              <th className="w-[15%] px-3 py-5">Thành viên</th>
-              <th className="w-[23%] px-3 py-5">Email</th>
-              <th className="w-[13%] px-3 py-5">Vai trò</th>
-              <th className="w-[15%] px-3 py-5">Trạng thái</th>
-              <th className="w-[15%] px-3 py-5">Ngày tham gia</th>
+              <th className="w-[22%] px-3 py-5">Thành viên</th>
+              <th className="w-[31%] px-3 py-5">Email</th>
+              <th className="w-[17%] px-3 py-5">Vai trò</th>
+              <th className="w-[18%] px-3 py-5">Ngày tham gia</th>
               <th className="w-18 px-3 py-5 text-center">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {members.map((member) => {
               const isSelected = selectedIds.includes(member.id);
-              const presence = getPresenceLabel(member, now);
 
               return (
                 <tr
@@ -771,25 +674,6 @@ export default function AdminMemberTable({
                       {roleLabels[member.role]}
                     </button>
                   </td>
-                  <td className="px-3 py-5">
-                    <button
-                      type="button"
-                      onClick={() => setActiveMember(member)}
-                      aria-label={presence.ariaLabel}
-                      className={[
-                        "inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-extrabold",
-                        presence.className,
-                      ].join(" ")}
-                    >
-                      <span
-                        className={[
-                          "h-2 w-2 rounded-full",
-                          presence.dotClassName,
-                        ].join(" ")}
-                      />
-                      {presence.label}
-                    </button>
-                  </td>
                   <td className="px-3 py-5 text-[#65717c]">
                     <button
                       type="button"
@@ -825,12 +709,18 @@ export default function AdminMemberTable({
         </table>
       </div>
 
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={onPageChange}
-      />
+      <div className="flex flex-col gap-4 border-t border-[#dbe3ea]/58 px-5 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-6">
+        <p className="text-sm font-extrabold text-[#5f6f82]">
+          {showingLabel}
+        </p>
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          className="justify-start px-0 py-0 sm:justify-end"
+          onPageChange={onPageChange}
+        />
+      </div>
       {activeMember && (
         <MemberDetailModal
           member={activeMember}
