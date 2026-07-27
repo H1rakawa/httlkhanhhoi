@@ -1,8 +1,8 @@
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import DashboardBackdrop from "@/com/dashboard/DashboardBackdrop";
+import DashboardInfoPanel from "@/com/dashboard/DashboardInfoPanel";
 import QuickStats from "@/com/dashboard/QuickStats";
-import RecentNotifications from "@/com/dashboard/RecentNotifications";
 import ShortcutsPanel from "@/com/dashboard/ShortcutsPanel";
 import UpcomingAssignments from "@/com/dashboard/UpcomingAssignments";
 import WelcomePanel from "@/com/dashboard/WelcomePanel";
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1.65fr_0.8fr]">
-            <RecentNotifications />
+            <DashboardInfoPanel />
             <ShortcutsPanel />
           </div>
         </div>

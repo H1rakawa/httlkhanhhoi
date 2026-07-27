@@ -37,6 +37,23 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "video") {
+    return (
+      <svg {...commonProps}>
+        <rect x="4" y="6.5" width="11" height="11" rx="2" />
+        <path d="m15 10 5-3v10l-5-3" />
+      </svg>
+    );
+  }
+
+  if (name === "heart") {
+    return (
+      <svg {...commonProps}>
+        <path d="M20.4 6.7a5 5 0 0 0-7.1 0L12 8l-1.3-1.3a5 5 0 0 0-7.1 7.1L12 22l8.4-8.2a5 5 0 0 0 0-7.1Z" />
+      </svg>
+    );
+  }
+
   if (name === "group" || name === "community") {
     return (
       <svg {...commonProps}>
