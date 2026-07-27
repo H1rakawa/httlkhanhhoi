@@ -6,11 +6,11 @@ const stats = [
 
 export default function QuickStats() {
   return (
-    <section className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+    <section className="grid h-full gap-4 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`liquid-glass-item border-b-[3px] ${stat.color} p-5`}
+          className={`liquid-glass-item flex h-full flex-col justify-center border-b-[3px] ${stat.color} p-5`}
         >
           <p className="text-sm text-[#8a8a8f]">{stat.label}</p>
           <p

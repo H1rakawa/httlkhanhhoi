@@ -17,7 +17,7 @@ export default function ShortcutsPanel() {
             key={shortcut.label}
             href={shortcut.href}
             className={[
-              "flex aspect-square min-h-32 flex-col items-center justify-center gap-4 rounded-4xl border-2 px-2 text-center no-underline shadow-[0_18px_40px_rgba(31,38,48,0.12)]",
+              "flex aspect-square min-h-32 flex-col items-center justify-center gap-4 rounded-[16px] border-2 px-2 text-center no-underline shadow-[0_18px_40px_rgba(31,38,48,0.12)]",
               shortcut.primary
                 ? "border-[#0066cc] bg-[#0066cc] text-white"
                 : "liquid-glass-item border-white/80 text-[#0066cc]",

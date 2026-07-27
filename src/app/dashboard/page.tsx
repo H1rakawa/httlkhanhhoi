@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <DashboardBackdrop />
       <Header activePath="/dashboard" />
-      <div className="relative z-10 mx-auto max-w-7xl pb-20 pt-24 md:pb-28 md:pt-28">
+      <div className="relative z-10 mx-auto w-[calc(100%_-_2rem)] max-w-7xl pb-20 pt-24 md:pb-28 md:pt-28">
         <div>
           <WelcomePanel
             displayName={displayName}
@@ -34,17 +34,16 @@ export default async function DashboardPage() {
             status={account.profile?.status || "active"}
           />
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1.65fr_0.8fr]">
-            <div className="grid content-start gap-8">
-              <div id="assignments">
-                <UpcomingAssignments />
-              </div>
-              <RecentNotifications />
+          <div className="mt-8 grid items-stretch gap-8 lg:grid-cols-[1.65fr_0.8fr]">
+            <div id="assignments" className="h-full">
+              <UpcomingAssignments />
             </div>
-            <aside className="grid content-start gap-8">
-              <QuickStats />
-              <ShortcutsPanel />
-            </aside>
+            <QuickStats />
+          </div>
+
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1.65fr_0.8fr]">
+            <RecentNotifications />
+            <ShortcutsPanel />
           </div>
         </div>
       </div>
