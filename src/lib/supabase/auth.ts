@@ -4,6 +4,7 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
 
 export const ACCESS_TOKEN_COOKIE = "httl-access-token";
 export const REFRESH_TOKEN_COOKIE = "httl-refresh-token";
+export const OAUTH_VERIFIER_COOKIE = "httl-oauth-verifier";
 
 export type SupabaseAuthUser = {
   id: string;

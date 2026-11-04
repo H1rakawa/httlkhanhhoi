@@ -141,6 +141,14 @@ function PasswordField({ label, name }: { label: string; name: string }) {
 }
 
 function SocialActions() {
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const handleGoogle = () => {
+    setIsRedirecting(true);
+    // Full-page navigation: the route sets the PKCE cookie and redirects to Google.
+    window.location.assign("/api/auth/google");
+  };
+
   return (
     <div className="mt-8">
       <div className="flex items-center gap-4">
@@ -153,12 +161,14 @@ function SocialActions() {
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
         <button
           type="button"
-          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
+          onClick={handleGoogle}
+          disabled={isRedirecting}
+          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc] disabled:cursor-wait disabled:opacity-70"
         >
           <span className="text-xl tracking-wider">
             <IconBrandGoogle />
           </span>
-          <span>Google</span>
+          <span>{isRedirecting ? "Đang chuyển hướng..." : "Google"}</span>
         </button>
         <button
           type="button"
@@ -174,9 +184,17 @@ function SocialActions() {
   );
 }
 
-function LoginForm({ onForgot }: { onForgot: () => void }) {
+function LoginForm({
+  onForgot,
+  initialError,
+}: {
+  onForgot: () => void;
+  initialError?: string;
+}) {
   const router = useRouter();
-  const [message, setMessage] = useState<FormMessage>(null);
+  const [message, setMessage] = useState<FormMessage>(
+    initialError ? { type: "error", text: initialError } : null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -409,7 +427,7 @@ function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   );
 }
 
-export default function AuthTabs() {
+export default function AuthTabs({ initialError }: { initialError?: string }) {
   const [view, setView] = useState<AuthView>("forms");
   const [activeTab, setActiveTab] = useState<AuthTab>("login");
 
@@ -450,7 +468,10 @@ export default function AuthTabs() {
       </Tabs>
 
       {activeTab === "login" ? (
-        <LoginForm onForgot={() => setView("forgot")} />
+        <LoginForm
+          onForgot={() => setView("forgot")}
+          initialError={initialError}
+        />
       ) : (
         <RegisterForm />
       )}

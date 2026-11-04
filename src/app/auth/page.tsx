@@ -5,8 +5,13 @@ import AuthBackdrop from "@/com/auth/AuthBackdrop";
 import AuthTabs from "@/com/auth/AuthTabs";
 import { getCurrentUser } from "@/lib/supabase/auth";
 
-export default async function AuthPage() {
+export default async function AuthPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string | string[] }>;
+}) {
   if (await getCurrentUser()) redirect("/dashboard");
+  const { error } = await searchParams;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent px-4 py-14 text-[#1d1d1f] md:px-6 md:py-16">
@@ -25,7 +30,7 @@ export default async function AuthPage() {
             className="h-14 w-auto md:h-16"
           />
         </NextLink>
-        <AuthTabs />
+        <AuthTabs initialError={Array.isArray(error) ? error[0] : error} />
       </section>
     </main>
   );
