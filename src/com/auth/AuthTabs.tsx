@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Button, Tabs, toast } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { ClockIcon } from "@/com/shared/Icons";
@@ -8,6 +8,7 @@ import { IconBrandFacebook, IconBrandGoogle } from "@tabler/icons-react";
 
 type AuthView = "forms" | "forgot";
 type AuthTab = "login" | "register";
+type OAuthProvider = "google" | "facebook";
 
 type FormMessage = {
   type: "success" | "error";
@@ -141,12 +142,23 @@ function PasswordField({ label, name }: { label: string; name: string }) {
 }
 
 function SocialActions() {
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [redirecting, setRedirecting] = useState<OAuthProvider | null>(null);
 
-  const handleGoogle = () => {
-    setIsRedirecting(true);
-    // Full-page navigation: the route sets the PKCE cookie and redirects to Google.
-    window.location.assign("/api/auth/google");
+  useEffect(() => {
+    // Coming back from the provider restores this page from the bfcache, with
+    // the buttons still in their redirecting state.
+    const reset = (event: PageTransitionEvent) => {
+      if (event.persisted) setRedirecting(null);
+    };
+
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
+
+  const handleOAuth = (provider: OAuthProvider) => {
+    setRedirecting(provider);
+    // Full-page navigation: the route sets the PKCE cookie and redirects to the provider.
+    window.location.assign(`/api/auth/oauth/${provider}`);
   };
 
   return (
@@ -161,23 +173,29 @@ function SocialActions() {
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
         <button
           type="button"
-          onClick={handleGoogle}
-          disabled={isRedirecting}
+          onClick={() => handleOAuth("google")}
+          disabled={redirecting !== null}
           className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc] disabled:cursor-wait disabled:opacity-70"
         >
           <span className="text-xl tracking-wider">
             <IconBrandGoogle />
           </span>
-          <span>{isRedirecting ? "Đang chuyển hướng..." : "Google"}</span>
+          <span>
+            {redirecting === "google" ? "Đang chuyển hướng..." : "Google"}
+          </span>
         </button>
         <button
           type="button"
-          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc]"
+          onClick={() => handleOAuth("facebook")}
+          disabled={redirecting !== null}
+          className="liquid-readable flex h-14 items-center justify-center gap-3 px-4 text-base font-semibold text-[#1d1d1f] hover:border-[#0a84ff] hover:text-[#0066cc] disabled:cursor-wait disabled:opacity-70"
         >
           <span className="text-lg">
             <IconBrandFacebook />
           </span>
-          <span>Facebook</span>
+          <span>
+            {redirecting === "facebook" ? "Đang chuyển hướng..." : "Facebook"}
+          </span>
         </button>
       </div>
     </div>

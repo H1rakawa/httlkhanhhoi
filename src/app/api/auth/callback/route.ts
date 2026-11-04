@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
   if (providerError) return redirectWithError(origin, providerError);
   if (!code) {
-    return redirectWithError(origin, "Thiếu mã xác thực từ Google.");
+    return redirectWithError(origin, "Thiếu mã xác thực đăng nhập.");
   }
 
   const cookieHeader = request.headers.get("cookie") || "";
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   if (!codeVerifier) {
     return redirectWithError(
       origin,
-      "Phiên đăng nhập Google đã hết hạn. Vui lòng thử lại.",
+      "Phiên đăng nhập đã hết hạn. Vui lòng thử lại.",
     );
   }
 
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       },
     );
 
-    // The handle_new_user trigger creates the member profile from the Google
+    // The handle_new_user trigger creates the member profile from the provider
     // metadata (full_name, avatar_url) on first sign-in.
     const response = NextResponse.redirect(new URL("/dashboard", origin));
     setAuthCookies(response, session);
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
   } catch (error) {
     return redirectWithError(
       origin,
-      error instanceof Error ? error.message : "Đăng nhập Google thất bại.",
+      error instanceof Error ? error.message : "Đăng nhập thất bại.",
     );
   }
 }
