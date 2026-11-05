@@ -21,6 +21,20 @@ function redirectWithError(origin: string, message: string) {
   return response;
 }
 
+function describeProviderError(error: string) {
+  const message = error.toLowerCase();
+
+  if (message.includes("denied")) {
+    return "Bạn đã hủy đăng nhập hoặc chưa cấp quyền cho ứng dụng.";
+  }
+  // Facebook accounts registered by phone have no email to share.
+  if (message.includes("email")) {
+    return "Tài khoản này không cung cấp email. Vui lòng cấp quyền email hoặc dùng phương thức đăng nhập khác.";
+  }
+
+  return error;
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const { origin, searchParams } = requestUrl;
@@ -28,7 +42,9 @@ export async function GET(request: Request) {
   const providerError =
     searchParams.get("error_description") || searchParams.get("error");
 
-  if (providerError) return redirectWithError(origin, providerError);
+  if (providerError) {
+    return redirectWithError(origin, describeProviderError(providerError));
+  }
   if (!code) {
     return redirectWithError(origin, "Thiếu mã xác thực đăng nhập.");
   }

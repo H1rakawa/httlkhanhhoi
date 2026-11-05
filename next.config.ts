@@ -37,6 +37,27 @@ const nextConfig: NextConfig = {
         hostname: "img.youtube.com",
         pathname: "/**",
       },
+      // Avatars of accounts signed in through Google and Facebook.
+      {
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "platform-lookaside.fbsbx.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "graph.facebook.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.fbcdn.net",
+        pathname: "/**",
+      },
     ],
   },
 };
