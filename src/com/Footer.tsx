@@ -14,7 +14,7 @@ const quickLinks = [
 ];
 
 const legalLinks = [
-  { label: "Chính sách bảo mật", href: "#" },
+  { label: "Chính sách bảo mật", href: "/privacy" },
   { label: "Điều khoản sử dụng", href: "#" },
 ];
 
