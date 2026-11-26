@@ -31,6 +31,11 @@ function describeProviderError(error: string) {
   if (message.includes("email")) {
     return "Tài khoản này không cung cấp email. Vui lòng cấp quyền email hoặc dùng phương thức đăng nhập khác.";
   }
+  // Supabase could not trade the provider's code for tokens, almost always a
+  // wrong client ID/secret in the provider settings. Not fixable by the user.
+  if (message.includes("unable to exchange external code")) {
+    return "Không thể hoàn tất đăng nhập do lỗi cấu hình máy chủ. Vui lòng thử lại sau hoặc dùng phương thức đăng nhập khác.";
+  }
 
   return error;
 }

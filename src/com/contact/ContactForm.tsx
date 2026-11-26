@@ -8,32 +8,62 @@ type FormStatus = {
   message: string;
 } | null;
 
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
 export default function ContactForm() {
   const [status, setStatus] = useState<FormStatus>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      name: String(formData.get("name") || "").trim(),
+      email: String(formData.get("email") || "").trim(),
+      phone: String(formData.get("phone") || "").trim(),
+      message: String(formData.get("message") || "").trim(),
+      website: String(formData.get("website") || ""),
+    };
 
-    const formData = new FormData(event.currentTarget);
-    const name = String(formData.get("name") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const phone = String(formData.get("phone") || "").trim();
-    const message = String(formData.get("message") || "").trim();
-
-    if (!name || !email || !phone || !message) {
-      setStatus({
-        type: "error",
-        message: "Vui lòng nhập đầy đủ thông tin trước khi gửi.",
-      });
+    if (!payload.name || !payload.email || !payload.phone || !payload.message) {
+      setStatus({ type: "error", message: "Vui lòng nhập đầy đủ thông tin trước khi gửi." });
+      return;
+    }
+    if (!EMAIL_PATTERN.test(payload.email)) {
+      setStatus({ type: "error", message: "Email không hợp lệ." });
       return;
     }
 
-    setStatus({
-      type: "success",
-      message:
-        "Cảm ơn bạn đã liên hệ. HTTL. Khánh Hội sẽ phản hồi trong thời gian sớm nhất.",
-    });
-    event.currentTarget.reset();
+    setSubmitting(true);
+    setStatus(null);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+
+      if (!response.ok) {
+        setStatus({
+          type: "error",
+          message: data.error || "Không thể gửi lời nhắn. Vui lòng thử lại.",
+        });
+        return;
+      }
+
+      setStatus({
+        type: "success",
+        message:
+          "Cảm ơn bạn đã liên hệ. HTTL. Khánh Hội đã nhận được lời nhắn và sẽ phản hồi trong thời gian sớm nhất.",
+      });
+      form.reset();
+    } catch {
+      setStatus({ type: "error", message: "Không thể kết nối máy chủ. Vui lòng thử lại." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -60,10 +90,21 @@ export default function ContactForm() {
       )}
 
       <div className="mt-7 grid gap-4">
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="hidden"
+        />
         <label className="grid gap-2 text-sm font-medium text-[#424245]">
           Họ và tên
           <input
             name="name"
+            required
+            maxLength={200}
+            autoComplete="name"
             className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
             placeholder="Nhập họ và tên"
           />
@@ -75,6 +116,9 @@ export default function ContactForm() {
             <input
               name="email"
               type="email"
+              required
+              maxLength={320}
+              autoComplete="email"
               className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
               placeholder="email@example.com"
             />
@@ -84,6 +128,9 @@ export default function ContactForm() {
             <input
               name="phone"
               type="tel"
+              required
+              maxLength={30}
+              autoComplete="tel"
               className="h-12 rounded-[12px] border border-white/90 bg-white/76 px-4 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
               placeholder="+84..."
             />
@@ -95,6 +142,8 @@ export default function ContactForm() {
           <textarea
             name="message"
             rows={6}
+            required
+            maxLength={5000}
             className="resize-none rounded-[12px] border border-white/90 bg-white/76 px-4 py-3 text-[#1d1d1f] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none placeholder:text-[#86868b] focus:border-[#0099ff]"
             placeholder="Bạn muốn chia sẻ điều gì?"
           />
@@ -103,9 +152,10 @@ export default function ContactForm() {
 
       <Button
         type="submit"
-        className="mt-6 h-11 rounded-full bg-[#0099ff] px-7 text-white"
+        isDisabled={submitting}
+        className="mt-6 h-11 rounded-full bg-[#0099ff] px-7 text-white disabled:opacity-60"
       >
-        Gửi liên hệ
+        {submitting ? "Đang gửi..." : "Gửi liên hệ"}
       </Button>
     </form>
   );

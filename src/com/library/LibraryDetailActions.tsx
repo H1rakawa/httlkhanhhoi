@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { LibraryResource } from "@/com/library/libraryData";
+import { useLibraryBookmarks } from "@/com/library/useLibraryBookmarks";
 
 export default function LibraryDetailActions({
   resource,
 }: {
   resource: LibraryResource;
 }) {
-  const [saved, setSaved] = useState(false);
+  const { bookmarkedIds, toggleBookmark } = useLibraryBookmarks();
+  const saved = bookmarkedIds.includes(resource.id);
 
   const share = () => {
     if (navigator.share) {
@@ -27,15 +28,10 @@ export default function LibraryDetailActions({
 
   return (
     <div className="liquid-glass p-5 sm:p-6">
-      {resource.url === "#" ? (
-        <button
-          type="button"
-          onClick={() => setSaved(true)}
-          className="flex min-h-14 w-full items-center justify-center gap-3 rounded-[14px] bg-[#07111f] px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,17,31,0.22)]"
-        >
-          <DownloadIcon />
-          {saved ? "Đã lưu vào thư viện" : actionLabel}
-        </button>
+      {!resource.url ? (
+        <p className="flex min-h-14 w-full items-center justify-center rounded-[14px] bg-[#07111f]/70 px-5 text-sm font-semibold text-white">
+          Tài liệu chưa có file đính kèm
+        </p>
       ) : (
         <a
           href={resource.url}
@@ -50,7 +46,7 @@ export default function LibraryDetailActions({
       <div className="mt-3 grid grid-cols-2 gap-3">
         <button
           type="button"
-          onClick={() => setSaved((current) => !current)}
+          onClick={() => toggleBookmark(resource.id)}
           className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-white/90 bg-white/66 text-sm font-semibold"
         >
           <BookmarkIcon filled={saved} />
@@ -66,7 +62,7 @@ export default function LibraryDetailActions({
         </button>
       </div>
       <p className="mt-5 text-center text-xs leading-6 text-[#626a75]">
-        Có thể xem trên điện thoại, máy tính bảng và máy tính.
+        Tài liệu đã lưu được ghi nhớ trên trình duyệt này.
       </p>
     </div>
   );

@@ -40,6 +40,7 @@ export const adminSidebarItems = [
   { href: "/admin/pray", label: "Cầu thay", icon: "hands" },
   { href: "/admin/pray", label: "Sự kiện", icon: "calendar" },
   { href: "/admin/library", label: "Thư viện", icon: "book" },
+  { href: "/admin/contact", label: "Liên hệ", icon: "mail" },
 ];
 
 export const adminQuickActions = [

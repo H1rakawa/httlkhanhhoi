@@ -1,9 +1,7 @@
+import type { ProgressStat } from "@/com/preachout/preachoutData";
+
 type ProgressReportPanelProps = {
-  stats: Array<{
-    label: string;
-    value: string;
-    detail: string;
-  }>;
+  stats: ProgressStat[];
 };
 
 export default function ProgressReportPanel({ stats }: ProgressReportPanelProps) {
@@ -20,8 +18,8 @@ export default function ProgressReportPanel({ stats }: ProgressReportPanelProps)
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-7 text-[#626a75]">
-            Bảng tổng hợp dành cho nhóm phụ trách để theo dõi phản hồi, số lượt
-            tham gia và tài liệu đã phân phối.
+            Số liệu cập nhật trực tiếp từ hệ thống: số hoạt động, lượt đăng ký
+            tham gia và tài liệu đang được chia sẻ.
           </p>
         </div>
         <div className="mt-7 grid gap-4 md:grid-cols-3">

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { MouseEvent, useState } from "react";
-import { LibraryResource } from "@/com/library/libraryData";
+import { categoryLabel, LibraryResource } from "@/com/library/libraryData";
 
 const artworkStyles: Record<LibraryResource["type"], string> = {
   PDF: "from-[#dbe9ff] via-[#f8fbff] to-[#a9c9ff]",
@@ -49,7 +49,7 @@ export function LibraryResourceArtwork({
           </>
         )}
       </svg>
-      {!failed && (
+      {resource.image && !failed && (
         <Image
           src={resource.image}
           alt={resource.title}
@@ -117,12 +117,16 @@ export default function LibraryResourceCard({
 
       <div className="flex flex-1 flex-col px-2 pb-2 pt-5">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#0066cc]">
-          {resource.type}
+          {[categoryLabel(resource.category), resource.type, resource.sizeLabel]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
         <h2 className="mt-2 text-lg font-semibold leading-snug">{resource.title}</h2>
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#626a75]">
-          {resource.description}
-        </p>
+        {resource.description && (
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#626a75]">
+            {resource.description}
+          </p>
+        )}
         <div className="mt-auto flex items-center justify-between gap-3 pt-6">
           <button
             type="button"
@@ -147,7 +151,7 @@ export default function LibraryResourceCard({
                 <path d="M7 4h10v16l-5-3-5 3z" />
               </svg>
             </button>
-            {resource.url === "#" ? (
+            {!resource.url ? (
               <button
                 type="button"
                 onClick={onOpen}

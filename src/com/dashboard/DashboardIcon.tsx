@@ -86,6 +86,15 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "mail") {
+    return (
+      <svg {...commonProps}>
+        <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+        <path d="m4 7 8 6 8-6" />
+      </svg>
+    );
+  }
+
   if (name === "bell") {
     return (
       <svg {...commonProps}>

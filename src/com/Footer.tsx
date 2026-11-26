@@ -15,7 +15,7 @@ const quickLinks = [
 
 const legalLinks = [
   { label: "Chính sách bảo mật", href: "/privacy" },
-  { label: "Điều khoản sử dụng", href: "#" },
+  { label: "Điều khoản sử dụng", href: "/term" },
 ];
 
 export default function Footer() {

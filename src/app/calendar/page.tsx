@@ -3,8 +3,20 @@ import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import CalendarBackdrop from "@/com/calendar/CalendarBackdrop";
 import CalendarPageClient from "@/com/calendar/CalendarPageClient";
+import { getEvents, getEventViewer } from "@/lib/events/events";
+import type { ChurchEvent } from "@/lib/events/types";
 
-export default function CalendarPage() {
+export default async function CalendarPage() {
+  const [eventsResult, { viewer, registeredEventIds }] = await Promise.all([
+    getEvents()
+      .then((events) => ({ events, error: null }))
+      .catch((error: unknown) => ({
+        events: [] as ChurchEvent[],
+        error: error instanceof Error ? error.message : "Không thể tải lịch sinh hoạt.",
+      })),
+    getEventViewer(),
+  ]);
+
   return (
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <CalendarBackdrop />
@@ -34,7 +46,12 @@ export default function CalendarPage() {
         </div>
       </section>
       <div className="relative z-10">
-        <CalendarPageClient />
+        <CalendarPageClient
+          events={eventsResult.events}
+          viewer={viewer}
+          registeredEventIds={registeredEventIds}
+          loadError={eventsResult.error}
+        />
         <Footer />
       </div>
     </main>

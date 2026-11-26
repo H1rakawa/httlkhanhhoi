@@ -6,85 +6,83 @@ import EventCard from "@/com/calendar/EventCard";
 import EventDetailDialog from "@/com/calendar/EventDetailDialog";
 import FeaturedEvent from "@/com/calendar/FeaturedEvent";
 import FilterSearchBar from "@/com/calendar/FilterSearchBar";
-import {
-  CalendarEvent,
-  getLiveCalendarEvents,
-} from "@/com/calendar/calendarData";
+import EventRegistrationDialog from "@/com/events/EventRegistrationDialog";
+import { useEventRegistrations } from "@/com/events/useEventRegistrations";
+import type { ChurchEvent, EventViewer } from "@/lib/events/types";
+import { eventMonthKey } from "@/lib/events/types";
 
-function eventMatchesMonth(event: CalendarEvent, month: string) {
-  return event.date.slice(0, 7) === month;
+function matchesQuery(event: ChurchEvent, query: string) {
+  if (!query) return true;
+  return [event.title, event.category, event.location, event.description]
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
 }
 
-function formatMonth(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
+type CalendarPageClientProps = {
+  events: ChurchEvent[];
+  viewer: EventViewer;
+  registeredEventIds: string[];
+  loadError?: string | null;
+};
 
-export default function CalendarPageClient() {
+export default function CalendarPageClient({
+  events: initialEvents,
+  viewer,
+  registeredEventIds,
+  loadError,
+}: CalendarPageClientProps) {
   const [currentTime, setCurrentTime] = useState(() => new Date());
   const [category, setCategory] = useState("Tất cả");
   const [query, setQuery] = useState("");
-  const [month, setMonth] = useState(() => formatMonth(currentTime));
+  const [month, setMonth] = useState(() => eventMonthKey(new Date()));
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [registeredIds, setRegisteredIds] = useState<string[]>([]);
-  const calendarEvents = useMemo(
-    () => getLiveCalendarEvents(currentTime),
-    [currentTime],
-  );
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const registrations = useEventRegistrations(initialEvents, registeredEventIds);
+  const { events } = registrations;
+  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
 
   useEffect(() => {
     const intervalId = window.setInterval(() => setCurrentTime(new Date()), 60_000);
-
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const filteredEvents = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase();
+  const categoryEvents = useMemo(
+    () =>
+      events
+        .filter((event) => category === "Tất cả" || event.category === category)
+        .filter((event) => matchesQuery(event, normalizedQuery)),
+    [events, category, normalizedQuery],
+  );
 
-    return calendarEvents
-      .filter((event) => category === "Tất cả" || event.category === category)
-      .filter((event) => eventMatchesMonth(event, month))
-      .filter((event) => {
-        if (!normalizedQuery) return true;
+  const monthEvents = useMemo(
+    () => categoryEvents.filter((event) => eventMonthKey(event.startsAt) === month),
+    [categoryEvents, month],
+  );
 
-        return [event.title, event.category, event.location, event.description]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedQuery);
-      })
-      .sort(
-        (eventA, eventB) =>
-          new Date(eventA.date).getTime() - new Date(eventB.date).getTime(),
-      );
-  }, [calendarEvents, category, month, query]);
+  const upcomingEvents = useMemo(
+    () =>
+      categoryEvents
+        .filter(
+          (event) =>
+            new Date(event.endsAt ?? event.startsAt).getTime() >= currentTime.getTime() &&
+            event.status !== "ended",
+        )
+        .slice(0, 3),
+    [categoryEvents, currentTime],
+  );
 
-  const upcomingEvents = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return calendarEvents
-      .filter((event) => new Date(event.date).getTime() >= currentTime.getTime())
-      .filter((event) => category === "Tất cả" || event.category === category)
-      .filter((event) => {
-        if (!normalizedQuery) return true;
-        return [event.title, event.category, event.location]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedQuery);
-      })
-      .sort(
-        (eventA, eventB) =>
-          new Date(eventA.date).getTime() - new Date(eventB.date).getTime(),
-      )
-      .slice(0, 3);
-  }, [calendarEvents, category, currentTime, query]);
-
-  const featuredEvent = upcomingEvents[0] || calendarEvents[0];
-
-  const registerEvent = (event: CalendarEvent) => {
-    setRegisteredIds((currentIds) =>
-      currentIds.includes(event.id) ? currentIds : [...currentIds, event.id],
+  const featuredEvent = useMemo(() => {
+    const upcoming = events.filter(
+      (event) =>
+        new Date(event.endsAt ?? event.startsAt).getTime() >= currentTime.getTime() &&
+        event.status !== "ended",
     );
-  };
+    return upcoming.find((event) => event.featured) ?? upcoming[0] ?? null;
+  }, [events, currentTime]);
+
+  const selectEvent = (event: ChurchEvent) => setSelectedEventId(event.id);
 
   return (
     <>
@@ -99,45 +97,47 @@ export default function CalendarPageClient() {
         onViewModeChange={setViewMode}
       />
 
+      {loadError && (
+        <p className="mx-auto mt-6 w-[calc(100%_-_2rem)] max-w-7xl rounded-[14px] bg-[#fff0f1] px-5 py-4 text-sm text-[#c0263a]">
+          {loadError}
+        </p>
+      )}
+
       <section className="py-16 md:py-24">
         <div className="liquid-glass mx-auto grid w-[calc(100%_-_2rem)] max-w-7xl gap-8 p-5 lg:grid-cols-[1.25fr_0.85fr] md:p-8">
           {viewMode === "calendar" ? (
             <CalendarGrid
               month={month}
-              events={filteredEvents}
+              events={monthEvents}
               today={currentTime}
               selectedEventId={selectedEvent?.id}
-              onSelect={setSelectedEvent}
+              onSelect={selectEvent}
               onMonthChange={setMonth}
             />
           ) : (
-            <div className="grid gap-4">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onSelect={setSelectedEvent}
-                />
+            <div className="grid content-start gap-4">
+              {monthEvents.map((event) => (
+                <EventCard key={event.id} event={event} onSelect={selectEvent} />
               ))}
+              {monthEvents.length === 0 && (
+                <div className="liquid-readable p-6 text-sm text-[#6e6e73]">
+                  Tháng này chưa có sự kiện nào phù hợp.
+                </div>
+              )}
             </div>
           )}
 
           <aside>
-            <h2 className="mb-5 text-base font-semibold text-[#1d1d1f]">
-              Sắp diễn ra
-            </h2>
+            <h2 className="mb-5 text-base font-semibold text-[#1d1d1f]">Sắp diễn ra</h2>
             <div className="grid gap-4">
               {upcomingEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  compact
-                  onSelect={setSelectedEvent}
-                />
+                <EventCard key={event.id} event={event} compact onSelect={selectEvent} />
               ))}
               {upcomingEvents.length === 0 && (
                 <div className="liquid-readable p-6 text-sm text-[#6e6e73]">
-                  Không tìm thấy sự kiện phù hợp.
+                  {events.length === 0
+                    ? "Hiện chưa có sự kiện nào được lên lịch."
+                    : "Không tìm thấy sự kiện phù hợp."}
                 </div>
               )}
             </div>
@@ -145,14 +145,16 @@ export default function CalendarPageClient() {
         </div>
       </section>
 
-      <div className="pb-16 md:pb-24">
-        <FeaturedEvent
-          event={featuredEvent}
-          isRegistered={registeredIds.includes(featuredEvent.id)}
-          onSelect={setSelectedEvent}
-          onRegister={registerEvent}
-        />
-      </div>
+      {featuredEvent && (
+        <div className="pb-16 md:pb-24">
+          <FeaturedEvent
+            event={featuredEvent}
+            isRegistered={registrations.isRegistered(featuredEvent.id)}
+            onSelect={selectEvent}
+            onRegister={registrations.openRegistration}
+          />
+        </div>
+      )}
 
       <section className="px-5 py-24 text-center">
         <div className="liquid-glass mx-auto max-w-4xl px-6 py-12">
@@ -179,11 +181,19 @@ export default function CalendarPageClient() {
 
       <EventDetailDialog
         event={selectedEvent}
-        isRegistered={
-          selectedEvent ? registeredIds.includes(selectedEvent.id) : false
-        }
-        onClose={() => setSelectedEvent(null)}
-        onRegister={registerEvent}
+        isRegistered={selectedEvent ? registrations.isRegistered(selectedEvent.id) : false}
+        onClose={() => setSelectedEventId(null)}
+        onRegister={(event) => {
+          setSelectedEventId(null);
+          registrations.openRegistration(event);
+        }}
+      />
+
+      <EventRegistrationDialog
+        event={registrations.registeringEvent}
+        viewer={viewer}
+        onClose={registrations.closeRegistration}
+        onRegistered={registrations.onRegistered}
       />
     </>
   );

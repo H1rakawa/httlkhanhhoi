@@ -52,7 +52,6 @@ type ApiAssignment = {
     sort_order: number;
     assignment_question_options?: Array<{
       option_text: string;
-      is_correct: boolean;
       sort_order: number;
     }>;
   }>;
@@ -107,7 +106,7 @@ async function getAssignment(id: string) {
   try {
     const rawId = assignmentRawId(id);
     const assignments = await supabaseDataRequest<ApiAssignment[]>(
-      `assignments?id=eq.${encodeURIComponent(rawId)}&select=id,title,description,category,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url,media_kind,mime_type,size_bytes),submissions(status,grade),assignment_questions(id,question_type,prompt,scripture_reference,answer_hint,allow_multiple,sort_order,assignment_question_options(option_text,is_correct,sort_order))&limit=1`,
+      `assignments?id=eq.${encodeURIComponent(rawId)}&select=id,title,description,category,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url,media_kind,mime_type,size_bytes),submissions(status,grade),assignment_questions(id,question_type,prompt,scripture_reference,answer_hint,allow_multiple,sort_order,assignment_question_options(option_text,sort_order))&limit=1`,
       await getAccessToken(),
     );
     const assignment = assignments[0];

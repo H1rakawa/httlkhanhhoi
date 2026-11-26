@@ -1,13 +1,11 @@
-import { CalendarEvent } from "@/com/calendar/calendarData";
+import type { ChurchEvent } from "@/lib/events/types";
+import { eventDayKey } from "@/lib/events/types";
 
 const weekdays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
-function sameDay(dateA: Date, dateB: Date) {
-  return (
-    dateA.getFullYear() === dateB.getFullYear() &&
-    dateA.getMonth() === dateB.getMonth() &&
-    dateA.getDate() === dateB.getDate()
-  );
+/** "YYYY-MM-DD" của một ô lịch (ngày cục bộ, không đổi múi giờ). */
+function cellDayKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function buildCalendarDays(month: string) {
@@ -25,10 +23,10 @@ function buildCalendarDays(month: string) {
 
 type CalendarGridProps = {
   month: string;
-  events: CalendarEvent[];
+  events: ChurchEvent[];
   today: Date;
   selectedEventId?: string;
-  onSelect: (event: CalendarEvent) => void;
+  onSelect: (event: ChurchEvent) => void;
   onMonthChange: (month: string) => void;
 };
 
@@ -111,12 +109,11 @@ export default function CalendarGrid({
         ))}
 
         {days.map((day) => {
-          const dayEvents = events.filter((event) =>
-            sameDay(new Date(event.date), day),
-          );
+          const dayKey = cellDayKey(day);
+          const dayEvents = events.filter((event) => eventDayKey(event.startsAt) === dayKey);
           const isOutsideMonth = day.getMonth() !== activeMonth;
           const isSelected = dayEvents.some((event) => event.id === selectedEventId);
-          const isToday = sameDay(day, today);
+          const isToday = dayKey === eventDayKey(today);
 
           return (
             <div
@@ -134,6 +131,7 @@ export default function CalendarGrid({
                 <button
                   type="button"
                   onClick={() => onSelect(dayEvents[0])}
+                  title={dayEvents.map((event) => event.title).join("\n")}
                   className="flex h-full w-full flex-col items-center justify-center rounded-[10px]"
                 >
                   <span>{day.getDate()}</span>
