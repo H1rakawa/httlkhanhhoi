@@ -3,6 +3,7 @@ import Link from "next/link";
 import Header from "@/com/Header";
 import Footer from "@/com/Footer";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
+import TermsToc from "@/com/term/TermsToc";
 
 export const metadata: Metadata = {
   title: "Điều khoản sử dụng | HTTL. Khánh Hội",
@@ -90,6 +91,11 @@ const sections = [
   },
 ];
 
+const tocItems = [
+  ...sections.map(({ id, title }) => ({ id, title })),
+  { id: "lien-he", title: "9. Liên hệ" },
+];
+
 export default function TermsPage() {
   return (
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
@@ -97,83 +103,67 @@ export default function TermsPage() {
       <Header activePath="/term" />
       <div className="relative z-10">
         <div className="px-4 pb-16 pt-32 md:px-6 md:pb-24 md:pt-40">
-          <article className="liquid-glass mx-auto w-full max-w-4xl p-7 md:p-12">
-            <p className="text-sm font-medium text-[#0066cc]">
-              Cập nhật lần cuối: 26/11/2026
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-normal">
-              Điều khoản sử dụng
-            </h1>
-            <p className="mt-5 text-base leading-7 text-[#515154]">
-              Các điều khoản dưới đây áp dụng cho mọi người truy cập website của
-              Hội Thánh Tin Lành Khánh Hội, gồm khách xem trang, thành viên đã
-              đăng nhập và ban mục vụ. Cách chúng tôi xử lý dữ liệu cá nhân được
-              mô tả trong{" "}
-              <Link href="/privacy" className="font-medium text-[#0066cc]">
-                Chính sách bảo mật
-              </Link>
-              .
-            </p>
-
-            <nav
-              aria-label="Mục lục"
-              className="liquid-readable mt-8 p-5 text-sm leading-7"
-            >
-              <p className="font-semibold">Mục lục</p>
-              <ol className="mt-2 grid gap-x-6 sm:grid-cols-2">
-                {sections.map((section) => (
-                  <li key={section.id}>
-                    <a
-                      href={`#${section.id}`}
-                      className="text-[#0066cc] no-underline hover:underline"
-                    >
-                      {section.title}
-                    </a>
-                  </li>
-                ))}
-                <li>
-                  <a
-                    href="#lien-he"
-                    className="text-[#0066cc] no-underline hover:underline"
-                  >
-                    9. Liên hệ
-                  </a>
-                </li>
-              </ol>
-            </nav>
-
-            {sections.map((section) => (
-              <section key={section.id} id={section.id} className="mt-10 scroll-mt-32">
-                <h2 className="text-2xl font-semibold tracking-normal">
-                  {section.title}
-                </h2>
-                <ul className="mt-4 list-disc space-y-2 pl-5 text-base leading-7 text-[#515154]">
-                  {section.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-
-            <section id="lien-he" className="mt-10 scroll-mt-32">
-              <h2 className="text-2xl font-semibold tracking-normal">9. Liên hệ</h2>
-              <p className="mt-4 text-base leading-7 text-[#515154]">
-                Mọi câu hỏi về điều khoản, xin gửi qua{" "}
-                <Link href="/contact" className="font-medium text-[#0066cc]">
-                  trang Liên hệ
-                </Link>{" "}
-                hoặc email{" "}
-                <a
-                  href={`mailto:${CONTACT_EMAIL}`}
-                  className="font-medium text-[#0066cc]"
-                >
-                  {CONTACT_EMAIL}
-                </a>
-                . Hội Thánh Tin Lành Khánh Hội, 98 Lê Quốc Hưng, Quận 4, TP. Hồ Chí
-                Minh.
+          <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
+            <aside className="lg:sticky lg:top-28">
+              <TermsToc items={tocItems} />
+            </aside>
+            <article className="liquid-glass w-full min-w-0 p-7 md:p-12">
+              <p className="text-sm font-medium text-[#0066cc]">
+                Cập nhật lần cuối: 26/11/2026
               </p>
-            </section>
-          </article>
+              <h1 className="mt-3 text-4xl font-semibold tracking-normal">
+                Điều khoản sử dụng
+              </h1>
+              <p className="mt-5 text-base leading-7 text-[#515154]">
+                Các điều khoản dưới đây áp dụng cho mọi người truy cập website
+                của Hội Thánh Tin Lành Khánh Hội, gồm khách xem trang, thành
+                viên đã đăng nhập và ban mục vụ. Cách chúng tôi xử lý dữ liệu cá
+                nhân được mô tả trong{" "}
+                <Link href="/privacy" className="font-medium text-[#0066cc]">
+                  Chính sách bảo mật
+                </Link>
+                .
+              </p>
+
+              {sections.map((section) => (
+                <section
+                  key={section.id}
+                  id={section.id}
+                  className="mt-10 scroll-mt-32"
+                >
+                  <h2 className="text-2xl font-semibold tracking-normal">
+                    {section.title}
+                  </h2>
+                  <ul className="mt-4 list-disc space-y-2 pl-5 text-base leading-7 text-[#515154]">
+                    {section.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+
+              <section id="lien-he" className="mt-10 scroll-mt-32">
+                <h2 className="text-2xl font-semibold tracking-normal">
+                  9. Liên hệ
+                </h2>
+                <p className="mt-4 text-base leading-7 text-[#515154]">
+                  Mọi câu hỏi về điều khoản, xin gửi qua{" "}
+                  <Link href="/contact" className="font-medium text-[#0066cc]">
+                    trang Liên hệ
+                  </Link>{" "}
+                  hoặc email{" "}
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="font-medium text-[#0066cc]"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                  . Hội Thánh Tin Lành Khánh Hội, 98 Lê Quốc Hưng, Quận 4, TP.
+                  Hồ Chí Minh.
+                </p>
+              </section>
+            </article>
+          </div>
         </div>
         <Footer />
       </div>
