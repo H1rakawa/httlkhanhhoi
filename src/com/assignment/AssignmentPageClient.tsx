@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import FilterSelect from "@/com/assignment/FilterSelect";
 import {
   type AssignmentItem,
   assignmentRouteId,
@@ -115,24 +116,18 @@ export default function AssignmentPageClient({ assignments, loadError }: Assignm
               />
             </div>
             <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
-              <select
+              <FilterSelect
+                ariaLabel="Lọc theo phân loại"
                 value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="h-12 shrink-0 rounded-full border border-white/90 bg-white/72 px-5 text-sm font-semibold outline-none focus:border-[#0066cc]"
-              >
-                {categories.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-              <select
+                options={categories}
+                onChange={setCategory}
+              />
+              <FilterSelect
+                ariaLabel="Lọc theo trạng thái"
                 value={status}
-                onChange={(event) => setStatus(event.target.value)}
-                className="h-12 shrink-0 rounded-full border border-white/90 bg-white/72 px-5 text-sm font-semibold outline-none focus:border-[#0066cc]"
-              >
-                {assignmentStatuses.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+                options={assignmentStatuses}
+                onChange={setStatus}
+              />
               <button
                 type="button"
                 onClick={() => setShowHistory((current) => !current)}
