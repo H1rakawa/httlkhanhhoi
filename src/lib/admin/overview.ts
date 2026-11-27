@@ -75,6 +75,7 @@ const ACTION_LABELS: Record<string, string> = {
   delete: "đã xóa",
   update: "đã cập nhật",
   create: "đã tạo",
+  publish: "đã đăng",
 };
 
 const TABLE_LABELS: Record<string, { label: string; href: string | null }> = {
@@ -82,8 +83,11 @@ const TABLE_LABELS: Record<string, { label: string; href: string | null }> = {
   assignments: { label: "bài tập", href: "/admin/assignment" },
   profiles: { label: "thành viên", href: "/admin/member" },
   contact_messages: { label: "lời nhắn liên hệ", href: "/admin/contact" },
-  events: { label: "sự kiện", href: null },
-  resources: { label: "tài liệu", href: null },
+  events: { label: "sự kiện", href: "/admin/events" },
+  event_registrations: { label: "đăng ký sự kiện", href: "/admin/events" },
+  resources: { label: "tài liệu", href: "/admin/library" },
+  news_posts: { label: "bài viết", href: "/admin/news" },
+  testimonies: { label: "lời làm chứng", href: "/admin/preachout" },
 };
 
 async function getRecentActivities(accessToken: string): Promise<AdminActivity[]> {
@@ -173,7 +177,7 @@ async function getRecentActivities(accessToken: string): Promise<AdminActivity[]
       status: "Đăng ký",
       tone: "blue" as const,
       avatarUrl: row.person?.avatar_url ?? null,
-      href: null,
+      href: "/admin/events",
     })),
     ...contacts.map((row) => ({
       id: `contact-${row.id}`,

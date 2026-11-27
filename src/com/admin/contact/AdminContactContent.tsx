@@ -162,7 +162,7 @@ export default function AdminContactContent() {
   };
 
   return (
-    <div className="relative z-10 min-h-[calc(100svh-1.5rem)] px-5 py-6 text-[#111827] sm:px-8 md:min-h-[calc(100svh-2.5rem)] lg:min-h-[calc(100svh-3rem)] lg:px-9 lg:py-9">
+    <>
       <header className="min-w-0">
         <div className="flex items-center gap-2 text-xs font-bold text-[#7d8798]">
           <span>Quản trị</span>
@@ -301,6 +301,6 @@ export default function AdminContactContent() {
           />
         </div>
       </section>
-    </div>
+    </>
   );
 }

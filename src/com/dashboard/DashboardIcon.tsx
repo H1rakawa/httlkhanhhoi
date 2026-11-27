@@ -113,6 +113,26 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "news") {
+    return (
+      <svg {...commonProps}>
+        <path d="M5 5h11v14H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" />
+        <path d="M16 9h3a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2h-2" />
+        <path d="M8 9h4M8 13h4M8 16h2" />
+      </svg>
+    );
+  }
+
+  if (name === "megaphone") {
+    return (
+      <svg {...commonProps}>
+        <path d="M4 10v4a1 1 0 0 0 1 1h3l8 4V5L8 9H5a1 1 0 0 0-1 1Z" />
+        <path d="M8 15l1.5 5h2.5L11 16" />
+        <path d="M19.5 9.5a3.5 3.5 0 0 1 0 5" />
+      </svg>
+    );
+  }
+
   if (name === "settings") {
     return (
       <svg {...commonProps}>

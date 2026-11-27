@@ -7,7 +7,8 @@ import {
   requireStaff,
   type ContactMessageRow,
 } from "@/lib/admin/contact";
-import { isContactStatus } from "@/com/admin/contact/adminContactData";
+import { logAdminActivity } from "@/lib/admin/prayers";
+import { contactStatusLabel, isContactStatus } from "@/com/admin/contact/adminContactData";
 
 type RouteProps = { params: Promise<{ id: string }> };
 
@@ -52,6 +53,17 @@ export async function PATCH(request: Request, { params }: RouteProps) {
     if (!rows[0]) {
       return NextResponse.json({ error: "Không tìm thấy lời nhắn." }, { status: 404 });
     }
+    // Chỉ ghi nhật ký các thao tác đáng chú ý (đã phản hồi, lưu trữ).
+    if (status === "replied" || status === "archived") {
+      await logAdminActivity(staff.accessToken, staff.account.user.id, [
+        {
+          action: "update",
+          targetTable: "contact_messages",
+          targetId: id,
+          metadata: { status, title: `${rows[0].name} → ${contactStatusLabel[status]}` },
+        },
+      ]);
+    }
     return NextResponse.json({ message: mapContactMessage(rows[0]) });
   } catch (error) {
     return errorResponse(error, "Không thể cập nhật lời nhắn.");
@@ -75,6 +87,9 @@ export async function DELETE(_request: Request, { params }: RouteProps) {
     if (!rows[0]) {
       return NextResponse.json({ error: "Không tìm thấy lời nhắn." }, { status: 404 });
     }
+    await logAdminActivity(staff.accessToken, staff.account.user.id, [
+      { action: "delete", targetTable: "contact_messages", targetId: id },
+    ]);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return errorResponse(error, "Không thể xoá lời nhắn.");

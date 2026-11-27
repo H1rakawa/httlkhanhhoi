@@ -33,12 +33,14 @@ export const adminStats = [
   },
 ] as const;
 
-// "Sự kiện" và "Thư viện" sẽ thêm lại khi có trang /admin/events và /admin/library
-// (trước đây "Sự kiện" trỏ nhầm sang /admin/pray, còn "Thư viện" dẫn tới trang 404).
 export const adminSidebarItems = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/member", label: "Thành viên", icon: "community" },
   { href: "/admin/assignment", label: "Bài tập", icon: "document" },
+  { href: "/admin/events", label: "Sự kiện", icon: "calendar" },
+  { href: "/admin/news", label: "Tin tức", icon: "news" },
+  { href: "/admin/preachout", label: "Truyền giảng", icon: "megaphone" },
+  { href: "/admin/library", label: "Thư viện", icon: "book" },
   { href: "/admin/pray", label: "Cầu thay", icon: "hands" },
   { href: "/admin/contact", label: "Liên hệ", icon: "mail" },
 ];

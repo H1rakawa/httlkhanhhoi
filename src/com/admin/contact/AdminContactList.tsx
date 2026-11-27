@@ -72,6 +72,16 @@ function ActionButton({
   );
 }
 
+/** Thư trả lời có sẵn lời chào và trích lời nhắn gốc. */
+function replyMailto(message: ContactMessage) {
+  const quoted = message.message
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n");
+  const body = `Chào ${message.name},\n\nCảm ơn bạn đã liên hệ với HTTL. Khánh Hội.\n\n\n\n---\nLời nhắn của bạn:\n${quoted}`;
+  return `mailto:${message.email}?subject=${encodeURIComponent("Phản hồi từ HTTL Khánh Hội")}&body=${encodeURIComponent(body)}`;
+}
+
 export default function AdminContactList({
   messages,
   isLoading,
@@ -169,7 +179,7 @@ export default function AdminContactList({
                 )}
                 <div className="flex flex-wrap gap-2">
                   <a
-                    href={`mailto:${message.email}?subject=${encodeURIComponent("Phản hồi từ HTTL Khánh Hội")}`}
+                    href={replyMailto(message)}
                     className="inline-flex h-9 items-center rounded-[10px] border border-[#dce4f2] bg-white px-3 text-xs font-extrabold text-[#0066cc] no-underline hover:bg-[#f8fbff]"
                   >
                     Gửi email

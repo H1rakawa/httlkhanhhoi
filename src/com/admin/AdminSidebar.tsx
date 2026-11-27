@@ -37,7 +37,7 @@ export default function AdminSidebar({
             : "max-sm:w-[68px] sm:max-lg:w-[76px]",
         ].join(" ")}
       >
-        <div className="min-h-0 shrink-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           <div className="mb-4 flex h-11 items-center justify-center gap-2 lg:mb-7 lg:h-12 lg:justify-start">
             <Link
               href="/"
@@ -75,7 +75,7 @@ export default function AdminSidebar({
             </Link>
           </div>
 
-          <nav className="grid grid-cols-1 gap-2 overflow-y-auto pr-0.5">
+          <nav className="grid min-h-0 grid-cols-1 content-start gap-1.5 overflow-y-auto pr-0.5">
             {adminSidebarItems.map((item, index) => {
               const isActive =
                 activeHref === item.href &&

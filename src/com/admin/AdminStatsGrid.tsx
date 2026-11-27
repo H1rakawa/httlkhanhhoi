@@ -12,8 +12,8 @@ const toneClassName: Record<string, string> = {
 const statLinks: Partial<Record<keyof AdminStatValues, string>> = {
   totalMembers: "/admin/member",
   assignments: "/admin/assignment",
-  libraryResources: "/library",
-  upcomingEvents: "/calendar",
+  libraryResources: "/admin/library",
+  upcomingEvents: "/admin/events",
 };
 
 const format = (value: number) => new Intl.NumberFormat("vi-VN").format(value);
