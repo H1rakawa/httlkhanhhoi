@@ -1,3 +1,7 @@
+/** Danh mục bài tập dùng ở trang tạo bài tập; mục đầu tiên là mặc định. */
+export const ASSIGNMENT_CATEGORIES = ["Bài học Kinh Thánh hằng tuần"] as const;
+export const ASSIGNMENT_DEFAULT_CATEGORY = ASSIGNMENT_CATEGORIES[0];
+
 export type AdminExamStatus = "ongoing" | "upcoming" | "ended" | "draft";
 
 export type AdminExamItem = {

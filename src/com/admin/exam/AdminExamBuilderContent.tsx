@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import { ASSIGNMENT_CATEGORIES } from "./adminExamData";
 
 type AdminExamBuilderContentProps = {
   adminId: string;
@@ -33,13 +34,7 @@ type QuestionDraft = {
   options: QuestionOption[];
 };
 
-const categories = [
-  "Thánh học căn bản",
-  "Tâm linh",
-  "Kinh Thánh",
-  "Cộng đồng",
-  "Kỹ năng",
-];
+const categories: readonly string[] = ASSIGNMENT_CATEGORIES;
 
 const questionTypeOptions: Array<{ value: QuestionType; label: string }> = [
   { value: "multiple_choice", label: "Trắc nghiệm" },

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireStaffApi } from "@/lib/admin/staff";
+import {
+  ASSIGNMENT_CATEGORIES,
+  ASSIGNMENT_DEFAULT_CATEGORY,
+} from "@/com/admin/exam/adminExamData";
 import { createClient } from "@supabase/supabase-js";
 import {
   getSupabaseUrl,
@@ -225,7 +229,10 @@ export async function POST(request: Request) {
     const isPublish = action === "publish";
     const title = cleanText(payload.title) || "Bài tập chưa đặt tên";
     const code = cleanText(payload.code) || null;
-    const category = cleanText(payload.category) || "Thánh học căn bản";
+    const requestedCategory = cleanText(payload.category);
+    const category = (ASSIGNMENT_CATEGORIES as readonly string[]).includes(requestedCategory ?? "")
+      ? (requestedCategory as string)
+      : ASSIGNMENT_DEFAULT_CATEGORY;
     const dueDate = cleanText(payload.dueDate) || null;
     const description = cleanText(payload.description) || null;
     const questions = (payload.questions ?? [])
