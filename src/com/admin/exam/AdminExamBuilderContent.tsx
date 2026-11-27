@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import type { EditableExam } from "@/lib/admin/exams";
 import { ASSIGNMENT_CATEGORIES } from "./adminExamData";
 
 type AdminExamBuilderContentProps = {
@@ -14,6 +15,8 @@ type AdminExamBuilderContentProps = {
   displayName: string;
   avatarUrl: string | null;
   viewerRole?: string | null;
+  /** Có giá trị khi đang ở trang chỉnh sửa. */
+  initialExam?: EditableExam;
 };
 
 type QuestionType = "multiple_choice" | "essay";
@@ -67,11 +70,18 @@ function AdminExamBuilderHeader({
   isSaving,
   onSaveDraft,
   onPublish,
+  editing,
 }: {
   isSaving: boolean;
   onSaveDraft: () => void;
   onPublish: () => void;
+  /** null: tạo mới. Có giá trị: đang sửa bài tập ở trạng thái đó. */
+  editing: { status: string; canSaveDraft: boolean } | null;
 }) {
+  const crumb = editing ? "Chỉnh sửa bài tập" : "Thêm bài tập mới";
+  const heading = editing ? "Chỉnh sửa bài tập" : "Tạo bài tập mới";
+  const publishLabel = !editing ? "Tiếp tục" : editing.status === "draft" ? "Đăng bài tập" : "Lưu thay đổi";
+
   return (
     <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
@@ -80,10 +90,10 @@ function AdminExamBuilderHeader({
             Quản lý bài tập
           </Link>
           <span>/</span>
-          <span className="text-[#101828]">Thêm bài tập mới</span>
+          <span className="text-[#101828]">{crumb}</span>
         </div>
         <h1 className="text-3xl font-extrabold tracking-[-0.055em] text-[#0f172a]">
-          Tạo bài tập mới
+          {heading}
         </h1>
         <p className="mt-2 text-sm font-bold text-[#667085]">
           Thiết lập thông tin cơ bản và câu hỏi cho bài kiểm tra.
@@ -91,6 +101,7 @@ function AdminExamBuilderHeader({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
+        {(!editing || editing.canSaveDraft) && (
         <button
           type="button"
           onClick={onSaveDraft}
@@ -98,15 +109,16 @@ function AdminExamBuilderHeader({
           className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#d8dde6] bg-white/82 px-5 text-sm font-extrabold text-[#1f2937] shadow-[0_14px_32px_rgba(31,48,70,0.1)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           <DashboardIcon name="document" className="h-4 w-4" />
-          Lưu nháp
+          {editing && editing.status !== "draft" ? "Chuyển về nháp" : "Lưu nháp"}
         </button>
+        )}
         <button
           type="button"
           onClick={onPublish}
           disabled={isSaving}
           className="inline-flex h-11 items-center justify-center rounded-full bg-[#0066cc] px-7 text-sm font-extrabold text-white shadow-[0_18px_42px_rgba(0,102,204,0.24)] transition hover:bg-[#0057ad] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Tiếp tục
+          {publishLabel}
         </button>
       </div>
     </header>
@@ -749,15 +761,32 @@ export default function AdminExamBuilderContent({
   displayName,
   avatarUrl,
   viewerRole,
+  initialExam,
 }: AdminExamBuilderContentProps) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [code, setCode] = useState("");
-  const [category, setCategory] = useState(categories[0]);
-  const [description, setDescription] = useState("");
-  const [questions, setQuestions] = useState<QuestionDraft[]>([
-    createQuestion("multiple_choice"),
-  ]);
+  const [title, setTitle] = useState(initialExam?.title ?? "");
+  const [code, setCode] = useState(initialExam?.code ?? "");
+  const [category, setCategory] = useState(initialExam?.category ?? categories[0]);
+  const [description, setDescription] = useState(initialExam?.description ?? "");
+  const [questions, setQuestions] = useState<QuestionDraft[]>(() =>
+    initialExam?.questions.length
+      ? initialExam.questions.map((question) => ({
+          id: createId("question"),
+          type: question.type,
+          prompt: question.prompt,
+          helperText: question.helperText,
+          scriptureReference: question.scriptureReference,
+          allowMultiple: question.allowMultiple,
+          options: question.options.map((option) => ({
+            id: createId("option"),
+            text: option.text,
+            isCorrect: option.isCorrect,
+          })),
+        }))
+      : [createQuestion("multiple_choice")],
+  );
+  // Đã có học viên làm bài: giữ nguyên câu hỏi để không làm hỏng bài nộp.
+  const questionsLocked = (initialExam?.submissionCount ?? 0) > 0;
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -778,8 +807,10 @@ export default function AdminExamBuilderContent({
     setMessage("");
 
     try {
-      const response = await fetch("/api/admin/exams", {
-        method: "POST",
+      const response = await fetch(
+        initialExam ? `/api/admin/exams/${encodeURIComponent(initialExam.id)}` : "/api/admin/exams",
+        {
+        method: initialExam ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action,
@@ -800,7 +831,8 @@ export default function AdminExamBuilderContent({
             })),
           })),
         }),
-      });
+        },
+      );
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
       };
@@ -810,9 +842,11 @@ export default function AdminExamBuilderContent({
       }
 
       setMessage(
-        action === "draft"
-          ? "Đã lưu nháp bài tập."
-          : "Đã đăng bài tập thành công.",
+        initialExam
+          ? "Đã lưu thay đổi."
+          : action === "draft"
+            ? "Đã lưu nháp bài tập."
+            : "Đã đăng bài tập thành công.",
       );
       router.push("/admin/assignment");
       router.refresh();
@@ -844,6 +878,11 @@ export default function AdminExamBuilderContent({
               isSaving={isSaving}
               onSaveDraft={() => saveExam("draft")}
               onPublish={() => saveExam("publish")}
+              editing={
+                initialExam
+                  ? { status: initialExam.status, canSaveDraft: !questionsLocked }
+                  : null
+              }
             />
 
             {(error || message) && (
@@ -879,6 +918,40 @@ export default function AdminExamBuilderContent({
               </span>
             </div>
 
+            {questionsLocked ? (
+              <div className="mt-4 grid gap-4">
+                <p className="rounded-2xl border border-[#f5d98a] bg-[#fff8e1]/80 px-5 py-4 text-sm font-bold text-[#8a6110]">
+                  Đã có {initialExam?.submissionCount} học viên làm bài này nên câu hỏi được giữ
+                  nguyên để không ảnh hưởng bài nộp và điểm. Bạn vẫn sửa được tiêu đề, mã, danh
+                  mục và mô tả. Cần đổi câu hỏi thì dùng “Nhân bản” ở danh sách bài tập.
+                </p>
+                {questions.map((question, index) => (
+                  <article
+                    key={question.id}
+                    className="liquid-glass rounded-[22px] p-5 text-sm font-bold text-[#344054]"
+                  >
+                    <h3 className="font-extrabold text-[#101828]">
+                      Câu {index + 1}: {question.prompt}
+                    </h3>
+                    {question.type === "multiple_choice" ? (
+                      <ul className="mt-3 grid gap-1.5">
+                        {question.options.map((option) => (
+                          <li
+                            key={option.id}
+                            className={option.isCorrect ? "text-[#14743a]" : "text-[#475467]"}
+                          >
+                            {option.isCorrect ? "✓ " : "• "}
+                            {option.text}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-xs text-[#667085]">Câu tự luận</p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
             <div className="mt-4 grid gap-5">
               {questions.map((question, index) => (
                 <QuestionCard
@@ -922,6 +995,7 @@ export default function AdminExamBuilderContent({
                 Thêm câu hỏi mới
               </IconTooltipButton>
             </div>
+            )}
           </div>
         </div>
       </section>

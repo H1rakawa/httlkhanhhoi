@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import Pagination from "@/com/lib/Pagination";
+import AdminExamActionMenu from "@/com/admin/exam/AdminExamActionMenu";
 import {
   adminExamStatusLabels,
   adminExamStatusOptions,
@@ -280,27 +281,6 @@ function AdminExamFilters({
   );
 }
 
-function AdminExamActionButton({ item }: { item: AdminExamItem }) {
-  return (
-    <Link
-      href={`/admin/assignment/${item.id}`}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#667085] transition hover:bg-white/70 hover:text-[#0f172a]"
-      aria-label={`Mở quản lý ${item.title}`}
-    >
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="5" r="1.8" />
-        <circle cx="12" cy="12" r="1.8" />
-        <circle cx="12" cy="19" r="1.8" />
-      </svg>
-    </Link>
-  );
-}
-
 function AdminExamTable({
   items,
   selectedIds,
@@ -310,6 +290,7 @@ function AdminExamTable({
   onToggleExam,
   onToggleAll,
   onPageChange,
+  onChanged,
 }: {
   items: AdminExamItem[];
   selectedIds: string[];
@@ -319,6 +300,7 @@ function AdminExamTable({
   onToggleExam: (examId: string) => void;
   onToggleAll: () => void;
   onPageChange: (page: number) => void;
+  onChanged: () => void;
 }) {
   const isAllSelected = items.length > 0 && selectedIds.length === items.length;
   const hasSelection = selectedIds.length > 0;
@@ -344,7 +326,7 @@ function AdminExamTable({
               <th className="px-4 py-5">Tên bài tập</th>
               <th className="w-33 px-4 py-5">Hạn nộp</th>
               <th className="w-38.75 px-4 py-5">Trạng thái</th>
-              <th className="w-27.5 px-4 py-5 text-center">Thao tác</th>
+              <th className="w-20 px-4 py-5" aria-label="Thao tác" />
             </tr>
           </thead>
           <tbody>
@@ -397,7 +379,7 @@ function AdminExamTable({
                     </span>
                   </td>
                   <td className="px-4 py-5 text-center">
-                    <AdminExamActionButton item={item} />
+                    <AdminExamActionMenu item={item} onChanged={onChanged} />
                   </td>
                 </tr>
               );
@@ -439,7 +421,7 @@ function AdminExamTable({
                     {item.description}
                   </p>
                 </div>
-                <AdminExamActionButton item={item} />
+                <AdminExamActionMenu item={item} onChanged={onChanged} />
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-extrabold text-[#526579] sm:grid-cols-3">
@@ -635,6 +617,7 @@ export default function AdminExamContent({
                 onToggleExam={handleToggleExam}
                 onToggleAll={handleToggleAllExams}
                 onPageChange={setPage}
+                onChanged={() => loadExams()}
               />
             )}
           </div>

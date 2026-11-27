@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import { requireStaffApi } from "@/lib/admin/staff";
 import {
-  ASSIGNMENT_CATEGORIES,
-  ASSIGNMENT_DEFAULT_CATEGORY,
-} from "@/com/admin/exam/adminExamData";
-import { createClient } from "@supabase/supabase-js";
-import {
-  getSupabaseUrl,
-  getSupabaseServiceRoleKey,
-} from "@/lib/supabase/config";
+  assignmentWriteError,
+  cleanText,
+  createSupabaseAdminClient,
+  formatExamCode,
+  insertQuestions,
+  normalizeCategory,
+  normalizeQuestions,
+  publishError,
+  type ExamPayload,
+} from "@/lib/admin/exams";
 
 const validStatuses = new Set(["ongoing", "upcoming", "ended", "draft"]);
 
@@ -24,41 +26,6 @@ type AssignmentRow = {
     status: "draft" | "submitted" | "graded";
   }>;
 };
-
-type ExamQuestionPayload = {
-  type?: string;
-  prompt?: string;
-  helperText?: string;
-  scriptureReference?: string;
-  answerHint?: string;
-  allowMultiple?: boolean;
-  options?: Array<{
-    text?: string;
-    isCorrect?: boolean;
-  }>;
-};
-
-type CreateExamPayload = {
-  action?: "draft" | "publish";
-  title?: string;
-  code?: string;
-  category?: string;
-  dueDate?: string;
-  description?: string;
-  questions?: ExamQuestionPayload[];
-};
-
-function createSupabaseAdminClient() {
-  const url = getSupabaseUrl();
-  const serviceRoleKey = getSupabaseServiceRoleKey();
-
-  return createClient(url, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
 
 function requireAdmin() {
   return requireStaffApi("Bạn không có quyền quản lý bài tập.");
@@ -83,7 +50,7 @@ function mapAssignment(row: AssignmentRow) {
   const participants = submissions.length;
 
   return {
-    id: `EX-${String(row.id).padStart(3, "0")}`,
+    id: formatExamCode(row.id),
     title: row.title,
     description:
       participants > 0
@@ -98,37 +65,6 @@ function mapAssignment(row: AssignmentRow) {
     participants,
     completed,
     iconTone: row.icon_tone,
-  };
-}
-
-function cleanText(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function normalizeQuestion(question: ExamQuestionPayload, index: number) {
-  const questionType =
-    question.type === "essay" ? "essay" : "multiple_choice";
-  const prompt = cleanText(question.prompt);
-  const options = (question.options ?? [])
-    .map((option, optionIndex) => ({
-      option_text: cleanText(option.text),
-      is_correct: Boolean(option.isCorrect),
-      sort_order: optionIndex + 1,
-    }))
-    .filter((option) => option.option_text);
-
-  return {
-    question_type: questionType,
-    prompt,
-    helper_text: cleanText(question.helperText) || null,
-    scripture_reference: cleanText(question.scriptureReference) || null,
-    answer_hint: cleanText(question.answerHint) || null,
-    allow_multiple:
-      questionType === "multiple_choice" ? Boolean(question.allowMultiple) : false,
-    sort_order: index + 1,
-    is_required: true,
-    points: 1,
-    options,
   };
 }
 
@@ -224,61 +160,24 @@ export async function POST(request: Request) {
     const admin = await requireAdmin();
     if ("error" in admin) return admin.error;
 
-    const payload = (await request.json().catch(() => ({}))) as CreateExamPayload;
-    const action = payload.action === "publish" ? "publish" : "draft";
-    const isPublish = action === "publish";
-    const title = cleanText(payload.title) || "Bài tập chưa đặt tên";
-    const code = cleanText(payload.code) || null;
-    const requestedCategory = cleanText(payload.category);
-    const category = (ASSIGNMENT_CATEGORIES as readonly string[]).includes(requestedCategory ?? "")
-      ? (requestedCategory as string)
-      : ASSIGNMENT_DEFAULT_CATEGORY;
-    const dueDate = cleanText(payload.dueDate) || null;
-    const description = cleanText(payload.description) || null;
-    const questions = (payload.questions ?? [])
-      .map(normalizeQuestion)
-      .filter((question) => question.prompt);
+    const payload = (await request.json().catch(() => ({}))) as ExamPayload;
+    const isPublish = payload.action === "publish";
+    const questions = normalizeQuestions(payload);
 
-    if (isPublish && !cleanText(payload.title)) {
-      return NextResponse.json(
-        { error: "Vui lòng nhập tiêu đề bài tập trước khi đăng." },
-        { status: 400 },
-      );
-    }
-
-    if (isPublish && questions.length === 0) {
-      return NextResponse.json(
-        { error: "Vui lòng thêm ít nhất một câu hỏi trước khi đăng." },
-        { status: 400 },
-      );
-    }
-
-    const invalidChoice = questions.find(
-      (question) =>
-        question.question_type === "multiple_choice" &&
-        (question.options.length < 2 ||
-          !question.options.some((option) => option.is_correct)),
-    );
-
-    if (isPublish && invalidChoice) {
-      return NextResponse.json(
-        {
-          error:
-            "Câu trắc nghiệm cần ít nhất 2 đáp án và 1 đáp án đúng trước khi đăng.",
-        },
-        { status: 400 },
-      );
+    if (isPublish) {
+      const message = publishError(cleanText(payload.title), questions);
+      if (message) return NextResponse.json({ error: message }, { status: 400 });
     }
 
     const supabaseAdmin = createSupabaseAdminClient();
     const { data: assignment, error: assignmentError } = await supabaseAdmin
       .from("assignments")
       .insert({
-        title,
-        assignment_code: code,
-        category,
-        description,
-        due_date: dueDate,
+        title: cleanText(payload.title) || "Bài tập chưa đặt tên",
+        assignment_code: cleanText(payload.code) || null,
+        category: normalizeCategory(payload.category),
+        description: cleanText(payload.description) || null,
+        due_date: cleanText(payload.dueDate) || null,
         created_by: admin.account.user.id,
         admin_status: isPublish ? "ongoing" : "draft",
         icon_tone: isPublish ? "blue" : "gold",
@@ -287,61 +186,22 @@ export async function POST(request: Request) {
       .single();
 
     if (assignmentError || !assignment) {
-      const isDuplicateCode = assignmentError?.code === "23505";
-
       return NextResponse.json(
-        {
-          error: isDuplicateCode
-            ? "Mã bài tập đã tồn tại. Vui lòng dùng mã khác."
-            : assignmentError?.message || "Không thể tạo bài tập.",
-        },
+        { error: assignmentWriteError(assignmentError, "Không thể tạo bài tập.") },
         { status: 400 },
       );
     }
 
-    for (const question of questions) {
-      const { options, ...questionRow } = question;
-      const { data: createdQuestion, error: questionError } = await supabaseAdmin
-        .from("assignment_questions")
-        .insert({
-          ...questionRow,
-          assignment_id: assignment.id,
-        })
-        .select("id")
-        .single();
-
-      if (questionError || !createdQuestion) {
-        await supabaseAdmin.from("assignments").delete().eq("id", assignment.id);
-        return NextResponse.json(
-          { error: questionError?.message || "Không thể lưu câu hỏi." },
-          { status: 400 },
-        );
-      }
-
-      if (options.length > 0) {
-        const { error: optionError } = await supabaseAdmin
-          .from("assignment_question_options")
-          .insert(
-            options.map((option) => ({
-              ...option,
-              question_id: createdQuestion.id,
-            })),
-          );
-
-        if (optionError) {
-          await supabaseAdmin.from("assignments").delete().eq("id", assignment.id);
-          return NextResponse.json(
-            { error: optionError.message || "Không thể lưu đáp án." },
-            { status: 400 },
-          );
-        }
-      }
+    const questionError = await insertQuestions(supabaseAdmin, assignment.id, questions);
+    if (questionError) {
+      await supabaseAdmin.from("assignments").delete().eq("id", assignment.id);
+      return NextResponse.json({ error: questionError }, { status: 400 });
     }
 
     return NextResponse.json(
       {
         exam: {
-          id: `EX-${String(assignment.id).padStart(3, "0")}`,
+          id: formatExamCode(assignment.id),
           title: assignment.title,
           status: assignment.admin_status,
         },
@@ -350,10 +210,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Không thể tạo bài tập.",
-      },
+      { error: error instanceof Error ? error.message : "Không thể tạo bài tập." },
       { status: 500 },
     );
   }

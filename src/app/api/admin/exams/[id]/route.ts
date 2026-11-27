@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
+import { logAdminActivity } from "@/lib/admin/prayers";
 import { requireStaffApi } from "@/lib/admin/staff";
-import { createClient } from "@supabase/supabase-js";
 import {
-  getSupabaseServiceRoleKey,
-  getSupabaseUrl,
-} from "@/lib/supabase/config";
+  assignmentWriteError,
+  cleanText,
+  countSubmissions,
+  duplicateAssignment,
+  formatExamCode,
+  insertQuestions,
+  isExamStatus,
+  normalizeCategory,
+  normalizeQuestions,
+  publishError,
+  createSupabaseAdminClient,
+  rawAssignmentId as parseAssignmentId,
+  type ExamPayload,
+} from "@/lib/admin/exams";
 
 type AdminExamDetailRouteProps = {
   params: Promise<{ id: string }>;
@@ -60,15 +71,6 @@ type ProfileRow = {
   email: string | null;
   avatar_url: string | null;
 };
-
-function createSupabaseAdminClient() {
-  return createClient(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
 
 function requireAdmin() {
   return requireStaffApi("Bạn không có quyền xem bài tập này.");
@@ -203,6 +205,7 @@ export async function GET(
         title: assignmentRow.title,
         description:
           assignmentRow.description || "Bài tập học tập và rèn luyện của cộng đồng.",
+        rawDescription: assignmentRow.description ?? "",
         code: assignmentRow.assignment_code,
         category: assignmentRow.category || "Bài tập",
         weekNumber: assignmentRow.week_number,
@@ -237,5 +240,205 @@ export async function GET(
       },
       { status: 500 },
     );
+  }
+}
+
+const STATUS_ACTION: Record<string, string> = {
+  ongoing: "publish",
+  ended: "update",
+  upcoming: "update",
+  draft: "update",
+};
+
+function errorResponse(error: unknown, fallback: string, status = 500) {
+  return NextResponse.json({ error: error instanceof Error ? error.message : fallback }, { status });
+}
+
+/**
+ * PATCH { quick: true, status }  → đổi trạng thái nhanh từ danh sách.
+ * PATCH { action, title, ... }   → lưu từ trang chỉnh sửa. Khi đã có học viên làm bài,
+ * câu hỏi được giữ nguyên để không làm hỏng bài nộp và đáp án đã chấm.
+ */
+export async function PATCH(request: Request, { params }: AdminExamDetailRouteProps) {
+  const admin = await requireAdmin();
+  if ("error" in admin) return admin.error;
+
+  const assignmentId = parseAssignmentId((await params).id);
+  if (!assignmentId) return NextResponse.json({ error: "Mã bài tập không hợp lệ." }, { status: 400 });
+
+  const body = (await request.json().catch(() => null)) as (ExamPayload & { quick?: boolean; status?: string }) | null;
+  if (!body) return NextResponse.json({ error: "Dữ liệu không hợp lệ." }, { status: 400 });
+
+  try {
+    const supabaseAdmin = createSupabaseAdminClient();
+    const { data: current } = await supabaseAdmin
+      .from("assignments")
+      .select("id,title,admin_status,assignment_questions(count)")
+      .eq("id", assignmentId)
+      .maybeSingle();
+    if (!current) return NextResponse.json({ error: "Không tìm thấy bài tập." }, { status: 404 });
+
+    const submissions = await countSubmissions(supabaseAdmin, assignmentId);
+
+    if (body.quick === true) {
+      if (!isExamStatus(body.status)) return NextResponse.json({ error: "Trạng thái không hợp lệ." }, { status: 400 });
+      const questionCount =
+        (current.assignment_questions as unknown as Array<{ count: number }> | null)?.[0]?.count ?? 0;
+      if (body.status === "ongoing" && questionCount === 0) {
+        return NextResponse.json({ error: "Bài tập chưa có câu hỏi nên chưa thể đăng." }, { status: 400 });
+      }
+      if (body.status === "draft" && submissions.total > 0) {
+        return NextResponse.json(
+          { error: "Đã có học viên làm bài nên không thể chuyển về nháp. Hãy dùng “Kết thúc” thay thế." },
+          { status: 400 },
+        );
+      }
+
+      const { error } = await supabaseAdmin
+        .from("assignments")
+        .update({
+          admin_status: body.status,
+          icon_tone: body.status === "draft" ? "gold" : body.status === "ended" ? "dark" : "blue",
+        })
+        .eq("id", assignmentId);
+      if (error) throw new Error(error.message);
+
+      await logAdminActivity(admin.accessToken, admin.userId, [
+        {
+          action: STATUS_ACTION[body.status],
+          targetTable: "assignments",
+          targetId: assignmentId,
+          metadata: { title: current.title, status: body.status },
+        },
+      ]);
+      return NextResponse.json({ exam: { id: formatExamCode(assignmentId), status: body.status } });
+    }
+
+    const lockQuestions = submissions.total > 0;
+    const isPublish = body.action === "publish";
+    const title = cleanText(body.title);
+    const questions = normalizeQuestions(body);
+
+    if (isPublish && !lockQuestions) {
+      const message = publishError(title, questions);
+      if (message) return NextResponse.json({ error: message }, { status: 400 });
+    }
+    if (isPublish && lockQuestions && !title) {
+      return NextResponse.json({ error: "Vui lòng nhập tiêu đề bài tập." }, { status: 400 });
+    }
+    if (!isPublish && lockQuestions) {
+      return NextResponse.json(
+        { error: "Đã có học viên làm bài nên không thể chuyển về nháp." },
+        { status: 400 },
+      );
+    }
+
+    // Bài đang mở / sắp mở / đã kết thúc thì giữ trạng thái khi "Lưu"; bản nháp thì đăng.
+    const nextStatus = isPublish
+      ? current.admin_status === "draft"
+        ? "ongoing"
+        : current.admin_status
+      : "draft";
+
+    const { error: updateError } = await supabaseAdmin
+      .from("assignments")
+      .update({
+        title: title || "Bài tập chưa đặt tên",
+        assignment_code: cleanText(body.code) || null,
+        category: normalizeCategory(body.category),
+        description: cleanText(body.description) || null,
+        admin_status: nextStatus,
+        icon_tone: nextStatus === "draft" ? "gold" : nextStatus === "ended" ? "dark" : "blue",
+      })
+      .eq("id", assignmentId);
+    if (updateError) {
+      return NextResponse.json(
+        { error: assignmentWriteError(updateError, "Không thể lưu bài tập.") },
+        { status: 400 },
+      );
+    }
+
+    if (!lockQuestions) {
+      const { error: deleteError } = await supabaseAdmin
+        .from("assignment_questions")
+        .delete()
+        .eq("assignment_id", assignmentId);
+      if (deleteError) throw new Error(deleteError.message);
+      const questionError = await insertQuestions(supabaseAdmin, Number(assignmentId), questions);
+      if (questionError) return NextResponse.json({ error: questionError }, { status: 400 });
+    }
+
+    await logAdminActivity(admin.accessToken, admin.userId, [
+      { action: "update", targetTable: "assignments", targetId: assignmentId, metadata: { title } },
+    ]);
+    return NextResponse.json({
+      exam: { id: formatExamCode(assignmentId), status: nextStatus },
+      questionsLocked: lockQuestions,
+    });
+  } catch (error) {
+    return errorResponse(error, "Không thể lưu bài tập.");
+  }
+}
+
+/** Xoá bài tập. Đã có học viên nộp bài thì chặn để không mất điểm, gợi ý "Kết thúc". */
+export async function DELETE(_request: Request, { params }: AdminExamDetailRouteProps) {
+  const admin = await requireAdmin();
+  if ("error" in admin) return admin.error;
+
+  const assignmentId = parseAssignmentId((await params).id);
+  if (!assignmentId) return NextResponse.json({ error: "Mã bài tập không hợp lệ." }, { status: 400 });
+
+  try {
+    const supabaseAdmin = createSupabaseAdminClient();
+    const submissions = await countSubmissions(supabaseAdmin, assignmentId);
+    if (submissions.finished > 0) {
+      return NextResponse.json(
+        {
+          error: `Đã có ${submissions.finished} học viên nộp bài nên không thể xoá. Hãy dùng “Kết thúc” để đóng bài tập.`,
+        },
+        { status: 409 },
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("assignments")
+      .delete()
+      .eq("id", assignmentId)
+      .select("id,title");
+    if (error) throw new Error(error.message);
+    if (!data?.length) return NextResponse.json({ error: "Không tìm thấy bài tập." }, { status: 404 });
+
+    await logAdminActivity(admin.accessToken, admin.userId, [
+      { action: "delete", targetTable: "assignments", targetId: assignmentId, metadata: { title: data[0].title } },
+    ]);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return errorResponse(error, "Không thể xoá bài tập.");
+  }
+}
+
+/** POST { action: "duplicate" }: tạo bản nháp sao chép thông tin và câu hỏi. */
+export async function POST(request: Request, { params }: AdminExamDetailRouteProps) {
+  const admin = await requireAdmin();
+  if ("error" in admin) return admin.error;
+
+  const assignmentId = parseAssignmentId((await params).id);
+  if (!assignmentId) return NextResponse.json({ error: "Mã bài tập không hợp lệ." }, { status: 400 });
+  const body = (await request.json().catch(() => null)) as { action?: string } | null;
+  if (body?.action !== "duplicate") return NextResponse.json({ error: "Thao tác không hợp lệ." }, { status: 400 });
+
+  try {
+    const copy = await duplicateAssignment(createSupabaseAdminClient(), assignmentId, admin.userId);
+    if (!copy) return NextResponse.json({ error: "Không tìm thấy bài tập." }, { status: 404 });
+
+    await logAdminActivity(admin.accessToken, admin.userId, [
+      { action: "create", targetTable: "assignments", targetId: String(copy.id), metadata: { title: copy.title } },
+    ]);
+    return NextResponse.json(
+      { exam: { id: formatExamCode(copy.id), title: copy.title, status: copy.admin_status } },
+      { status: 201 },
+    );
+  } catch (error) {
+    return errorResponse(error, "Không thể nhân bản bài tập.");
   }
 }
