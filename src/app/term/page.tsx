@@ -29,7 +29,7 @@ const sections = [
     items: [
       "Bạn có thể đăng ký bằng email và mật khẩu, hoặc đăng nhập bằng Google hay Facebook. Thông tin cung cấp cần chính xác và là của chính bạn.",
       "Bạn chịu trách nhiệm giữ bí mật mật khẩu và mọi hoạt động diễn ra dưới tài khoản của mình. Hãy báo ngay cho chúng tôi nếu nghi ngờ tài khoản bị truy cập trái phép.",
-      "Vai trò của tài khoản (thành viên, giáo viên, quản trị viên) do Hội Thánh cấp. Bạn không được tìm cách tự nâng quyền hoặc truy cập khu vực không dành cho mình.",
+      "Vai trò của tài khoản (tín hữu, chấp sự, nhân sự, quản nhiệm, quản trị viên) do Hội Thánh cấp. Bạn không được tìm cách tự nâng quyền hoặc truy cập khu vực không dành cho mình.",
       "Hội Thánh có thể tạm khoá tài khoản vi phạm các điều khoản này. Bạn có thể yêu cầu xoá tài khoản bất cứ lúc nào theo hướng dẫn trong Chính sách bảo mật.",
     ],
   },

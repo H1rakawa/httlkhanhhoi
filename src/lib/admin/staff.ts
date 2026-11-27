@@ -13,7 +13,7 @@ export function isAdminProfile(
 }
 
 type StaffOptions = {
-  /** Chỉ quản trị viên (vd: quản lý thành viên); mặc định cho cả giáo viên. */
+  /** Chỉ quản trị viên (vd: quản lý thành viên); mặc định cho cả ban mục vụ. */
   adminOnly?: boolean;
 };
 
@@ -25,7 +25,7 @@ function hasAccess(
 }
 
 /**
- * Trang /admin/*: chỉ ban mục vụ (admin hoặc giáo viên đang hoạt động, trùng RLS is_staff()).
+ * Trang /admin/*: chỉ ban mục vụ (quản trị viên, quản nhiệm, nhân sự đang hoạt động; trùng RLS is_staff()).
  * Tài khoản bị khoá hoặc không đủ quyền được đưa về /dashboard.
  */
 export async function requireStaffPage(options: StaffOptions = {}) {

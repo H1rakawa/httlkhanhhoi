@@ -417,3 +417,77 @@ export function ConfirmDeleteButton({
     </button>
   );
 }
+
+/** Hộp xác nhận trước khi thực hiện thao tác (đổi vai trò, khoá, xoá…). */
+export function AdminConfirmDialog({
+  title,
+  children,
+  confirmLabel,
+  tone = "primary",
+  busy = false,
+  onConfirm,
+  onClose,
+}: {
+  title: string;
+  children: React.ReactNode;
+  confirmLabel: string;
+  tone?: "primary" | "danger";
+  busy?: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const confirmRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    confirmRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !busy) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [busy, onClose]);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100001] flex items-center justify-center bg-[#0f172a]/30 px-4 backdrop-blur-[2px]"
+      onClick={() => !busy && onClose()}
+    >
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="admin-confirm-title"
+        onClick={(event) => event.stopPropagation()}
+        className="w-full max-w-md rounded-[24px] border border-white/80 bg-white p-6 shadow-[0_34px_100px_rgba(15,23,42,0.28)]"
+      >
+        <h2 id="admin-confirm-title" className="text-lg font-extrabold text-[#0f172a]">
+          {title}
+        </h2>
+        <div className="mt-3 text-sm font-semibold leading-6 text-[#475467]">{children}</div>
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
+          <button type="button" onClick={onClose} disabled={busy} className={secondaryButtonClassName}>
+            Huỷ
+          </button>
+          <button
+            ref={confirmRef}
+            type="button"
+            onClick={onConfirm}
+            disabled={busy}
+            className={
+              tone === "danger"
+                ? "inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#d92d20] px-6 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(217,45,32,0.24)] transition hover:bg-[#b42318] disabled:cursor-not-allowed disabled:opacity-60"
+                : primaryButtonClassName
+            }
+          >
+            {busy ? "Đang xử lý…" : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}

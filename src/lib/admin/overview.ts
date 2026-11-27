@@ -77,6 +77,9 @@ const ACTION_LABELS: Record<string, string> = {
   create: "đã tạo",
   publish: "đã đăng",
   grade: "đã chấm",
+  change_role: "đã đổi vai trò",
+  block: "đã khoá tài khoản",
+  unblock: "đã mở khoá tài khoản",
 };
 
 const TABLE_LABELS: Record<string, { label: string; href: string | null }> = {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireStaffApi } from "@/lib/admin/staff";
+import { logAdminActivity } from "@/lib/admin/prayers";
+import { MEMBER_ROLES } from "@/lib/roles";
 import { createClient } from "@supabase/supabase-js";
 import {
   getSupabaseConfig,
@@ -7,9 +9,9 @@ import {
   getSupabaseServiceRoleKey,
 } from "@/lib/supabase/config";
 
-const validRoles = new Set(["member", "teacher", "admin"]);
+const validRoles = new Set<string>(MEMBER_ROLES);
 const profileSelectColumns =
-  "id,name,email,phone,avatar_url,role,created_at,updated_at";
+  "id,name,email,phone,avatar_url,role,status,created_at,updated_at";
 
 type MemberPatchBody = {
   ids?: string[];
@@ -317,7 +319,7 @@ export async function PATCH(request: Request) {
 
     if (
       ids.includes(admin.account.user.id) &&
-      (updates.role === "member" || updates.role === "teacher")
+      updates.role !== "admin"
     ) {
       return NextResponse.json(
         { error: "Không thể tự hạ quyền tài khoản quản trị hiện tại." },
@@ -339,6 +341,17 @@ export async function PATCH(request: Request) {
         { status: 400 },
       );
     }
+
+    await logAdminActivity(
+      admin.accessToken,
+      admin.account.user.id,
+      ids.map((id) => ({
+        action: "change_role",
+        targetTable: "profiles",
+        targetId: id,
+        metadata: { role: updates.role },
+      })),
+    );
 
     return NextResponse.json({ members: data });
   } catch (error) {

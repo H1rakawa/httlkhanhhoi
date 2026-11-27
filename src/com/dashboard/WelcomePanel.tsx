@@ -1,3 +1,5 @@
+import { roleLabel } from "@/lib/roles";
+
 export default function WelcomePanel({
   displayName,
   email,
@@ -11,8 +13,7 @@ export default function WelcomePanel({
   status: string;
   role: string;
 }) {
-  const roleLabel =
-    role === "admin" ? "Quản trị viên" : role === "teacher" ? "Giáo viên" : "Thành viên";
+  const roleText = roleLabel(role);
   const today = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
     day: "2-digit",
@@ -44,7 +45,7 @@ export default function WelcomePanel({
               Chào mừng trở lại, {displayName}
             </h1>
             <p className="mt-3 inline-flex rounded-full border border-[#cfe0f7] bg-[#eef5ff] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[#0066cc]">
-              {roleLabel}
+              {roleText}
             </p>
             <p className="mt-3 text-sm text-[#6e6e73]">
               {email}

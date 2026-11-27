@@ -3,16 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Pagination from "@/com/lib/Pagination";
+import { type AdminMember } from "@/com/admin/member/memberData";
 import {
-  roleLabels,
-  type AdminMember,
-} from "@/com/admin/member/memberData";
+  MemberActionMenu,
+  MemberRoleSelect,
+  type MemberRowAction,
+} from "@/com/admin/member/AdminMemberMenus";
+import type { MemberRole } from "@/lib/roles";
 
-const roleClassName: Record<AdminMember["role"], string> = {
-  admin: "bg-[#e8ddff] text-[#7c4dff]",
-  member: "bg-[#eef0f2] text-[#626b75]",
-  teacher: "bg-[#dff3ff] text-[#0d7490]",
-};
+function BlockedPill() {
+  return (
+    <span className="ml-2 inline-flex shrink-0 rounded-full bg-[#fee4e2] px-2 py-0.5 text-[10px] font-extrabold text-[#b42318]">
+      Đã khoá
+    </span>
+  );
+}
 
 type TooltipState = {
   text: string;
@@ -136,153 +141,22 @@ function TruncatedInfoButton({
   );
 }
 
-function ActionMenu({
-  member,
-  isOpen,
-  onToggle,
-  onChangeRole,
-  onDelete,
-}: {
-  member: AdminMember;
-  isOpen: boolean;
-  onToggle: () => void;
-  onChangeRole: () => void;
-  onDelete: () => void;
-}) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const syncPosition = () => {
-      const rect = buttonRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const menuWidth = 176;
-      const gap = 8;
-      setMenuPosition({
-        top: rect.bottom + gap,
-        left: Math.min(
-          Math.max(12, rect.right - menuWidth),
-          window.innerWidth - menuWidth - 12,
-        ),
-      });
-    };
-
-    syncPosition();
-    window.addEventListener("resize", syncPosition);
-    window.addEventListener("scroll", syncPosition, true);
-
-    return () => {
-      window.removeEventListener("resize", syncPosition);
-      window.removeEventListener("scroll", syncPosition, true);
-    };
-  }, [isOpen]);
-
-  return (
-    <div className="relative flex justify-center">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={onToggle}
-        className={[
-          "flex h-9 w-9 items-center justify-center rounded-full text-[#6b7280] transition-colors",
-          isOpen
-            ? "bg-white text-[#111827]"
-            : "hover:bg-white/72 hover:text-[#111827]",
-        ].join(" ")}
-        aria-label={`Mở thao tác cho ${member.name}`}
-        aria-expanded={isOpen}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="h-5 w-5"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="5" r="1.8" />
-          <circle cx="12" cy="12" r="1.8" />
-          <circle cx="12" cy="19" r="1.8" />
-        </svg>
-      </button>
-
-      {isOpen &&
-        createPortal(
-          <div
-            className="fixed z-100 w-44 overflow-hidden rounded-4xl border border-white/80 bg-white/92 p-2 text-sm font-extrabold text-[#303943] shadow-[0_18px_42px_rgba(31,48,70,0.18)] backdrop-blur-xl"
-            style={{
-              top: menuPosition.top,
-              left: menuPosition.left,
-            }}
-          >
-            <button
-              type="button"
-              onClick={onChangeRole}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#f1f5f9]"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-                aria-hidden="true"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-              </svg>
-              Đổi vai trò
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[#ef4444] hover:bg-[#fff1f0]"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-                aria-hidden="true"
-              >
-                <path d="M4 7h16" />
-                <path d="M10 11v6M14 11v6" />
-                <path d="M6 7l1 14h10l1-14" />
-                <path d="M9 7V4h6v3" />
-              </svg>
-              Xóa
-            </button>
-          </div>,
-          document.body,
-        )}
-    </div>
-  );
-}
-
 function MemberMobileCard({
   member,
+  isSelf,
   isSelected,
-  isActionOpen,
   onToggleMember,
   onOpenDetail,
-  onToggleAction,
-  onChangeRole,
-  onDelete,
+  onPickRole,
+  onAction,
 }: {
   member: AdminMember;
+  isSelf: boolean;
   isSelected: boolean;
-  isActionOpen: boolean;
   onToggleMember: () => void;
   onOpenDetail: () => void;
-  onToggleAction: () => void;
-  onChangeRole: () => void;
-  onDelete: () => void;
+  onPickRole: (role: MemberRole) => void;
+  onAction: (action: MemberRowAction) => void;
 }) {
   return (
     <article
@@ -309,56 +183,53 @@ function MemberMobileCard({
           onClick={onOpenDetail}
           className="min-w-0 flex-1 text-left"
         >
-          <span className="block truncate text-base font-extrabold text-[#17202a]">
-            {member.name}
+          <span className="flex min-w-0 items-center text-base font-extrabold text-[#17202a]">
+            <span className="truncate">{member.name}</span>
+            {member.status === "blocked" && <BlockedPill />}
           </span>
           <span className="mt-1 block truncate text-sm font-bold text-[#65717c]">
             {member.email}
           </span>
         </button>
 
-        <ActionMenu
+        <MemberActionMenu
           member={member}
-          isOpen={isActionOpen}
-          onToggle={onToggleAction}
-          onChangeRole={onChangeRole}
-          onDelete={onDelete}
+          isSelf={isSelf}
+          onView={onOpenDetail}
+          onAction={onAction}
         />
       </div>
 
-      <button
-        type="button"
-        onClick={onOpenDetail}
-        className="mt-4 grid w-full grid-cols-2 gap-2 text-left text-xs font-extrabold text-[#4c5662]"
-      >
-        <span className="rounded-2xl bg-white/58 px-3 py-2">
+      <div className="mt-4 grid w-full grid-cols-2 gap-2 text-left text-xs font-extrabold text-[#4c5662]">
+        <div className="rounded-2xl bg-white/58 px-3 py-2">
           Vai trò
-          <span
-            className={[
-              "mt-1 block w-fit rounded-full px-2.5 py-1",
-              roleClassName[member.role],
-            ].join(" ")}
-          >
-            {roleLabels[member.role]}
-          </span>
-        </span>
-        <span className="rounded-2xl bg-white/58 px-3 py-2">
+          <div className="mt-1">
+            <MemberRoleSelect member={member} isSelf={isSelf} onPick={onPickRole} />
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenDetail}
+          className="rounded-2xl bg-white/58 px-3 py-2 text-left"
+        >
           Ngày tham gia
           <span className="mt-1 block text-[#65717c]">{member.joinedAt}</span>
-        </span>
-      </button>
+        </button>
+      </div>
     </article>
   );
 }
 
 function MemberDetailModal({
   member,
+  isSelf,
   onClose,
-  onEdit,
+  onPickRole,
 }: {
   member: AdminMember;
+  isSelf: boolean;
   onClose: () => void;
-  onEdit: () => void;
+  onPickRole: (role: MemberRole) => void;
 }) {
   const initial = member.name.charAt(0).toUpperCase();
 
@@ -478,55 +349,16 @@ function MemberDetailModal({
             </div>
           </dl>
 
-          <section className="mt-8 rounded-[22px] border-l-4 border-[#a78bfa] bg-white/42 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
-              Nhóm đang tham gia
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {[roleLabels[member.role], "Hội đồng lãnh đạo", "+2 khác"].map(
-                (group) => (
-                  <span
-                    key={group}
-                    className="rounded-full border border-[#dfe5ee] bg-white/72 px-3 py-1.5 text-xs font-bold text-[#2f3740]"
-                  >
-                    {group}
-                  </span>
-                ),
-              )}
+          <div className="mt-9 flex flex-wrap items-center justify-between gap-3 border-t border-[#dfe6ef]/80 pt-5">
+            <div className="flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+              Vai trò
+              <MemberRoleSelect member={member} isSelf={isSelf} onPick={onPickRole} />
             </div>
-          </section>
-
-          <section className="mt-8">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
-              Tiểu sử tâm linh
-            </p>
-            <p className="mt-3 text-sm font-semibold leading-7 text-[#39434d]">
-              {member.name} là một thành viên trong cộng đồng, đang đồng hành
-              trong các hoạt động học tập, cầu thay và phục vụ của hội thánh.
-            </p>
-          </section>
-
-          <div className="mt-9 flex items-center justify-end border-t border-[#dfe6ef]/80 pt-5">
-            <button
-              type="button"
-              onClick={onEdit}
-              className="flex items-center gap-2 rounded-[14px] bg-[#111614] px-6 py-3 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(17,22,20,0.22)]"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-                aria-hidden="true"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-              </svg>
-              Chỉnh sửa
-            </button>
+            {member.status === "blocked" && (
+              <span className="rounded-full bg-[#fee4e2] px-3 py-1.5 text-xs font-extrabold text-[#b42318]">
+                Tài khoản đang bị khoá
+              </span>
+            )}
           </div>
         </div>
       </article>
@@ -537,28 +369,29 @@ function MemberDetailModal({
 
 export default function AdminMemberTable({
   members,
+  currentUserId,
   selectedIds,
   onToggleMember,
   onToggleAll,
-  onChangeRole,
-  onDeleteMember,
+  onPickRole,
+  onAction,
   page,
   pageSize,
   total,
   onPageChange,
 }: {
   members: AdminMember[];
+  currentUserId: string;
   selectedIds: string[];
   onToggleMember: (memberId: string) => void;
   onToggleAll: () => void;
-  onChangeRole: (memberIds: string[]) => void;
-  onDeleteMember: (memberIds: string[]) => void;
+  onPickRole: (members: AdminMember[], role: MemberRole) => void;
+  onAction: (member: AdminMember, action: MemberRowAction) => void;
   page: number;
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
 }) {
-  const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [activeMember, setActiveMember] = useState<AdminMember | null>(null);
   const isAllSelected =
     members.length > 0 && selectedIds.length === members.length;
@@ -585,23 +418,12 @@ export default function AdminMemberTable({
             <MemberMobileCard
               key={member.id}
               member={member}
+              isSelf={member.id === currentUserId}
               isSelected={isSelected}
-              isActionOpen={openActionId === member.id}
               onToggleMember={() => onToggleMember(member.id)}
               onOpenDetail={() => setActiveMember(member)}
-              onToggleAction={() =>
-                setOpenActionId((currentId) =>
-                  currentId === member.id ? null : member.id,
-                )
-              }
-              onChangeRole={() => {
-                setOpenActionId(null);
-                onChangeRole([member.id]);
-              }}
-              onDelete={() => {
-                setOpenActionId(null);
-                onDeleteMember([member.id]);
-              }}
+              onPickRole={(role) => onPickRole([member], role)}
+              onAction={(action) => onAction(member, action)}
             />
           );
         })}
@@ -623,7 +445,7 @@ export default function AdminMemberTable({
               <th className="w-[31%] px-3 py-5">Email</th>
               <th className="w-[17%] px-3 py-5">Vai trò</th>
               <th className="w-[18%] px-3 py-5">Ngày tham gia</th>
-              <th className="w-18 px-3 py-5 text-center">Thao tác</th>
+              <th className="w-18 px-3 py-5" aria-label="Thao tác" />
             </tr>
           </thead>
           <tbody>
@@ -650,10 +472,15 @@ export default function AdminMemberTable({
                     />
                   </td>
                   <td className="px-3 py-5">
-                    <TruncatedInfoButton
-                      text={member.name}
-                      onClick={() => setActiveMember(member)}
-                    />
+                    <div className="flex min-w-0 items-center">
+                      <div className="min-w-0 flex-1">
+                        <TruncatedInfoButton
+                          text={member.name}
+                          onClick={() => setActiveMember(member)}
+                        />
+                      </div>
+                      {member.status === "blocked" && <BlockedPill />}
+                    </div>
                   </td>
                   <td className="px-3 py-5 text-[#65717c]">
                     <TruncatedInfoButton
@@ -663,16 +490,11 @@ export default function AdminMemberTable({
                     />
                   </td>
                   <td className="px-3 py-5">
-                    <button
-                      type="button"
-                      onClick={() => setActiveMember(member)}
-                      className={[
-                        "inline-flex max-w-full justify-center rounded-full px-3 py-2 text-xs font-extrabold",
-                        roleClassName[member.role],
-                      ].join(" ")}
-                    >
-                      {roleLabels[member.role]}
-                    </button>
+                    <MemberRoleSelect
+                      member={member}
+                      isSelf={member.id === currentUserId}
+                      onPick={(role) => onPickRole([member], role)}
+                    />
                   </td>
                   <td className="px-3 py-5 text-[#65717c]">
                     <button
@@ -683,23 +505,12 @@ export default function AdminMemberTable({
                       {member.joinedAt}
                     </button>
                   </td>
-                  <td className="w-18 px-3 py-5">
-                    <ActionMenu
+                  <td className="w-18 px-3 py-5 text-center">
+                    <MemberActionMenu
                       member={member}
-                      isOpen={openActionId === member.id}
-                      onToggle={() =>
-                        setOpenActionId((currentId) =>
-                          currentId === member.id ? null : member.id,
-                        )
-                      }
-                      onChangeRole={() => {
-                        setOpenActionId(null);
-                        onChangeRole([member.id]);
-                      }}
-                      onDelete={() => {
-                        setOpenActionId(null);
-                        onDeleteMember([member.id]);
-                      }}
+                      isSelf={member.id === currentUserId}
+                      onView={() => setActiveMember(member)}
+                      onAction={(action) => onAction(member, action)}
                     />
                   </td>
                 </tr>
@@ -723,12 +534,10 @@ export default function AdminMemberTable({
       </div>
       {activeMember && (
         <MemberDetailModal
-          member={activeMember}
+          member={members.find((member) => member.id === activeMember.id) ?? activeMember}
+          isSelf={activeMember.id === currentUserId}
           onClose={() => setActiveMember(null)}
-          onEdit={() => {
-            setActiveMember(null);
-            onChangeRole([activeMember.id]);
-          }}
+          onPickRole={(role) => onPickRole([activeMember], role)}
         />
       )}
     </section>

@@ -1,4 +1,7 @@
-export type MemberRole = "member" | "teacher" | "admin";
+import { ROLE_LABELS, type MemberRole } from "@/lib/roles";
+
+export type { MemberRole };
+export type MemberStatus = "active" | "inactive" | "blocked";
 
 export type AdminMember = {
   id: string;
@@ -6,6 +9,7 @@ export type AdminMember = {
   email: string;
   phone: string | null;
   role: MemberRole;
+  status: MemberStatus;
   joinedAt: string;
   selected?: boolean;
   avatar: string | null;
@@ -18,6 +22,7 @@ export type AdminMemberApiProfile = {
   phone: string | null;
   avatar_url: string | null;
   role: MemberRole;
+  status: MemberStatus;
   created_at: string;
   updated_at: string;
 };
@@ -29,11 +34,7 @@ export type AdminMembersResponse = {
   total: number;
 };
 
-export const roleLabels: Record<MemberRole, string> = {
-  admin: "Quản trị viên",
-  teacher: "Giáo viên",
-  member: "Thành viên",
-};
+export const roleLabels = ROLE_LABELS;
 
 export function formatMemberDate(value: string) {
   return new Intl.DateTimeFormat("vi-VN", {
@@ -52,6 +53,7 @@ export function mapProfileToAdminMember(
     email: profile.email,
     phone: profile.phone,
     role: profile.role,
+    status: profile.status ?? "active",
     joinedAt: formatMemberDate(profile.created_at),
     avatar: profile.avatar_url,
   };

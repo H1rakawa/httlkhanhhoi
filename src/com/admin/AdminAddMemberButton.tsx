@@ -4,12 +4,12 @@ import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, toast } from "@heroui/react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import { MEMBER_ROLES, ROLE_LABELS } from "@/lib/roles";
 
-const ROLE_OPTIONS = [
-  { value: "member", label: "Tín hữu" },
-  { value: "teacher", label: "Giáo viên" },
-  { value: "admin", label: "Quản trị viên" },
-];
+const ROLE_OPTIONS = [...MEMBER_ROLES].reverse().map((role) => ({
+  value: role,
+  label: ROLE_LABELS[role],
+}));
 
 const MINISTRY_OPTIONS = [
   "Ban Truyền giảng",

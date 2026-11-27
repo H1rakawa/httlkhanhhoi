@@ -1,4 +1,9 @@
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import { BulkRoleButton } from "@/com/admin/member/AdminMemberMenus";
+import type { MemberRole } from "@/lib/roles";
+
+const bulkActionClassName =
+  "flex h-10 shrink-0 items-center gap-2 rounded-full px-3 text-xs font-extrabold transition-colors sm:h-11 sm:px-4 sm:text-sm";
 
 function BulkAction({
   label,
@@ -16,7 +21,7 @@ function BulkAction({
       type="button"
       onClick={onClick}
       className={[
-        "flex h-10 shrink-0 items-center gap-2 rounded-full px-3 text-xs font-extrabold transition-colors sm:h-11 sm:px-4 sm:text-sm",
+        bulkActionClassName,
         danger
           ? "text-[#ef4444] hover:bg-[#fff1f0]"
           : "text-[#3a424b] hover:bg-white/58",
@@ -30,11 +35,13 @@ function BulkAction({
 
 export default function AdminMemberBulkBar({
   selectedCount,
-  onChangeRole,
+  includesSelf,
+  onPickRole,
   onDelete,
 }: {
   selectedCount: number;
-  onChangeRole: () => void;
+  includesSelf: boolean;
+  onPickRole: (role: MemberRole) => void;
   onDelete: () => void;
 }) {
   if (selectedCount <= 0) return null;
@@ -52,9 +59,14 @@ export default function AdminMemberBulkBar({
           </span>
         </div>
         <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-1">
-          <BulkAction label="Đổi vai trò" onClick={onChangeRole}>
+          <BulkRoleButton
+            includesSelf={includesSelf}
+            onPick={onPickRole}
+            className={`${bulkActionClassName} text-[#3a424b] hover:bg-white/58`}
+          >
             <DashboardIcon name="community" className="h-4 w-4" />
-          </BulkAction>
+            Đổi vai trò
+          </BulkRoleButton>
           <BulkAction label="Xóa vĩnh viễn" danger onClick={onDelete}>
             <svg
               viewBox="0 0 24 24"

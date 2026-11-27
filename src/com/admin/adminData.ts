@@ -37,7 +37,7 @@ export const adminSidebarItems: Array<{
   href: string;
   label: string;
   icon: string;
-  /** Chỉ quản trị viên thấy; giáo viên bị ẩn. */
+  /** Chỉ quản trị viên thấy; quản nhiệm / nhân sự bị ẩn. */
   adminOnly?: boolean;
 }> = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },

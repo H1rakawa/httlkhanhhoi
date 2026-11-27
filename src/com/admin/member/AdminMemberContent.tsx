@@ -1,11 +1,16 @@
 "use client";
 
+import { toast } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import AdminMemberBulkBar from "@/com/admin/member/AdminMemberBulkBar";
 import AdminMemberFilters from "@/com/admin/member/AdminMemberFilters";
 import AdminMemberHeader from "@/com/admin/member/AdminMemberHeader";
 import AdminMemberTable from "@/com/admin/member/AdminMemberTable";
+import type { MemberRowAction } from "@/com/admin/member/AdminMemberMenus";
+import { AdminConfirmDialog } from "@/com/admin/ui/AdminUi";
+import { adminFetch } from "@/com/admin/ui/adminClient";
+import { isStaffRole, ROLE_LABELS } from "@/lib/roles";
 import {
   mapProfileToAdminMember,
   type AdminMember,
@@ -21,6 +26,111 @@ type AdminMemberContentProps = {
 };
 
 const PAGE_SIZE = 12;
+
+type PendingAction =
+  | { kind: "role"; members: AdminMember[]; role: MemberRole }
+  | { kind: "delete"; members: AdminMember[] }
+  | { kind: Exclude<MemberRowAction, "delete">; member: AdminMember };
+
+function describeTargets(members: AdminMember[]) {
+  return members.length === 1 ? members[0].name : `${members.length} thành viên`;
+}
+
+/** Nội dung hộp xác nhận cho từng loại thao tác. */
+function confirmCopy(action: PendingAction) {
+  switch (action.kind) {
+    case "role": {
+      const next = ROLE_LABELS[action.role];
+      const single = action.members.length === 1 ? action.members[0] : null;
+      const gainsAdmin = isStaffRole(action.role) && action.members.some((member) => !isStaffRole(member.role));
+      const losesAdmin = !isStaffRole(action.role) && action.members.some((member) => isStaffRole(member.role));
+      return {
+        title: "Xác nhận đổi vai trò",
+        confirmLabel: `Đổi thành ${next}`,
+        tone: "primary" as const,
+        body: (
+          <>
+            <p>
+              {single ? (
+                <>
+                  Đổi vai trò của <strong className="text-[#0f172a]">{single.name}</strong> từ{" "}
+                  <strong className="text-[#0f172a]">{ROLE_LABELS[single.role]}</strong> thành{" "}
+                  <strong className="text-[#0f172a]">{next}</strong>?
+                </>
+              ) : (
+                <>
+                  Đổi vai trò của <strong className="text-[#0f172a]">{action.members.length} thành viên</strong> thành{" "}
+                  <strong className="text-[#0f172a]">{next}</strong>?
+                </>
+              )}
+            </p>
+            {action.role === "admin" && (
+              <p className="mt-3 rounded-[14px] bg-[#fff6e5] px-3.5 py-2.5 text-[#93370d]">
+                Quản trị viên có toàn quyền, kể cả đổi vai trò và xoá thành viên khác.
+              </p>
+            )}
+            {action.role !== "admin" && gainsAdmin && (
+              <p className="mt-3 rounded-[14px] bg-[#eef6ff] px-3.5 py-2.5 text-[#1d4f91]">
+                Vai trò này được vào trang quản trị (trừ quản lý thành viên).
+              </p>
+            )}
+            {losesAdmin && (
+              <p className="mt-3 rounded-[14px] bg-[#fff6e5] px-3.5 py-2.5 text-[#93370d]">
+                Người này sẽ không còn vào được trang quản trị.
+              </p>
+            )}
+          </>
+        ),
+      };
+    }
+    case "delete":
+      return {
+        title: "Xoá thành viên",
+        confirmLabel: "Xoá vĩnh viễn",
+        tone: "danger" as const,
+        body: (
+          <p>
+            Xoá vĩnh viễn <strong className="text-[#0f172a]">{describeTargets(action.members)}</strong> cùng tài khoản
+            đăng nhập? Thao tác này không hoàn tác được.
+          </p>
+        ),
+      };
+    case "block":
+      return {
+        title: "Khoá tài khoản",
+        confirmLabel: "Khoá tài khoản",
+        tone: "danger" as const,
+        body: (
+          <p>
+            <strong className="text-[#0f172a]">{action.member.name}</strong> sẽ không đăng nhập được cho tới khi được mở
+            khoá. Dữ liệu của người này vẫn được giữ nguyên.
+          </p>
+        ),
+      };
+    case "unblock":
+      return {
+        title: "Mở khoá tài khoản",
+        confirmLabel: "Mở khoá",
+        tone: "primary" as const,
+        body: (
+          <p>
+            Cho phép <strong className="text-[#0f172a]">{action.member.name}</strong> đăng nhập lại?
+          </p>
+        ),
+      };
+    case "reset-password":
+      return {
+        title: "Gửi email đặt lại mật khẩu",
+        confirmLabel: "Gửi email",
+        tone: "primary" as const,
+        body: (
+          <p>
+            Gửi liên kết đặt lại mật khẩu tới <strong className="text-[#0f172a]">{action.member.email}</strong>?
+          </p>
+        ),
+      };
+  }
+}
 
 export default function AdminMemberContent({
   adminId,
@@ -107,62 +217,66 @@ export default function AdminMemberContent({
     );
   };
 
-  const patchMembers = async (
-    ids: string[],
-    payload: { role?: MemberRole },
-  ) => {
-    if (!ids.length) return;
+  const [pending, setPending] = useState<PendingAction | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const closePending = useCallback(() => setPending(null), []);
 
-    const response = await fetch("/api/admin/members", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, ...payload }),
-    });
-    const data = (await response.json().catch(() => ({}))) as { error?: string };
-    if (!response.ok) {
-      setError(data.error || "Không thể cập nhật thành viên.");
+  const requestRole = (targets: AdminMember[], nextRole: MemberRole) => {
+    const changing = targets.filter((member) => member.role !== nextRole);
+    if (!changing.length) {
+      toast.info(`Đã là ${ROLE_LABELS[nextRole]}`, { timeout: 2500 });
       return;
     }
-    await loadMembers();
+    setPending({ kind: "role", members: changing, role: nextRole });
   };
 
-  const deleteMembers = async (ids: string[]) => {
-    if (!ids.length) return;
+  const requestAction = (member: AdminMember, action: MemberRowAction) => {
+    setPending(action === "delete" ? { kind: "delete", members: [member] } : { kind: action, member });
+  };
 
-    const confirmed = window.confirm(
-      ids.length === 1
-        ? "Bạn chắc chắn muốn xóa vĩnh viễn thành viên này khỏi database?"
-        : `Bạn chắc chắn muốn xóa vĩnh viễn ${ids.length} thành viên khỏi database?`,
-    );
-    if (!confirmed) return;
-
-    const response = await fetch("/api/admin/members", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    const data = (await response.json().catch(() => ({}))) as { error?: string };
-    if (!response.ok) {
-      setError(data.error || "Không thể xóa thành viên.");
-      return;
+  const runPending = async () => {
+    if (!pending) return;
+    setIsRunning(true);
+    try {
+      let message: string;
+      if (pending.kind === "role") {
+        await adminFetch("/api/admin/members", {
+          method: "PATCH",
+          body: { ids: pending.members.map((member) => member.id), role: pending.role },
+        });
+        message = `Đã đổi vai trò của ${describeTargets(pending.members)} thành ${ROLE_LABELS[pending.role]}`;
+      } else if (pending.kind === "delete") {
+        await adminFetch("/api/admin/members", {
+          method: "DELETE",
+          body: { ids: pending.members.map((member) => member.id) },
+        });
+        message = `Đã xoá ${describeTargets(pending.members)}`;
+      } else {
+        const result = await adminFetch<{ message?: string }>(
+          `/api/admin/members/${pending.member.id}`,
+          { method: "POST", body: { action: pending.kind } },
+        );
+        message =
+          result.message ||
+          (pending.kind === "block"
+            ? `Đã khoá tài khoản ${pending.member.name}`
+            : `Đã mở khoá tài khoản ${pending.member.name}`);
+      }
+      toast.success(message, { timeout: 3500 });
+      setPending(null);
+      await loadMembers();
+    } catch (actionError) {
+      toast.danger("Chưa thực hiện được", {
+        description: actionError instanceof Error ? actionError.message : "Vui lòng thử lại.",
+        timeout: 5000,
+      });
+    } finally {
+      setIsRunning(false);
     }
-    await loadMembers();
   };
 
-  const changeRole = (ids: string[]) => {
-    const nextRole = window.prompt(
-      "Nhập vai trò mới: member, teacher hoặc admin",
-      "member",
-    ) as MemberRole | null;
-
-    if (!nextRole) return;
-    if (!["member", "teacher", "admin"].includes(nextRole)) {
-      setError("Vai trò không hợp lệ. Vui lòng dùng member, teacher hoặc admin.");
-      return;
-    }
-
-    patchMembers(ids, { role: nextRole });
-  };
+  const selectedMembers = members.filter((member) => selectedIds.includes(member.id));
+  const confirm = pending ? confirmCopy(pending) : null;
 
   return (
     <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:gap-5 md:px-5 md:py-5 lg:grid-cols-[244px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6 xl:grid-cols-[268px_minmax(0,1fr)]">
@@ -203,11 +317,12 @@ export default function AdminMemberContent({
             ) : (
               <AdminMemberTable
                 members={members}
+                currentUserId={adminId}
                 selectedIds={selectedIds}
                 onToggleMember={toggleMember}
                 onToggleAll={toggleAllMembers}
-                onChangeRole={changeRole}
-                onDeleteMember={deleteMembers}
+                onPickRole={requestRole}
+                onAction={requestAction}
                 page={page}
                 pageSize={PAGE_SIZE}
                 total={total}
@@ -216,9 +331,22 @@ export default function AdminMemberContent({
             )}
             <AdminMemberBulkBar
               selectedCount={selectedIds.length}
-              onChangeRole={() => changeRole(selectedIds)}
-              onDelete={() => deleteMembers(selectedIds)}
+              includesSelf={selectedIds.includes(adminId)}
+              onPickRole={(nextRole) => requestRole(selectedMembers, nextRole)}
+              onDelete={() => setPending({ kind: "delete", members: selectedMembers })}
             />
+            {confirm && (
+              <AdminConfirmDialog
+                title={confirm.title}
+                confirmLabel={confirm.confirmLabel}
+                tone={confirm.tone}
+                busy={isRunning}
+                onConfirm={runPending}
+                onClose={closePending}
+              >
+                {confirm.body}
+              </AdminConfirmDialog>
+            )}
           </div>
         </div>
       </section>

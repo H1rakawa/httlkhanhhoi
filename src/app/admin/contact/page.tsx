@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function AdminContactPage() {
-  // Trùng điều kiện RLS public.is_staff(): admin hoặc giáo viên đang hoạt động.
+  // Trùng điều kiện RLS public.is_staff(): ban mục vụ đang hoạt động.
   const { account } = await requireStaffPage();
 
   return (

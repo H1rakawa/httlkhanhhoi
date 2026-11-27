@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { roleLabel } from "@/lib/roles";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import AdminPasswordSecurity from "@/com/admin/AdminPasswordSecurity";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
@@ -40,7 +41,7 @@ export default function AdminProfileContent({
   avatarUrl,
   viewerRole,
 }: AdminProfileContentProps) {
-  const role = viewerRole === "teacher" ? "Giáo viên" : "Quản trị viên";
+  const role = roleLabel(viewerRole);
   const initial = (displayName.charAt(0) || email.charAt(0) || "A").toUpperCase();
 
   return (

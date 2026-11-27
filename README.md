@@ -53,11 +53,13 @@ tests/            Unit test
 
 | Vai trò | Được làm |
 | --- | --- |
-| `member` | Trang công khai, khu vực thành viên, làm bài tập, gửi cầu thay và lời làm chứng |
-| `teacher` | Như member, cộng thêm toàn bộ trang quản trị **trừ** quản lý thành viên |
-| `admin` | Toàn quyền, gồm quản lý thành viên |
+| `member` (Tín hữu) | Trang công khai, khu vực thành viên, làm bài tập, gửi cầu thay và lời làm chứng |
+| `deacon` (Chấp sự) | Như tín hữu |
+| `staff` (Nhân sự) | Như tín hữu, cộng thêm toàn bộ trang quản trị **trừ** quản lý thành viên |
+| `pastor` (Quản nhiệm) | Như nhân sự |
+| `admin` (Quản trị viên) | Toàn quyền, gồm quản lý thành viên |
 
-Chỉ tài khoản có `status = 'active'` mới được vào trang quản trị. Ở mã nguồn, quyền được kiểm tra bằng
+Danh sách vai trò và nhóm ban mục vụ nằm ở `src/lib/roles.ts`. Chỉ tài khoản có `status = 'active'` mới được vào trang quản trị. Ở mã nguồn, quyền được kiểm tra bằng
 `requireStaffPage()` / `requireStaffApi()` trong `src/lib/admin/staff.ts` (truyền `{ adminOnly: true }`
 cho chức năng chỉ dành cho admin). Ở database, RLS dùng `public.is_staff()` và `private.is_admin()`.
 Sidebar quản trị ẩn các mục mà vai trò hiện tại không được dùng.

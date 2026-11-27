@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isStaffRole } from "@/lib/roles";
 import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import type {
@@ -6,13 +7,13 @@ import type {
   ContactStatus,
 } from "@/com/admin/contact/adminContactData";
 
-/** Khớp public.is_staff(): giáo viên hoặc quản trị viên đang hoạt động. */
+/** Khớp public.is_staff(): quản trị viên, quản nhiệm hoặc nhân sự đang hoạt động. */
 export function isStaffProfile(
   profile: { role?: string | null; status?: string | null } | null | undefined,
 ) {
   return (
     !!profile &&
-    (profile.role === "admin" || profile.role === "teacher") &&
+    isStaffRole(profile.role) &&
     profile.status === "active"
   );
 }

@@ -1,3 +1,4 @@
+import { isStaffRole } from "@/lib/roles";
 import {
   getAccessToken,
   getCurrentAccount,
@@ -116,8 +117,7 @@ export async function getEventViewer(): Promise<{
     email: profile?.email || user.email || null,
     phone: profile?.phone || metadata.phone || null,
     isStaff:
-      profile?.status === "active" &&
-      (profile.role === "admin" || profile.role === "teacher"),
+      profile?.status === "active" && isStaffRole(profile.role),
   };
 
   try {

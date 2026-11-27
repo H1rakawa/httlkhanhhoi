@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { roleLabel } from "@/lib/roles";
 import { redirect } from "next/navigation";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
@@ -20,12 +21,6 @@ import {
 export const metadata: Metadata = {
   title: "Hồ sơ cá nhân",
   robots: { index: false, follow: false },
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Quản trị viên",
-  teacher: "Giáo viên",
-  member: "Thành viên",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -81,7 +76,7 @@ export default async function ProfilePage() {
             email={getUserDisplayEmail(user, profile)}
             phone={profile?.phone ?? null}
             avatarUrl={getUserAvatarUrl(user, profile)}
-            roleLabel={ROLE_LABELS[profile?.role ?? "member"] ?? "Thành viên"}
+            roleLabel={roleLabel(profile?.role)}
             statusLabel={STATUS_LABELS[profile?.status ?? "active"] ?? "Đang hoạt động"}
             joinedLabel={joinedLabel}
             providerLabel={providers.map((item) => PROVIDER_LABELS[item] ?? item).join(", ")}

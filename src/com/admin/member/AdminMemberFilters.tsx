@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { MEMBER_ROLES } from "@/lib/roles";
 import {
   roleLabels,
   type MemberRole,
@@ -149,9 +150,7 @@ function FilterDropdown<T extends string>({
 
 const roleOptions: Array<FilterOption<"" | MemberRole>> = [
   { value: "", label: "Tất cả vai trò" },
-  { value: "admin", label: roleLabels.admin },
-  { value: "teacher", label: roleLabels.teacher },
-  { value: "member", label: roleLabels.member },
+  ...MEMBER_ROLES.map((value) => ({ value, label: roleLabels[value] })),
 ];
 
 export default function AdminMemberFilters({

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { roleLabel } from "@/lib/roles";
 import Link from "next/link";
 import { useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
@@ -175,7 +176,7 @@ export default function AdminSidebar({
                 {displayName || "Admin Grace"}
               </p>
               <p className="text-xs font-medium text-[#687580]">
-                {role === "teacher" ? "Giáo viên" : "Quản trị viên"}
+                {roleLabel(role)}
               </p>
             </div>
           </Link>
