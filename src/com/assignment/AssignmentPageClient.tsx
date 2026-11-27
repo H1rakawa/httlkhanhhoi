@@ -166,9 +166,9 @@ export default function AssignmentPageClient({ assignments, loadError }: Assignm
             {filteredAssignments.map((assignment) => (
               <Link
                 key={assignment.id}
-                href={`/assignment/${assignmentRouteId(assignment.id)}`}
+                href={`/assignment/${assignmentRouteId(assignment.id)}${assignment.status === "Đã chấm" ? "/result" : ""}`}
                 className="grid gap-5 bg-white/18 px-5 py-6 text-[#1d1d1f] no-underline transition-colors hover:bg-white/34 lg:grid-cols-[0.55fr_2fr_1fr_1fr_1fr_0.55fr] lg:items-center lg:gap-4 lg:px-7"
-                aria-label={`Làm bài ${assignment.title}`}
+                aria-label={`${assignment.status === "Đã chấm" ? "Xem kết quả" : "Làm bài"} ${assignment.title}`}
               >
                 <p className="text-sm font-semibold text-[#6e6e73]">#{assignment.id}</p>
                 <div>

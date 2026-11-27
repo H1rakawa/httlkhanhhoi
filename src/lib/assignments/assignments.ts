@@ -165,3 +165,25 @@ export async function getAssignmentDetail(rawId: number, userId: string, accessT
 
   return { assignment: toAssignment(row), questions, submission, answers };
 }
+
+/**
+ * Đáp án đúng của câu trắc nghiệm, chỉ có khi bài nộp của người xem đã được chấm
+ * (hàm public.get_assignment_answer_key tự kiểm tra). Trả map rỗng nếu chưa có quyền
+ * hoặc hàm chưa được tạo trên database.
+ */
+export async function getAssignmentAnswerKey(rawId: number, accessToken: string) {
+  const key = new Map<number, number[]>();
+  try {
+    const rows = await supabaseDataRequest<Array<{ question_id: number; option_id: number }>>(
+      "rpc/get_assignment_answer_key",
+      accessToken,
+      { method: "POST", body: JSON.stringify({ p_assignment_id: rawId }) },
+    );
+    for (const row of rows) {
+      key.set(row.question_id, [...(key.get(row.question_id) ?? []), row.option_id]);
+    }
+  } catch {
+    // Không có đáp án thì trang kết quả vẫn hiển thị điểm và nhận xét.
+  }
+  return key;
+}

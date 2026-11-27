@@ -193,6 +193,12 @@ export default function AssignmentWorkClient({
                   {submission.feedback}
                 </p>
               )}
+              <Link
+                href={`/assignment/${assignment.id}/result`}
+                className="mt-5 inline-flex text-sm font-semibold text-[#14743a] no-underline hover:underline"
+              >
+                Xem chi tiết kết quả và đáp án →
+              </Link>
             </section>
           )}
 
@@ -525,9 +531,17 @@ export default function AssignmentWorkClient({
               </p>
             )}
             {locked ? (
-              <span className="flex h-12 items-center rounded-[14px] bg-[#eaf3ff] px-6 text-sm font-semibold text-[#0066cc]">
-                {graded ? "Đã chấm điểm" : "Đã nộp bài"}
-              </span>
+              <>
+                <span className="flex h-12 items-center rounded-[14px] bg-[#eaf3ff] px-6 text-sm font-semibold text-[#0066cc]">
+                  {graded ? "Đã chấm điểm" : "Đã nộp bài"}
+                </span>
+                <Link
+                  href={`/assignment/${assignment.id}/result`}
+                  className="flex h-12 items-center justify-center rounded-[14px] bg-[#07111f] px-8 text-sm font-semibold text-white no-underline shadow-[0_14px_28px_rgba(7,17,31,0.2)]"
+                >
+                  {graded ? "Xem điểm và nhận xét" : "Xem bài đã nộp"}
+                </Link>
+              </>
             ) : (
               <>
                 <button
