@@ -33,9 +33,15 @@ export const adminStats = [
   },
 ] as const;
 
-export const adminSidebarItems = [
+export const adminSidebarItems: Array<{
+  href: string;
+  label: string;
+  icon: string;
+  /** Chỉ quản trị viên thấy; giáo viên bị ẩn. */
+  adminOnly?: boolean;
+}> = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/member", label: "Thành viên", icon: "community" },
+  { href: "/admin/member", label: "Thành viên", icon: "community", adminOnly: true },
   { href: "/admin/assignment", label: "Bài tập", icon: "document" },
   { href: "/admin/events", label: "Sự kiện", icon: "calendar" },
   { href: "/admin/news", label: "Tin tức", icon: "news" },

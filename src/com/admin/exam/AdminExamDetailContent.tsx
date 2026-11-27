@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
+import type { GradingSubmission } from "@/lib/admin/grading";
+import AdminGradingDrawer from "./AdminGradingDrawer";
 import { adminExamStatusLabels, type AdminExamStatus } from "./adminExamData";
 
 type AdminExamDetailContentProps = {
@@ -11,6 +13,7 @@ type AdminExamDetailContentProps = {
   adminId: string;
   displayName: string;
   avatarUrl: string | null;
+  viewerRole?: string | null;
 };
 
 type ExamQuestion = {
@@ -69,8 +72,14 @@ type ExamDetailResponse = {
 
 const submissionStatusLabels: Record<ExamStudent["status"], string> = {
   draft: "Đang làm",
-  submitted: "Đã nộp",
+  submitted: "Chờ chấm",
   graded: "Đã chấm",
+};
+
+const submissionStatusClassNames: Record<ExamStudent["status"], string> = {
+  draft: "bg-[#edf2fb] text-[#526174]",
+  submitted: "bg-[#ffe4a8] text-[#805500]",
+  graded: "bg-[#dcfae6] text-[#14743a]",
 };
 
 function formatDate(value: string | null) {
@@ -161,6 +170,7 @@ export default function AdminExamDetailContent({
   adminId,
   displayName,
   avatarUrl,
+  viewerRole,
 }: AdminExamDetailContentProps) {
   const [detail, setDetail] = useState<ExamDetailResponse | null>(null);
   const [error, setError] = useState("");
@@ -210,7 +220,31 @@ export default function AdminExamDetailContent({
     return Math.round((detail.stats.completed / detail.stats.totalStudents) * 100);
   }, [detail]);
 
-  const visibleStudents = detail?.students.slice(0, 5) ?? [];
+  const [gradingId, setGradingId] = useState<string | null>(null);
+  // Chờ chấm lên đầu, rồi tới đã chấm, cuối cùng là đang làm.
+  const students = useMemo(() => {
+    const order = { submitted: 0, graded: 1, draft: 2 } as const;
+    return (detail?.students ?? [])
+      .slice()
+      .sort((first, second) => order[first.status] - order[second.status]);
+  }, [detail]);
+  const waiting = students.filter((student) => student.status === "submitted").length;
+
+  const applyGrade = (saved: GradingSubmission) => {
+    setDetail((current) =>
+      current
+        ? {
+            ...current,
+            students: current.students.map((student) =>
+              student.id === String(saved.id)
+                ? { ...student, status: saved.status, grade: saved.grade }
+                : student,
+            ),
+          }
+        : current,
+    );
+    setGradingId(null);
+  };
 
   return (
     <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1500px] grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:gap-5 md:px-5 md:py-5 lg:grid-cols-[244px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6 xl:grid-cols-[268px_minmax(0,1fr)]">
@@ -218,6 +252,7 @@ export default function AdminExamDetailContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
+        role={viewerRole}
         activeHref="/admin/assignment"
       />
 
@@ -261,8 +296,7 @@ export default function AdminExamDetailContent({
                     </p>
                     <p className="mt-5 max-w-3xl text-sm font-bold leading-7 text-[#475467]">
                       Yêu cầu: Học viên hoàn thành các câu hỏi bên dưới trước hạn nộp.
-                      Quản trị viên có thể theo dõi tiến độ và danh sách học viên đã
-                      nộp ở cột bên phải.
+                      Ban mục vụ theo dõi tiến độ và chấm bài ở cột bên phải.
                     </p>
                   </article>
 
@@ -415,18 +449,23 @@ export default function AdminExamDetailContent({
                       <DashboardIcon name="community" className="h-5 w-5" />
                       Học viên
                     </h2>
-                    <div className="mt-5 grid grid-cols-[1fr_auto] border-b border-[#e8edf5] pb-3 text-[11px] font-black uppercase tracking-[0.08em] text-[#667085]">
+                    <p className="mt-1 text-xs font-bold text-[#667085]">
+                      Bấm vào học viên để xem bài và chấm điểm.
+                    </p>
+                    <div className="mt-4 grid grid-cols-[1fr_auto] border-b border-[#e8edf5] pb-3 text-[11px] font-black uppercase tracking-[0.08em] text-[#667085]">
                       <span>Học viên</span>
                       <span>Trạng thái</span>
                     </div>
-                    <div className="grid gap-3 py-4">
-                      {visibleStudents.length > 0 ? (
-                        visibleStudents.map((student) => (
-                          <div
+                    <div className="grid max-h-[460px] gap-1 overflow-y-auto py-3">
+                      {students.length > 0 ? (
+                        students.map((student) => (
+                          <button
+                            type="button"
                             key={student.id}
-                            className="grid grid-cols-[1fr_auto] items-center gap-3"
+                            onClick={() => setGradingId(student.id)}
+                            className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[12px] p-1.5 text-left transition hover:bg-[#f2f5fb]"
                           >
-                            <div className="flex min-w-0 items-center gap-3">
+                            <span className="flex min-w-0 items-center gap-3">
                               <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#111827] text-xs font-black text-white">
                                 {student.avatarUrl ? (
                                   // eslint-disable-next-line @next/next/no-img-element
@@ -439,14 +478,28 @@ export default function AdminExamDetailContent({
                                   initials(student.name)
                                 )}
                               </span>
-                              <span className="truncate text-sm font-black text-[#101418]">
-                                {student.name}
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-black text-[#101418]">
+                                  {student.name}
+                                </span>
+                                {student.submittedAt && (
+                                  <span className="block text-[11px] font-bold text-[#8a94a6]">
+                                    {formatDate(student.submittedAt)}
+                                  </span>
+                                )}
                               </span>
-                            </div>
-                            <span className="rounded-full bg-[#ffe4a8] px-2.5 py-1 text-[11px] font-black text-[#805500]">
-                              {submissionStatusLabels[student.status]}
                             </span>
-                          </div>
+                            <span
+                              className={[
+                                "rounded-full px-2.5 py-1 text-[11px] font-black",
+                                submissionStatusClassNames[student.status],
+                              ].join(" ")}
+                            >
+                              {student.status === "graded" && student.grade != null
+                                ? `${student.grade}/10`
+                                : submissionStatusLabels[student.status]}
+                            </span>
+                          </button>
                         ))
                       ) : (
                         <p className="py-4 text-sm font-bold text-[#667085]">
@@ -455,32 +508,11 @@ export default function AdminExamDetailContent({
                       )}
                     </div>
                     <div className="flex items-center justify-between border-t border-[#e8edf5] pt-4 text-xs font-bold text-[#667085]">
+                      <span>{waiting} bài chờ chấm</span>
                       <span>
-                        {visibleStudents.length}/{detail.students.length} học viên đã nộp
+                        {students.filter((student) => student.status === "graded").length}/
+                        {students.length} đã chấm
                       </span>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f2f5fb] text-[#8a94a6]"
-                          aria-label="Trang trước"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          type="button"
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#101418] text-white"
-                          aria-label="Trang hiện tại"
-                        >
-                          1
-                        </button>
-                        <button
-                          type="button"
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f2f5fb] text-[#8a94a6]"
-                          aria-label="Trang sau"
-                        >
-                          ›
-                        </button>
-                      </div>
                     </div>
                   </section>
                 </aside>
@@ -489,6 +521,15 @@ export default function AdminExamDetailContent({
           </div>
         </div>
       </section>
+      {gradingId && (
+        <AdminGradingDrawer
+          key={gradingId}
+          examId={examId}
+          submissionId={gradingId}
+          onClose={() => setGradingId(null)}
+          onSaved={applyGrade}
+        />
+      )}
     </div>
   );
 }

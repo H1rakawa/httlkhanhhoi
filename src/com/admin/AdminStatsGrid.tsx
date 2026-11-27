@@ -18,7 +18,13 @@ const statLinks: Partial<Record<keyof AdminStatValues, string>> = {
 
 const format = (value: number) => new Intl.NumberFormat("vi-VN").format(value);
 
-export default function AdminStatsGrid({ values }: { values: AdminStatValues }) {
+export default function AdminStatsGrid({
+  values,
+  canManageMembers = true,
+}: {
+  values: AdminStatValues;
+  canManageMembers?: boolean;
+}) {
   return (
     <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {adminStats.map((stat) => {
@@ -28,7 +34,11 @@ export default function AdminStatsGrid({ values }: { values: AdminStatValues }) 
         return (
           <Link
             key={stat.title}
-            href={statLinks[stat.key] ?? "/admin"}
+            href={
+              stat.key === "totalMembers" && !canManageMembers
+                ? "/admin"
+                : (statLinks[stat.key] ?? "/admin")
+            }
             className="group min-h-[150px] rounded-[24px] border border-white/72 bg-white/36 p-6 text-inherit no-underline shadow-[0_22px_54px_rgba(31,48,70,0.12)] backdrop-blur-2xl transition-transform duration-300 hover:-translate-y-1"
           >
             <div className="flex items-start justify-between">

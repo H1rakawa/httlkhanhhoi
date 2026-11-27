@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import NewsCard from "@/com/news/NewsCard";
 import NewsFilterBar from "@/com/news/NewsFilterBar";
-import Pagination from "@/com/news/Pagination";
+import Pagination from "@/com/lib/Pagination";
 import { NewsPost, newsPosts } from "@/com/news/newsData";
 
 const postsPerPage = 6;
@@ -81,7 +81,7 @@ export default function NewsFeed() {
             </div>
           )}
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination variant="site" page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </section>
 

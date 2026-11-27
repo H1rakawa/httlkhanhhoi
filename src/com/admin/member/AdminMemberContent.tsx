@@ -17,6 +17,7 @@ type AdminMemberContentProps = {
   adminId: string;
   displayName: string;
   avatarUrl: string | null;
+  viewerRole?: string | null;
 };
 
 const PAGE_SIZE = 12;
@@ -25,6 +26,7 @@ export default function AdminMemberContent({
   adminId,
   displayName,
   avatarUrl,
+  viewerRole,
 }: AdminMemberContentProps) {
   const [members, setMembers] = useState<AdminMember[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -168,6 +170,7 @@ export default function AdminMemberContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
+        role={viewerRole}
         activeHref="/admin/member"
       />
 

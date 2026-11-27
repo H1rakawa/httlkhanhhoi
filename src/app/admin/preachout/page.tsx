@@ -5,7 +5,7 @@ import { requireStaffPage } from "@/lib/admin/staff";
 import { countOutreachResources, getAdminTestimonies } from "@/lib/admin/testimonies";
 
 export const metadata = {
-  title: "Quản lý truyền giảng | Quản trị HTTL Khánh Hội",
+  title: "Quản lý truyền giảng",
 };
 
 async function settle<T>(promise: Promise<T>, fallback: T) {

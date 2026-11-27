@@ -1,17 +1,13 @@
-import { redirect } from "next/navigation";
 import AdminExamBuilderContent from "@/com/admin/exam/AdminExamBuilderContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { getCurrentAccount } from "@/lib/supabase/auth";
+import { requireStaffPage } from "@/lib/admin/staff";
 import {
   getUserAvatarUrl,
   getUserDisplayName,
 } from "@/lib/supabase/user-display";
 
 export default async function AdminNewExamPage() {
-  const account = await getCurrentAccount();
-
-  if (!account) redirect("/auth");
-  if (account.profile?.role !== "admin") redirect("/dashboard");
+  const { account } = await requireStaffPage();
 
   return (
     <main className="relative min-h-screen overflow-clip bg-[#eef4ff] text-[#111827]">
@@ -26,6 +22,7 @@ export default async function AdminNewExamPage() {
         adminId={account.user.id}
         displayName={getUserDisplayName(account.user, account.profile)}
         avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+        viewerRole={account.profile?.role}
       />
     </main>
   );

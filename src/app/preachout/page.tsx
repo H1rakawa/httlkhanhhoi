@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import PreachoutPageContent from "@/com/preachout/PreachoutPageContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
 import { getEventViewer } from "@/lib/events/events";
 import { getPreachoutPageData } from "@/lib/events/preachout";
+
+export const metadata: Metadata = {
+  title: "Truyền giảng",
+  description: "Các chương trình truyền giảng và lời làm chứng của cộng đồng.",
+  alternates: { canonical: "/preachout" },
+};
 
 export default async function PreachoutPage() {
   const [data, { viewer, registeredEventIds }] = await Promise.all([

@@ -1,19 +1,14 @@
-import { redirect } from "next/navigation";
 import AdminDashboardContent from "@/com/admin/AdminDashboardContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
 import { getAdminOverview } from "@/lib/admin/overview";
-import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
+import { requireStaffPage } from "@/lib/admin/staff";
 import {
   getUserAvatarUrl,
   getUserDisplayName,
 } from "@/lib/supabase/user-display";
 
 export default async function AdminDashboardPage() {
-  const account = await getCurrentAccount();
-  const accessToken = await getAccessToken();
-
-  if (!account || !accessToken) redirect("/auth");
-  if (account.profile?.role !== "admin") redirect("/dashboard");
+  const { account, accessToken } = await requireStaffPage();
 
   const overview = await getAdminOverview(accessToken);
 
@@ -30,6 +25,7 @@ export default async function AdminDashboardPage() {
         adminId={account.user.id}
         displayName={getUserDisplayName(account.user, account.profile)}
         avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+        viewerRole={account.profile?.role}
         overview={overview}
       />
     </main>

@@ -3,7 +3,7 @@ import AdminContactContent from "@/com/admin/contact/AdminContactContent";
 import { requireStaffPage } from "@/lib/admin/staff";
 
 export const metadata = {
-  title: "Hộp thư liên hệ | Quản trị HTTL Khánh Hội",
+  title: "Hộp thư liên hệ",
 };
 
 export default async function AdminContactPage() {

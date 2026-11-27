@@ -18,7 +18,8 @@ import {
 } from "@/lib/supabase/user-display";
 
 export const metadata: Metadata = {
-  title: "Hồ sơ cá nhân | HTTL Khánh Hội",
+  title: "Hồ sơ cá nhân",
+  robots: { index: false, follow: false },
 };
 
 const ROLE_LABELS: Record<string, string> = {

@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import NextLink from "next/link";
 import { redirect } from "next/navigation";
 import AuthBackdrop from "@/com/auth/AuthBackdrop";
 import AuthTabs from "@/com/auth/AuthTabs";
 import { getCurrentUser } from "@/lib/supabase/auth";
+
+export const metadata: Metadata = {
+  title: "Đăng nhập",
+  description: "Đăng nhập hoặc đăng ký tài khoản thành viên.",
+  robots: { index: false, follow: false },
+};
 
 export default async function AuthPage({
   searchParams,

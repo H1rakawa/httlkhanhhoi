@@ -13,7 +13,7 @@ type AssignmentResultPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Kết quả bài tập | HTTL. Khánh Hội",
+  title: "Kết quả bài tập",
 };
 
 export default async function AssignmentResultPage({ params }: AssignmentResultPageProps) {

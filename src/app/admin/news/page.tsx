@@ -5,7 +5,7 @@ import { getAdminNewsPosts } from "@/lib/admin/news";
 import { requireStaffPage } from "@/lib/admin/staff";
 
 export const metadata = {
-  title: "Quản lý tin tức | Quản trị HTTL Khánh Hội",
+  title: "Quản lý tin tức",
 };
 
 export default async function AdminNewsPage() {

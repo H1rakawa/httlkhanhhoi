@@ -13,7 +13,7 @@ type AssignmentWorkPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Làm bài tập | HTTL. Khánh Hội",
+  title: "Làm bài tập",
 };
 
 export default async function AssignmentWorkPage({ params }: AssignmentWorkPageProps) {

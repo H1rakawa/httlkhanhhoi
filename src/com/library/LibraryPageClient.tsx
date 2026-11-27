@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import Pagination from "@/com/news/Pagination";
+import Pagination from "@/com/lib/Pagination";
 import LibraryResourceCard, {
   LibraryResourceArtwork,
 } from "@/com/library/LibraryResourceCard";
@@ -163,7 +163,7 @@ export default function LibraryPageClient({ resources, loadError }: LibraryPageC
               : "Không tìm thấy tài liệu phù hợp."}
           </div>
         )}
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination variant="site" page={page} totalPages={totalPages} onPageChange={setPage} />
       </section>
 
       <section className="relative z-10 mx-auto w-[calc(100%_-_2rem)] max-w-7xl pb-16 md:pb-24">

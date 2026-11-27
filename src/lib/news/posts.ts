@@ -55,3 +55,15 @@ export async function getPublishedNewsPostBySlug(slug: string) {
 
   return posts[0] ? mapApiNewsPost(posts[0]) : null;
 }
+
+/** Bài "Thông báo" mới nhất đã đăng, cho dải thông báo trên Header. Lỗi thì ẩn dải. */
+export async function getLatestAnnouncement() {
+  try {
+    const posts = await supabaseDataRequest<Array<Pick<ApiNewsPost, "slug" | "title">>>(
+      `news_posts?select=slug,title&status=eq.published&category=eq.${encodeURIComponent("Thông báo")}&order=published_at.desc.nullslast,created_at.desc&limit=1`,
+    );
+    return posts[0] ? { title: posts[0].title, href: `/news/${posts[0].slug}` } : null;
+  } catch {
+    return null;
+  }
+}

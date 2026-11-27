@@ -6,15 +6,22 @@ import { useEffect, useRef, useState } from "react";
 import HeaderAccountMenu from "@/com/auth/HeaderAccountMenu";
 import { navItems } from "@/com/shared/data";
 
+export type HeaderNotice = {
+  title: string;
+  href: string;
+};
+
 type HeaderProps = {
   activePath?: string;
-  showNotice?: boolean;
+  /** Thông báo chạy trên cùng (bài "Thông báo" mới nhất); không có thì ẩn. */
+  notice?: HeaderNotice | null;
 };
 
 export default function Header({
   activePath = "/",
-  showNotice = false,
+  notice = null,
 }: HeaderProps) {
+  const showNotice = Boolean(notice);
   const [isNoticeVisible, setIsNoticeVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const lastScrollY = useRef(0);
@@ -64,12 +71,9 @@ export default function Header({
           ].join(" ")}
         >
           <div className="mx-auto flex min-h-9 max-w-7xl flex-col items-center justify-center gap-1 px-5 py-2 text-center text-xs text-white/76 md:flex-row">
-            <span>
-              Thông báo mới nhất: Lễ Kỷ Niệm 10 Năm HTTL. Khánh Hội vào Chủ Nhật
-              tới.
-            </span>
+            <span className="line-clamp-1">Thông báo mới nhất: {notice?.title}</span>
             <NextLink
-              href="/calendar"
+              href={notice?.href ?? "/news"}
               className="text-[#2997ff] no-underline hover:text-[#6bb6ff]"
             >
               Xem chi tiết

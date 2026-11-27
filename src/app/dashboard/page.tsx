@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import { vietnamDateKey, type AssignmentItem } from "@/com/assignment/assignmentData";
@@ -17,6 +18,12 @@ import { getLibraryResources } from "@/lib/library/resources";
 import { getPrayerFeed } from "@/lib/pray/prayers";
 import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import { getUserAvatarUrl, getUserDisplayName } from "@/lib/supabase/user-display";
+
+export const metadata: Metadata = {
+  title: "Trang cá nhân",
+  description: "Bảng điều khiển của thành viên.",
+  robots: { index: false, follow: false },
+};
 
 async function settle<T>(promise: Promise<T>, fallback: T) {
   try {

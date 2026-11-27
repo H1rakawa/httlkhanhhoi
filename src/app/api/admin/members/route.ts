@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireStaffApi } from "@/lib/admin/staff";
 import { createClient } from "@supabase/supabase-js";
-import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import {
   getSupabaseConfig,
   getSupabaseUrl,
@@ -37,26 +37,8 @@ type ProfileRow = {
   updated_at: string;
 };
 
-async function requireAdmin() {
-  const account = await getCurrentAccount();
-  const accessToken = await getAccessToken();
-
-  if (!account || !accessToken) {
-    return {
-      error: NextResponse.json({ error: "Chưa đăng nhập." }, { status: 401 }),
-    };
-  }
-
-  if (account.profile?.role !== "admin" || account.profile.status !== "active") {
-    return {
-      error: NextResponse.json(
-        { error: "Bạn không có quyền quản lý thành viên." },
-        { status: 403 },
-      ),
-    };
-  }
-
-  return { account, accessToken };
+function requireAdmin() {
+  return requireStaffApi("Bạn không có quyền quản lý thành viên.", { adminOnly: true });
 }
 
 function sanitizeIds(ids?: string[]) {

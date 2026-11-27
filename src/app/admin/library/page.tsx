@@ -5,7 +5,7 @@ import { getAdminResources } from "@/lib/admin/library";
 import { requireStaffPage } from "@/lib/admin/staff";
 
 export const metadata = {
-  title: "Quản lý thư viện | Quản trị HTTL Khánh Hội",
+  title: "Quản lý thư viện",
 };
 
 type AdminLibraryPageProps = {

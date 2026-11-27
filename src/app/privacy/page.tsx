@@ -4,7 +4,7 @@ import Footer from "@/com/Footer";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
 
 export const metadata: Metadata = {
-  title: "Chính sách bảo mật | HTTL. Khánh Hội",
+  title: "Chính sách bảo mật",
   description:
     "Cách Hội Thánh Tin Lành Khánh Hội thu thập, sử dụng và xóa dữ liệu cá nhân của người dùng.",
 };

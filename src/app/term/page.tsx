@@ -6,7 +6,7 @@ import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
 import TermsToc from "@/com/term/TermsToc";
 
 export const metadata: Metadata = {
-  title: "Điều khoản sử dụng | HTTL. Khánh Hội",
+  title: "Điều khoản sử dụng",
   description:
     "Các điều khoản khi sử dụng website, tài khoản thành viên và các tính năng của Hội Thánh Tin Lành Khánh Hội.",
 };

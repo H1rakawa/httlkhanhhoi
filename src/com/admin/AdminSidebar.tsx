@@ -11,6 +11,7 @@ type AdminSidebarProps = {
   displayName: string;
   avatarUrl: string | null;
   activeHref?: string;
+  role?: string | null;
 };
 
 export default function AdminSidebar({
@@ -18,8 +19,10 @@ export default function AdminSidebar({
   displayName,
   avatarUrl,
   activeHref,
+  role,
 }: AdminSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const items = adminSidebarItems.filter((item) => !item.adminOnly || role === "admin");
 
   return (
     <aside
@@ -76,10 +79,10 @@ export default function AdminSidebar({
           </div>
 
           <nav className="grid min-h-0 grid-cols-1 content-start gap-1.5 overflow-y-auto pr-0.5">
-            {adminSidebarItems.map((item, index) => {
+            {items.map((item, index) => {
               const isActive =
                 activeHref === item.href &&
-                adminSidebarItems.findIndex(
+                items.findIndex(
                   (sidebarItem) => sidebarItem.href === activeHref,
                 ) === index;
 
@@ -171,7 +174,9 @@ export default function AdminSidebar({
               <p className="truncate text-sm font-bold text-[#101418]">
                 {displayName || "Admin Grace"}
               </p>
-              <p className="text-xs font-medium text-[#687580]">Quản trị viên</p>
+              <p className="text-xs font-medium text-[#687580]">
+                {role === "teacher" ? "Giáo viên" : "Quản trị viên"}
+              </p>
             </div>
           </Link>
         </div>

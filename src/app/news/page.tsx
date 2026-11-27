@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/com/Footer";
@@ -6,6 +7,12 @@ import NewsBackdrop from "@/com/news/NewsBackdrop";
 import NewsFeed from "@/com/news/NewsFeed";
 import { newsPosts } from "@/com/news/newsData";
 import { getPublishedNewsPosts } from "@/lib/news/posts";
+
+export const metadata: Metadata = {
+  title: "Tin tức",
+  description: "Tin tức, thông báo và bài chia sẻ từ Hội Thánh Tin Lành Khánh Hội.",
+  alternates: { canonical: "/news" },
+};
 
 export default async function NewsPage() {
   const posts = await getPublishedNewsPosts().catch(() => newsPosts);

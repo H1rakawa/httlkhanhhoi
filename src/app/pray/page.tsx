@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import PrayPageContent from "@/com/pray/PrayPageContent";
@@ -6,6 +7,12 @@ import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
 import { getPrayerFeed } from "@/lib/pray/prayers";
 import { getAccessToken, getCurrentUser } from "@/lib/supabase/auth";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Cầu thay",
+  description: "Gửi lời cầu nguyện và cùng cầu thay cho nhau trong cộng đồng.",
+  alternates: { canonical: "/pray" },
+};
 
 type PrayPageProps = {
   searchParams: Promise<{ prayer?: string }>;

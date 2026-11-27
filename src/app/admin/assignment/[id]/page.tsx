@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
 import AdminExamDetailContent from "@/com/admin/exam/AdminExamDetailContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { getCurrentAccount } from "@/lib/supabase/auth";
+import { requireStaffPage } from "@/lib/admin/staff";
 import {
   getUserAvatarUrl,
   getUserDisplayName,
@@ -14,10 +13,7 @@ type AdminExamDetailPageProps = {
 export default async function AdminExamDetailPage({
   params,
 }: AdminExamDetailPageProps) {
-  const account = await getCurrentAccount();
-
-  if (!account) redirect("/auth");
-  if (account.profile?.role !== "admin") redirect("/dashboard");
+  const { account } = await requireStaffPage();
 
   const { id } = await params;
 
@@ -35,6 +31,7 @@ export default async function AdminExamDetailPage({
         adminId={account.user.id}
         displayName={getUserDisplayName(account.user, account.profile)}
         avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+        viewerRole={account.profile?.role}
       />
     </main>
   );

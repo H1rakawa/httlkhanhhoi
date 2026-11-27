@@ -5,7 +5,7 @@ import { getAdminEvents } from "@/lib/admin/events";
 import { requireStaffPage } from "@/lib/admin/staff";
 
 export const metadata = {
-  title: "Quản lý sự kiện | Quản trị HTTL Khánh Hội",
+  title: "Quản lý sự kiện",
 };
 
 type AdminEventsPageProps = {

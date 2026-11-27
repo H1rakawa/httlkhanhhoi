@@ -12,6 +12,7 @@ type AdminExamBuilderContentProps = {
   adminId: string;
   displayName: string;
   avatarUrl: string | null;
+  viewerRole?: string | null;
 };
 
 type QuestionType = "multiple_choice" | "essay";
@@ -752,6 +753,7 @@ export default function AdminExamBuilderContent({
   adminId,
   displayName,
   avatarUrl,
+  viewerRole,
 }: AdminExamBuilderContentProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -834,6 +836,7 @@ export default function AdminExamBuilderContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
+        role={viewerRole}
         activeHref="/admin/assignment"
       />
 

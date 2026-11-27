@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import AdminProfileContent from "@/com/admin/AdminProfileContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { getCurrentAccount } from "@/lib/supabase/auth";
+import { requireStaffPage } from "@/lib/admin/staff";
 import {
   getUserAvatarUrl,
   getUserDisplayEmail,
@@ -15,10 +15,7 @@ type AdminProfilePageProps = {
 export default async function AdminProfilePage({
   params,
 }: AdminProfilePageProps) {
-  const account = await getCurrentAccount();
-
-  if (!account) redirect("/auth");
-  if (account.profile?.role !== "admin") redirect("/dashboard");
+  const { account } = await requireStaffPage();
 
   const { id } = await params;
   if (id !== account.user.id) redirect(`/admin/${account.user.id}`);
@@ -38,6 +35,7 @@ export default async function AdminProfilePage({
         email={getUserDisplayEmail(account.user, account.profile)}
         phone={account.profile?.phone}
         avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+        viewerRole={account.profile?.role}
       />
     </main>
   );

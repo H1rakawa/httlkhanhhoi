@@ -76,6 +76,7 @@ const ACTION_LABELS: Record<string, string> = {
   update: "đã cập nhật",
   create: "đã tạo",
   publish: "đã đăng",
+  grade: "đã chấm",
 };
 
 const TABLE_LABELS: Record<string, { label: string; href: string | null }> = {
@@ -88,6 +89,7 @@ const TABLE_LABELS: Record<string, { label: string; href: string | null }> = {
   resources: { label: "tài liệu", href: "/admin/library" },
   news_posts: { label: "bài viết", href: "/admin/news" },
   testimonies: { label: "lời làm chứng", href: "/admin/preachout" },
+  submissions: { label: "bài nộp", href: "/admin/assignment" },
 };
 
 async function getRecentActivities(accessToken: string): Promise<AdminActivity[]> {

@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import AdminPrayerContent from "@/com/admin/pray/AdminPrayerContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { isStaffProfile } from "@/lib/admin/contact";
 import { getAdminPrayers } from "@/lib/admin/prayers";
-import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
+import { requireStaffPage } from "@/lib/admin/staff";
 import type { AdminPrayerItem } from "@/com/admin/pray/adminPrayerData";
 import {
   getUserAvatarUrl,
@@ -12,16 +10,11 @@ import {
 } from "@/lib/supabase/user-display";
 
 export const metadata = {
-  title: "Duyệt cầu thay | Quản trị HTTL Khánh Hội",
+  title: "Duyệt cầu thay",
 };
 
 export default async function AdminPrayPage() {
-  const account = await getCurrentAccount();
-  const accessToken = await getAccessToken();
-
-  if (!account || !accessToken) redirect("/auth");
-  // Ban mục vụ (admin hoặc giáo viên đang hoạt động) — trùng RLS public.is_staff().
-  if (!isStaffProfile(account.profile)) redirect("/dashboard");
+  const { account, accessToken } = await requireStaffPage();
 
   let prayers: AdminPrayerItem[] = [];
   let loadError: string | null = null;
@@ -45,6 +38,7 @@ export default async function AdminPrayPage() {
           adminId={account.user.id}
           displayName={getUserDisplayName(account.user, account.profile)}
           avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+          role={account.profile?.role}
           activeHref="/admin/pray"
         />
         <section className="min-w-0">

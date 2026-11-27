@@ -17,6 +17,7 @@ type AdminExamContentProps = {
   adminId: string;
   displayName: string;
   avatarUrl: string | null;
+  viewerRole?: string | null;
 };
 
 type StatusFilter = "all" | AdminExamStatus;
@@ -500,6 +501,7 @@ export default function AdminExamContent({
   adminId,
   displayName,
   avatarUrl,
+  viewerRole,
 }: AdminExamContentProps) {
   const [items, setItems] = useState<AdminExamItem[]>([]);
   const [query, setQuery] = useState("");
@@ -593,6 +595,7 @@ export default function AdminExamContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
+        role={viewerRole}
         activeHref="/admin/assignment"
       />
 

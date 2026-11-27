@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import LibraryBackdrop from "@/com/library/LibraryBackdrop";
 import LibraryPageClient from "@/com/library/LibraryPageClient";
 import { getLibraryResources } from "@/lib/library/resources";
+
+export const metadata: Metadata = {
+  title: "Thư viện",
+  description: "Giáo trình, bài giảng và tài liệu học Kinh Thánh của Hội Thánh.",
+  alternates: { canonical: "/library" },
+};
 
 export default async function LibraryPage() {
   const { resources, error } = await getLibraryResources();

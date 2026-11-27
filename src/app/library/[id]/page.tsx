@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: LibraryDetailPageProps): Prom
   const resource = await getLibraryResourceById((await params).id);
   if (!resource) return { title: "Không tìm thấy tài liệu" };
   return {
-    title: `${resource.title} | Thư viện HTTL. Khánh Hội`,
+    title: `${resource.title} · Thư viện`,
     description: resource.description || undefined,
   };
 }

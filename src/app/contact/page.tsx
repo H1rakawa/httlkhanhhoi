@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/com/Header";
 import Footer from "@/com/Footer";
 import ContactBackdrop from "@/com/contact/ContactBackdrop";
@@ -5,6 +6,12 @@ import ContactHero from "@/com/contact/ContactHero";
 import ContactInfo from "@/com/contact/ContactInfo";
 import ContactMain from "@/com/contact/ContactMain";
 import ContactMap from "@/com/contact/ContactMap";
+
+export const metadata: Metadata = {
+  title: "Liên hệ",
+  description: "Địa chỉ, giờ nhóm và cách liên hệ với Hội Thánh Tin Lành Khánh Hội.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   return (

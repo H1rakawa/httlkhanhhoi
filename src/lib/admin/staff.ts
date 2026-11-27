@@ -3,23 +3,52 @@ import { redirect } from "next/navigation";
 import { isStaffProfile } from "@/lib/admin/contact";
 import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 
-/** Trang /admin/*: chỉ ban mục vụ (admin hoặc giáo viên đang hoạt động, trùng RLS is_staff()). */
-export async function requireStaffPage() {
+export { isStaffProfile };
+
+/** Quản trị viên đang hoạt động (trùng private.is_admin()). */
+export function isAdminProfile(
+  profile: { role?: string | null; status?: string | null } | null | undefined,
+) {
+  return !!profile && profile.role === "admin" && profile.status === "active";
+}
+
+type StaffOptions = {
+  /** Chỉ quản trị viên (vd: quản lý thành viên); mặc định cho cả giáo viên. */
+  adminOnly?: boolean;
+};
+
+function hasAccess(
+  profile: { role?: string | null; status?: string | null } | null | undefined,
+  options: StaffOptions,
+) {
+  return options.adminOnly ? isAdminProfile(profile) : isStaffProfile(profile);
+}
+
+/**
+ * Trang /admin/*: chỉ ban mục vụ (admin hoặc giáo viên đang hoạt động, trùng RLS is_staff()).
+ * Tài khoản bị khoá hoặc không đủ quyền được đưa về /dashboard.
+ */
+export async function requireStaffPage(options: StaffOptions = {}) {
   const account = await getCurrentAccount();
   const accessToken = await getAccessToken();
   if (!account || !accessToken) redirect("/auth");
-  if (!isStaffProfile(account.profile)) redirect("/dashboard");
+  if (!hasAccess(account.profile, options)) {
+    redirect(isStaffProfile(account.profile) ? "/admin" : "/dashboard");
+  }
   return { account, accessToken };
 }
 
 /** API /api/admin/*: trả lỗi 401 / 403 thay vì chuyển trang. */
-export async function requireStaffApi(forbiddenMessage = "Bạn không có quyền thực hiện thao tác này.") {
+export async function requireStaffApi(
+  forbiddenMessage = "Bạn không có quyền thực hiện thao tác này.",
+  options: StaffOptions = {},
+) {
   const account = await getCurrentAccount();
   const accessToken = await getAccessToken();
   if (!account || !accessToken) {
     return { error: NextResponse.json({ error: "Chưa đăng nhập." }, { status: 401 }) };
   }
-  if (!isStaffProfile(account.profile)) {
+  if (!hasAccess(account.profile, options)) {
     return { error: NextResponse.json({ error: forbiddenMessage }, { status: 403 }) };
   }
   return { account, accessToken, userId: account.user.id };

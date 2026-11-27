@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isStaffProfile } from "@/lib/admin/staff";
 import { getCurrentAccount } from "@/lib/supabase/auth";
 import { changePasswordResponse } from "@/lib/supabase/password";
 import { getUserDisplayEmail } from "@/lib/supabase/user-display";
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (account.profile?.role !== "admin" || account.profile.status !== "active") {
+    if (!isStaffProfile(account.profile)) {
       return NextResponse.json(
         { error: "Bạn không có quyền đổi mật khẩu quản trị." },
         { status: 403 },

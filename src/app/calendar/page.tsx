@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
@@ -5,6 +6,12 @@ import CalendarBackdrop from "@/com/calendar/CalendarBackdrop";
 import CalendarPageClient from "@/com/calendar/CalendarPageClient";
 import { getEvents, getEventViewer } from "@/lib/events/events";
 import type { ChurchEvent } from "@/lib/events/types";
+
+export const metadata: Metadata = {
+  title: "Lịch sự kiện",
+  description: "Lịch nhóm thờ phượng, sinh hoạt và các sự kiện sắp tới của Hội Thánh.",
+  alternates: { canonical: "/calendar" },
+};
 
 export default async function CalendarPage() {
   const [eventsResult, { viewer, registeredEventIds }] = await Promise.all([

@@ -5,9 +5,15 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { FacebookIcon, YoutubeIcon } from "@/com/shared/Icons";
 import { navItems } from "@/com/shared/data";
+import { SOCIAL_LINKS } from "@/lib/site";
 
 // Cùng thứ tự với menu trên Header.
 const quickLinks = navItems;
+
+const socialLinks = [
+  { label: "Facebook", href: SOCIAL_LINKS.facebook, Icon: FacebookIcon },
+  { label: "Youtube", href: SOCIAL_LINKS.youtube, Icon: YoutubeIcon },
+].filter((link) => link.href);
 
 const legalLinks = [
   { label: "Chính sách bảo mật", href: "/privacy" },
@@ -87,27 +93,25 @@ export default function Footer() {
           <div>
             <p className="text-sm font-semibold">Theo dõi</p>
             <div className="mt-5 flex gap-3">
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white bg-white text-black transition-colors hover:border-[#0066cc] hover:bg-[#0066cc] hover:text-white"
-                aria-label="Facebook"
-              >
-                <FacebookIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white bg-white text-black transition-colors hover:border-[#0066cc] hover:bg-[#0066cc] hover:text-white"
-                aria-label="Youtube"
-              >
-                <YoutubeIcon className="h-4 w-4" />
-              </a>
+              {socialLinks.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white bg-white text-black transition-colors hover:border-[#0066cc] hover:bg-[#0066cc] hover:text-white"
+                  aria-label={label}
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
         <hr className="mt-9 border-white/12" />
         <p className="mt-5 text-center text-sm font-semibold text-white/56">
-          © 2026 HTTL. Khánh Hội. All rights reserved.
+          © {new Date().getFullYear()} HTTL. Khánh Hội. All rights reserved.
         </p>
       </div>
     </footer>

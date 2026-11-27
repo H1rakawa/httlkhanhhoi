@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireStaffApi } from "@/lib/admin/staff";
 import { createClient } from "@supabase/supabase-js";
-import { getCurrentAccount } from "@/lib/supabase/auth";
 import {
   getSupabaseServiceRoleKey,
   getSupabaseUrl,
@@ -51,6 +51,7 @@ type SubmissionRow = {
   user_id: string;
   status: "draft" | "submitted" | "graded";
   grade?: number | null;
+  submitted_at?: string | null;
 };
 
 type ProfileRow = {
@@ -69,25 +70,8 @@ function createSupabaseAdminClient() {
   });
 }
 
-async function requireAdmin() {
-  const account = await getCurrentAccount();
-
-  if (!account) {
-    return {
-      error: NextResponse.json({ error: "Chưa đăng nhập." }, { status: 401 }),
-    };
-  }
-
-  if (account.profile?.role !== "admin" || account.profile.status !== "active") {
-    return {
-      error: NextResponse.json(
-        { error: "Bạn không có quyền xem bài tập này." },
-        { status: 403 },
-      ),
-    };
-  }
-
-  return { account };
+function requireAdmin() {
+  return requireStaffApi("Bạn không có quyền xem bài tập này.");
 }
 
 function rawAssignmentId(id: string) {
@@ -133,7 +117,7 @@ function mapSubmission(submission: SubmissionRow, profiles: Map<string, ProfileR
     avatarUrl: profile?.avatar_url || null,
     status: submission.status,
     grade: submission.grade ?? null,
-    submittedAt: null,
+    submittedAt: submission.submitted_at ?? null,
   };
 }
 
@@ -172,7 +156,8 @@ export async function GET(
         .eq("role", "member"),
       supabaseAdmin
         .from("submissions")
-        .select("id,user_id,status,grade")
+        .select("id,user_id,status,grade,submitted_at")
+        .order("submitted_at", { ascending: false, nullsFirst: false })
         .eq("assignment_id", assignmentRow.id),
     ]);
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/com/Header";
 import Footer from "@/com/Footer";
 import AboutHero from "@/com/about/AboutHero";
@@ -7,6 +8,12 @@ import HistoryTimeline from "@/com/about/HistoryTimeline";
 import LeadershipTeam from "@/com/about/LeadershipTeam";
 import MissionVision from "@/com/about/MissionVision";
 import QuickContact from "@/com/about/QuickContact";
+
+export const metadata: Metadata = {
+  title: "Giới thiệu",
+  description: "Lịch sử, niềm tin và các mục vụ của Hội Thánh Tin Lành Khánh Hội.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (

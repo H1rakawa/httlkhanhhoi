@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AssignmentBackdrop from "@/com/assignment/AssignmentBackdrop";
 import AssignmentPageClient from "@/com/assignment/AssignmentPageClient";
@@ -6,6 +7,12 @@ import Footer from "@/com/Footer";
 import Header from "@/com/Header";
 import { getMemberAssignments } from "@/lib/assignments/assignments";
 import { getAccessToken, getCurrentUser } from "@/lib/supabase/auth";
+
+export const metadata: Metadata = {
+  title: "Bài tập",
+  description: "Bài tập học Kinh Thánh dành cho thành viên.",
+  robots: { index: false, follow: false },
+};
 
 export default async function AssignmentPage() {
   const user = await getCurrentUser();

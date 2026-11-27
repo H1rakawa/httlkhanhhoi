@@ -29,6 +29,7 @@ export default function AdminShell({
           adminId={account.user.id}
           displayName={getUserDisplayName(account.user, account.profile)}
           avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+          role={account.profile?.role}
           activeHref={activeHref}
         />
         <section className="min-w-0">

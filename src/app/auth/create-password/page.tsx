@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import NextLink from "next/link";
 import AuthBackdrop from "@/com/auth/AuthBackdrop";
 import ResetPasswordForm from "@/com/auth/ResetPasswordForm";
+
+export const metadata: Metadata = {
+  title: "Tạo mật khẩu",
+  robots: { index: false, follow: false },
+};
 
 export default function CreatePasswordPage() {
   return (

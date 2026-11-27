@@ -9,6 +9,7 @@ type AdminProfileContentProps = {
   email: string;
   phone?: string | null;
   avatarUrl: string | null;
+  viewerRole?: string | null;
 };
 
 function Field({
@@ -37,8 +38,9 @@ export default function AdminProfileContent({
   email,
   phone,
   avatarUrl,
+  viewerRole,
 }: AdminProfileContentProps) {
-  const role = "Trưởng Ban sự kiện";
+  const role = viewerRole === "teacher" ? "Giáo viên" : "Quản trị viên";
   const initial = (displayName.charAt(0) || email.charAt(0) || "A").toUpperCase();
 
   return (
@@ -47,6 +49,7 @@ export default function AdminProfileContent({
         adminId={adminId}
         displayName={displayName}
         avatarUrl={avatarUrl}
+        role={viewerRole}
       />
 
       <section className="min-w-0">

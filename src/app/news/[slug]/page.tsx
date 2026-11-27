@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,6 +21,27 @@ function formatDate(date: string) {
     month: "long",
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
+}
+
+export async function generateMetadata({ params }: NewsDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post =
+    (await getPublishedNewsPostBySlug(slug).catch(() => null)) ||
+    newsPosts.find((item) => item.slug === slug);
+  if (!post) return { title: "Không tìm thấy bài viết" };
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: `/news/${post.slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: post.date,
+      authors: [post.author],
+      ...(post.photo ? { images: [{ url: post.photo }] } : {}),
+    },
+  };
 }
 
 export async function generateStaticParams() {

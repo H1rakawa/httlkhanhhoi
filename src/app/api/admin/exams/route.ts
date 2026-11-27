@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireStaffApi } from "@/lib/admin/staff";
 import { createClient } from "@supabase/supabase-js";
-import { getCurrentAccount } from "@/lib/supabase/auth";
 import {
   getSupabaseUrl,
   getSupabaseServiceRoleKey,
@@ -56,25 +56,8 @@ function createSupabaseAdminClient() {
   });
 }
 
-async function requireAdmin() {
-  const account = await getCurrentAccount();
-
-  if (!account) {
-    return {
-      error: NextResponse.json({ error: "Chưa đăng nhập." }, { status: 401 }),
-    };
-  }
-
-  if (account.profile?.role !== "admin" || account.profile.status !== "active") {
-    return {
-      error: NextResponse.json(
-        { error: "Bạn không có quyền quản lý bài tập." },
-        { status: 403 },
-      ),
-    };
-  }
-
-  return { account };
+function requireAdmin() {
+  return requireStaffApi("Bạn không có quyền quản lý bài tập.");
 }
 
 function formatExamDate(value: string | null) {

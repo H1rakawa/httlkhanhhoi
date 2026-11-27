@@ -7,12 +7,15 @@ import HeroBanner from "@/com/home/HeroBanner";
 import HomeParallaxBackdrop from "@/com/home/HomeParallaxBackdrop";
 import KeyMessages from "@/com/home/KeyMessages";
 import SermonVideos from "@/com/news/SermonVideos";
+import { getLatestAnnouncement } from "@/lib/news/posts";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const notice = await getLatestAnnouncement();
+
   return (
     <main className="relative min-h-screen overflow-clip bg-transparent text-[#1d1d1f]">
       <HomeParallaxBackdrop />
-      <Header activePath="/" showNotice />
+      <Header activePath="/" notice={notice} />
       <HeroBanner />
       <div className="relative z-10 space-y-16 px-4 py-14 md:space-y-24 md:px-6 md:py-20">
         <AboutSummary />
