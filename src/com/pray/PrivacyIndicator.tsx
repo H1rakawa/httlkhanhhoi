@@ -1,7 +1,7 @@
-import { PrayerPrivacy } from "@/com/pray/prayData";
+import { PRAYER_PRIVACY_LABELS, type PrayerPrivacy } from "@/com/pray/prayData";
 
 export default function PrivacyIndicator({ privacy }: { privacy: PrayerPrivacy }) {
-  const isPrivate = privacy === "Riêng tư";
+  const isPrivate = privacy === "private";
 
   return (
     <span
@@ -12,7 +12,7 @@ export default function PrivacyIndicator({ privacy }: { privacy: PrayerPrivacy }
           : "border-[#6c4cff]/22 bg-[#f0ecff] text-[#6c4cff]",
       ].join(" ")}
     >
-      {privacy}
+      {PRAYER_PRIVACY_LABELS[privacy]}
     </span>
   );
 }

@@ -1,16 +1,26 @@
-const stats = [
-  { label: "Bài tập đã xong", value: "12", color: "border-[#0066cc]" },
-  { label: "Điểm trung bình", value: "8.5", color: "border-[#0066cc]" },
-  { label: "Thông báo mới", value: "3", color: "border-[#ff7a00]", accent: true },
-];
+export default function QuickStats({
+  completed,
+  average,
+  unread,
+}: {
+  completed: number;
+  average: string | null;
+  unread: number;
+}) {
+  const stats = [
+    { label: "Bài tập đã xong", value: String(completed), accent: false },
+    { label: "Điểm trung bình", value: average ?? "—", accent: false },
+    { label: "Thông báo mới", value: String(unread), accent: unread > 0 },
+  ];
 
-export default function QuickStats() {
   return (
     <section className="grid h-full gap-4 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`liquid-glass-item flex h-full flex-col justify-center border-b-[3px] ${stat.color} p-5`}
+          className={`liquid-glass-item flex h-full flex-col justify-center border-b-[3px] p-5 ${
+            stat.accent ? "border-[#ff7a00]" : "border-[#0066cc]"
+          }`}
         >
           <p className="text-sm text-[#8a8a8f]">{stat.label}</p>
           <p

@@ -3,16 +3,21 @@ export default function WelcomePanel({
   email,
   avatarUrl,
   status,
+  role,
 }: {
   displayName: string;
   email: string;
   avatarUrl?: string | null;
   status: string;
+  role: string;
 }) {
+  const roleLabel =
+    role === "admin" ? "Quản trị viên" : role === "teacher" ? "Giáo viên" : "Thành viên";
   const today = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
     day: "2-digit",
     month: "long",
+    timeZone: "Asia/Ho_Chi_Minh",
   }).format(new Date());
   const initial =
     email.charAt(0).toUpperCase() || displayName.charAt(0).toUpperCase();
@@ -39,11 +44,11 @@ export default function WelcomePanel({
               Chào mừng trở lại, {displayName}
             </h1>
             <p className="mt-3 inline-flex rounded-full border border-[#cfe0f7] bg-[#eef5ff] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[#0066cc]">
-              Thành viên tích cực
+              {roleLabel}
             </p>
             <p className="mt-3 text-sm text-[#6e6e73]">
-              Tài khoản đã xác minh ·{" "}
-              {status === "active" ? "Hoạt động tốt" : "Đang tạm ngưng"}
+              {email}
+              {status !== "active" && " · Tài khoản đang tạm ngưng"}
             </p>
           </div>
         </div>

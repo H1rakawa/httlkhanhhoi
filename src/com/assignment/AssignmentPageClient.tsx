@@ -1,89 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 import {
-  AssignmentStatus,
-  assignmentCategories,
+  type AssignmentItem,
   assignmentRouteId,
   assignmentStatuses,
-  categoryFromWeek,
-  fallbackAssignments,
+  formatDueDate,
+  statusClasses,
 } from "@/com/assignment/assignmentData";
 
-type ApiAssignment = {
-  id: number;
-  title: string;
-  description: string | null;
-  category: string | null;
-  week_number: number | null;
-  attachment_url: string | null;
-  due_date: string | null;
-  submissions?: Array<{
-    status: "draft" | "submitted" | "graded";
-    grade: number | null;
-  }>;
+type AssignmentPageClientProps = {
+  assignments: AssignmentItem[];
+  loadError: string | null;
 };
 
-function statusFromApi(assignment: ApiAssignment): AssignmentStatus {
-  const submission = assignment.submissions?.[0];
-  if (submission?.status === "graded") return "Đã chấm";
-  if (submission?.status === "submitted") return "Đã nộp";
-  if (submission?.status === "draft") return "Đang thực hiện";
-  if (assignment.due_date && new Date(`${assignment.due_date}T23:59:59`) < new Date()) {
-    return "Trễ hạn";
-  }
-  return "Chưa bắt đầu";
-}
-
-function statusClasses(status: AssignmentStatus) {
-  if (status === "Đã chấm") return "bg-[#e5f7ec] text-[#14743a]";
-  if (status === "Đã nộp") return "bg-[#eaf3ff] text-[#0066cc]";
-  if (status === "Đang thực hiện") return "bg-[#fff2cf] text-[#855c00]";
-  if (status === "Trễ hạn") return "bg-[#ffe9e7] text-[#b42318]";
-  return "bg-white/66 text-[#6e6e73]";
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(`${date}T12:00:00`));
-}
-
-export default function AssignmentPageClient() {
-  const [assignments, setAssignments] = useState(fallbackAssignments);
+export default function AssignmentPageClient({ assignments, loadError }: AssignmentPageClientProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Tất cả");
   const [status, setStatus] = useState("Tất cả trạng thái");
   const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/assignments", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as ApiAssignment[];
-      })
-      .then((data) => {
-        if (!data?.length) return;
-        setAssignments(
-          data.map((assignment) => ({
-            id: `HW-${String(assignment.id).padStart(3, "0")}`,
-            title: assignment.title,
-            description: assignment.description || "Bài tập học tập và rèn luyện.",
-            category: assignment.category || categoryFromWeek(assignment.week_number),
-            dueDate: assignment.due_date || new Date().toISOString().slice(0, 10),
-            weekNumber: assignment.week_number,
-            attachmentUrl: assignment.attachment_url,
-            status: statusFromApi(assignment),
-            grade: assignment.submissions?.[0]?.grade,
-          })),
-        );
-      })
-      .catch(() => undefined);
-  }, []);
+  const categories = useMemo(
+    () => ["Tất cả", ...new Set(assignments.map((assignment) => assignment.category))],
+    [assignments],
+  );
 
   const filteredAssignments = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -91,7 +33,7 @@ export default function AssignmentPageClient() {
     return assignments.filter((assignment) => {
       const matchesQuery =
         !normalizedQuery ||
-        [assignment.id, assignment.title, assignment.description, assignment.category]
+        [assignment.id, assignment.title, assignment.description ?? "", assignment.category]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);
@@ -178,7 +120,7 @@ export default function AssignmentPageClient() {
                 onChange={(event) => setCategory(event.target.value)}
                 className="h-12 shrink-0 rounded-full border border-white/90 bg-white/72 px-5 text-sm font-semibold outline-none focus:border-[#0066cc]"
               >
-                {assignmentCategories.map((item) => (
+                {categories.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
@@ -231,9 +173,11 @@ export default function AssignmentPageClient() {
                 <p className="text-sm font-semibold text-[#6e6e73]">#{assignment.id}</p>
                 <div>
                   <h2 className="text-base font-semibold">{assignment.title}</h2>
-                  <p className="mt-1 text-sm leading-6 text-[#6e6e73]">
-                    {assignment.description}
-                  </p>
+                  {assignment.description && (
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-[#6e6e73]">
+                      {assignment.description}
+                    </p>
+                  )}
                 </div>
                 <p className="w-fit rounded-full border border-white bg-white/62 px-3 py-2 text-xs font-semibold text-[#4f5865]">
                   {assignment.category}
@@ -244,7 +188,7 @@ export default function AssignmentPageClient() {
                   {assignment.status}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold">{formatDate(assignment.dueDate)}</p>
+                  <p className="text-sm font-semibold">{formatDueDate(assignment.dueDate)}</p>
                   {assignment.grade != null && (
                     <p className="mt-1 text-xs font-semibold text-[#14743a]">
                       Điểm: {assignment.grade}/10
@@ -263,9 +207,18 @@ export default function AssignmentPageClient() {
 
           {filteredAssignments.length === 0 && (
             <div className="px-6 py-16 text-center">
-              <p className="text-lg font-semibold">Không tìm thấy bài tập phù hợp</p>
+              <p className="text-lg font-semibold">
+                {loadError
+                  ? "Chưa tải được bài tập"
+                  : assignments.length === 0
+                    ? "Chưa có bài tập nào được giao"
+                    : "Không tìm thấy bài tập phù hợp"}
+              </p>
               <p className="mt-2 text-sm text-[#6e6e73]">
-                Hãy thử thay đổi từ khóa hoặc bộ lọc.
+                {loadError ||
+                  (assignments.length === 0
+                    ? "Bài tập mới từ giáo viên sẽ hiện ở đây."
+                    : "Hãy thử thay đổi từ khóa hoặc bộ lọc.")}
               </p>
             </div>
           )}

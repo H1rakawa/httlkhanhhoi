@@ -1,95 +1,89 @@
-export type PrayerPrivacy = "Công khai" | "Riêng tư";
-export type PrayerStatus = "Đang cầu nguyện" | "Đã nhận lời";
+export const PRAYER_CATEGORIES = ["Sức khỏe", "Gia đình", "Tâm linh", "Tài chính", "Khác"] as const;
+export type PrayerCategory = (typeof PRAYER_CATEGORIES)[number];
 
-export type PrayerComment = {
-  name: string;
-  time: string;
-  message: string;
-  image?: string;
+export type PrayerPrivacy = "public" | "private";
+export type PrayerStatus = "pending" | "approved" | "answered" | "rejected";
+
+export const PRAYER_STATUS_LABELS: Record<PrayerStatus, string> = {
+  pending: "Chờ duyệt",
+  approved: "Đang cầu nguyện",
+  answered: "Đã nhận lời",
+  rejected: "Không được duyệt",
+};
+
+export const PRAYER_PRIVACY_LABELS: Record<PrayerPrivacy, string> = {
+  public: "Công khai",
+  private: "Riêng tư",
 };
 
 export type PrayerRequest = {
   id: string;
   title: string;
-  author: string;
-  time: string;
-  privacy: PrayerPrivacy;
-  status: PrayerStatus;
-  prayedCount: number;
-  excerpt: string;
   content: string;
-  image: string;
-  comments: PrayerComment[];
+  category: string;
+  privacy: PrayerPrivacy;
+  isAnonymous: boolean;
+  status: PrayerStatus;
+  imageUrl: string | null;
+  intercessionCount: number;
+  createdAt: string;
+  answeredAt: string | null;
+  isMine: boolean;
+  hasInterceded: boolean;
+  commentCount: number;
+  /** null khi lời cầu nguyện ẩn danh và người xem không phải chủ/ban mục vụ. */
+  authorName: string | null;
+  authorAvatar: string | null;
 };
 
-export const prayerRequests: PrayerRequest[] = [
-  {
-    id: "family-health",
-    title: "Cầu nguyện cho sức khỏe gia đình",
-    author: "Minh Tuấn",
-    time: "2 giờ trước",
-    privacy: "Công khai",
-    status: "Đang cầu nguyện",
-    prayedCount: 128,
-    image:
-      "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=240&q=85",
-    excerpt:
-      "Con xin mọi người hiệp ý cầu nguyện cho mẹ con đang trong giai đoạn hồi phục sau phẫu thuật.",
-    content:
-      "Con xin mọi người hiệp ý cầu nguyện cho mẹ con đang trong giai đoạn hồi phục sau phẫu thuật. Mong rằng ơn phước sẽ luôn ở cùng bà để bà sớm bình phục và quay lại với cuộc sống thường nhật. Con cũng xin cầu nguyện cho các bác sĩ và điều dưỡng đang trực tiếp chăm sóc cho mẹ con, xin ban cho họ sự minh mẫn và đôi bàn tay khéo léo.",
-    comments: [
-      {
-        name: "Bác Hùng",
-        time: "1 giờ trước",
-        message: "Hiệp ý cùng con. Xin Chúa ban bình an và sự chữa lành cho mẹ con.",
-        image:
-          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=85",
-      },
-      {
-        name: "Phương Anh",
-        time: "45 phút trước",
-        message: "Mạnh mẽ lên nhé bạn. Mọi chuyện rồi sẽ tốt đẹp thôi.",
-        image:
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=85",
-      },
-    ],
-  },
-  {
-    id: "exam-thanks",
-    title: "Tạ ơn về kỳ thi vừa qua",
-    author: "Khánh Linh",
-    time: "5 giờ trước",
-    privacy: "Công khai",
-    status: "Đã nhận lời",
-    prayedCount: 42,
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=240&q=85",
-    excerpt:
-      "Thật hạnh phúc khi được thông báo rằng mình đã vượt qua kỳ thi chứng chỉ với kết quả tốt.",
-    content:
-      "Thật hạnh phúc khi được thông báo rằng mình đã vượt qua kỳ thi chứng chỉ với kết quả tốt. Cảm ơn mọi người đã đồng hành và cầu thay cho mình trong suốt thời gian ôn luyện vất vả vừa qua.",
-    comments: [
-      {
-        name: "Mai Chi",
-        time: "3 giờ trước",
-        message: "Tạ ơn Chúa cùng em. Mong em tiếp tục bước đi vững vàng.",
-      },
-    ],
-  },
-  {
-    id: "work-guidance",
-    title: "Xin Chúa hướng dẫn trong công việc mới",
-    author: "Hà My",
-    time: "Hôm qua",
-    privacy: "Riêng tư",
-    status: "Đang cầu nguyện",
-    prayedCount: 63,
-    image:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=240&q=85",
-    excerpt:
-      "Mình sắp bước vào môi trường làm việc mới và cần sự bình an để học hỏi, thích nghi.",
-    content:
-      "Mình sắp bước vào môi trường làm việc mới và cần sự bình an để học hỏi, thích nghi. Xin Chúa giúp mình có sự khôn ngoan trong giao tiếp, tinh thần phục vụ và lòng khiêm nhường.",
-    comments: [],
-  },
-];
+export type PrayerComment = {
+  id: string;
+  message: string;
+  imageUrl: string | null;
+  createdAt: string;
+  isMine: boolean;
+  authorName: string | null;
+  authorAvatar: string | null;
+};
+
+/** Chỉ cầu thay / động viên được khi lời cầu nguyện đã được duyệt. */
+export function isPrayerOpen(request: Pick<PrayerRequest, "status">) {
+  return request.status === "approved" || request.status === "answered";
+}
+
+export function prayerAuthorLabel(
+  request: Pick<PrayerRequest, "authorName" | "isAnonymous" | "isMine">,
+) {
+  if (request.authorName) {
+    return request.isAnonymous && request.isMine
+      ? `${request.authorName} (ẩn danh)`
+      : request.authorName;
+  }
+  return request.isAnonymous ? "Ẩn danh" : "Thành viên";
+}
+
+export function initials(name: string | null) {
+  if (!name) return "?";
+  const words = name.trim().split(/\s+/);
+  const letters =
+    words.length > 1 ? `${words[0][0]}${words[words.length - 1][0]}` : words[0].slice(0, 2);
+  return letters.toUpperCase();
+}
+
+const relativeFormat = new Intl.RelativeTimeFormat("vi-VN", { numeric: "auto" });
+const dateFormat = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Asia/Ho_Chi_Minh",
+});
+
+export function relativeTime(date: string, now = Date.now()) {
+  const seconds = Math.round((new Date(date).getTime() - now) / 1000);
+  const abs = Math.abs(seconds);
+  if (abs < 60) return "Vừa xong";
+  if (abs < 3600) return relativeFormat.format(Math.round(seconds / 60), "minute");
+  if (abs < 86400) return relativeFormat.format(Math.round(seconds / 3600), "hour");
+  if (abs < 7 * 86400) return relativeFormat.format(Math.round(seconds / 86400), "day");
+  return dateFormat.format(new Date(date));
+}
