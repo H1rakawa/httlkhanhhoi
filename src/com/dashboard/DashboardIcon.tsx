@@ -104,6 +104,15 @@ export default function DashboardIcon({
     );
   }
 
+  if (name === "user") {
+    return (
+      <svg {...commonProps}>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+      </svg>
+    );
+  }
+
   if (name === "settings") {
     return (
       <svg {...commonProps}>

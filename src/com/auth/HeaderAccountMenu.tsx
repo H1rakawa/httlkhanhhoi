@@ -195,19 +195,13 @@ export default function HeaderAccountMenu() {
           onAction={handleAction}
           className="p-3 outline-none"
         >
-          {canOpenAdmin && (
-            <Dropdown.Item id="admin" className={itemClassName("admin")}>
-              <DashboardIcon name="settings" className="h-5 w-5" />
-              <span>Admin</span>
-            </Dropdown.Item>
-          )}
+          <Dropdown.Item id="profile" className={itemClassName("profile")}>
+            <DashboardIcon name="user" className="h-5 w-5" />
+            <span>Hồ sơ cá nhân</span>
+          </Dropdown.Item>
           <Dropdown.Item id="dashboard" className={itemClassName("dashboard")}>
             <DashboardIcon name="dashboard" className="h-5 w-5" />
             <span>Bảng điều khiển</span>
-          </Dropdown.Item>
-          <Dropdown.Item id="profile" className={itemClassName("profile")}>
-            <DashboardIcon name="settings" className="h-5 w-5" />
-            <span>Hồ sơ cá nhân</span>
           </Dropdown.Item>
           <Dropdown.Item
             id="assignments"
@@ -224,6 +218,12 @@ export default function HeaderAccountMenu() {
             <DashboardIcon name="community" className="h-5 w-5" />
             <span>Cầu thay</span>
           </Dropdown.Item>
+          {canOpenAdmin && (
+            <Dropdown.Item id="admin" className={itemClassName("admin")}>
+              <DashboardIcon name="settings" className="h-5 w-5" />
+              <span>Admin</span>
+            </Dropdown.Item>
+          )}
           <Dropdown.Item
             id="logout"
             className="account-menu-item mt-2 border-t border-[#8aa0b5]/20 pt-4 text-[#0077dd]"
