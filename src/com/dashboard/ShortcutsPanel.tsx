@@ -5,6 +5,7 @@ const shortcuts = [
   { label: "Làm bài tập", href: "/assignment", icon: "upload", primary: true },
   { label: "Thư viện", href: "/library", icon: "book" },
   { label: "Cầu thay", href: "/pray", icon: "community" },
+  { label: "Hồ sơ", href: "/profile", icon: "settings" },
 ];
 
 export default function ShortcutsPanel() {

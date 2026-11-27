@@ -45,6 +45,7 @@ function isAdminAccount(account: Account | null) {
 const accountRoutes: Record<string, string> = {
   admin: "/admin",
   dashboard: "/dashboard",
+  profile: "/profile",
   assignments: "/assignment",
   library: "/library",
   pray: "/pray",
@@ -203,6 +204,10 @@ export default function HeaderAccountMenu() {
           <Dropdown.Item id="dashboard" className={itemClassName("dashboard")}>
             <DashboardIcon name="dashboard" className="h-5 w-5" />
             <span>Bảng điều khiển</span>
+          </Dropdown.Item>
+          <Dropdown.Item id="profile" className={itemClassName("profile")}>
+            <DashboardIcon name="settings" className="h-5 w-5" />
+            <span>Hồ sơ cá nhân</span>
           </Dropdown.Item>
           <Dropdown.Item
             id="assignments"

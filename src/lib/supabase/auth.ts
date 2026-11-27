@@ -19,6 +19,12 @@ export type SupabaseAuthUser = {
     avatar_url?: string;
     picture?: string;
   };
+  app_metadata?: {
+    provider?: string;
+    providers?: string[];
+  };
+  created_at?: string;
+  last_sign_in_at?: string;
 };
 
 type AuthSession = {
@@ -117,9 +123,10 @@ export async function getCurrentAccount() {
         avatar_url: string | null;
         role: string;
         status: string;
+        created_at: string;
       }>
     >(
-      `profiles?id=eq.${user.id}&select=id,name,email,phone,avatar_url,role,status`,
+      `profiles?id=eq.${user.id}&select=id,name,email,phone,avatar_url,role,status,created_at`,
       accessToken,
     );
 

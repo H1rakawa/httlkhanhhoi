@@ -87,7 +87,13 @@ function PasswordField({
   );
 }
 
-export default function AdminPasswordSecurity() {
+export default function AdminPasswordSecurity({
+  endpoint = "/api/admin/password",
+  accountLabel = "quản trị",
+}: {
+  endpoint?: string;
+  accountLabel?: string;
+} = {}) {
   const [form, setForm] = useState<PasswordForm>(initialForm);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -138,7 +144,7 @@ export default function AdminPasswordSecurity() {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/admin/password", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -156,10 +162,10 @@ export default function AdminPasswordSecurity() {
       setIsConfirmOpen(false);
       setMessage({
         type: "success",
-        text: data.message || "Mật khẩu quản trị đã được cập nhật.",
+        text: data.message || `Mật khẩu ${accountLabel} đã được cập nhật.`,
       });
       toast.success("Đổi mật khẩu thành công", {
-        description: "Mật khẩu quản trị đã được cập nhật.",
+        description: `Mật khẩu ${accountLabel} đã được cập nhật.`,
         timeout: 3500,
       });
     } catch (error) {
@@ -261,7 +267,7 @@ export default function AdminPasswordSecurity() {
                 Bạn có chắc muốn đổi mật khẩu không?
               </h3>
               <p className="mt-3 text-sm font-medium leading-6 text-[#667085]">
-                Sau khi xác nhận, mật khẩu quản trị sẽ được cập nhật ngay. Hãy
+                Sau khi xác nhận, mật khẩu {accountLabel} sẽ được cập nhật ngay. Hãy
                 đảm bảo bạn đã ghi nhớ mật khẩu mới.
               </p>
             </div>
