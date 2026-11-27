@@ -5,21 +5,14 @@ import { createPortal } from "react-dom";
 import { Button, toast } from "@heroui/react";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
 import { MEMBER_ROLES, ROLE_LABELS } from "@/lib/roles";
+import type { Ministry } from "@/lib/ministries";
+import MinistryPicker from "@/com/admin/member/MinistryPicker";
 
 const ROLE_OPTIONS = [...MEMBER_ROLES].reverse().map((role) => ({
   value: role,
   label: ROLE_LABELS[role],
 }));
 
-const MINISTRY_OPTIONS = [
-  "Ban Truyền giảng",
-  "Ban Cầu thay",
-  "Ban Thờ phượng",
-  "Ban Thiếu nhi",
-  "Ban Thanh niên",
-  "Ban Truyền thông",
-  "Ban Thư viện",
-];
 
 const COUNTRY_OPTIONS = [
   { code: "+84", flag: "🇻🇳", label: "Việt Nam" },
@@ -35,7 +28,7 @@ type MemberForm = {
   phoneCode: string;
   phoneNumber: string;
   role: string;
-  ministry: string;
+  ministries: Ministry[];
   isWorker: boolean;
 };
 
@@ -56,7 +49,7 @@ const initialForm: MemberForm = {
   phoneCode: COUNTRY_OPTIONS[0].code,
   phoneNumber: "",
   role: "member",
-  ministry: MINISTRY_OPTIONS[0],
+  ministries: [],
   isWorker: false,
 };
 
@@ -209,7 +202,7 @@ export default function AdminAddMemberButton({
     };
   }, [isModalOpen]);
 
-  const updateField = (field: keyof MemberForm, value: string | boolean) => {
+  const updateField = (field: keyof MemberForm, value: string | boolean | Ministry[]) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
@@ -238,8 +231,7 @@ export default function AdminAddMemberButton({
           email: form.email,
           phone,
           role: form.role,
-          team: form.ministry,
-          ministry: form.ministry,
+          ministries: form.ministries,
           isWorker: form.isWorker,
         }),
       });
@@ -399,19 +391,20 @@ export default function AdminAddMemberButton({
                       setActiveKey={setActiveDropdown}
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <FieldLabel htmlFor="member-ministry">Ban Ngành</FieldLabel>
-                    <SelectDropdown
-                      id="member-ministry"
-                      value={form.ministry}
-                      options={MINISTRY_OPTIONS.map((ministry) => ({
-                        value: ministry,
-                        label: ministry,
-                      }))}
-                      onChange={(value) => updateField("ministry", value)}
-                      openKey="ministry"
-                      activeKey={activeDropdown}
-                      setActiveKey={setActiveDropdown}
+                  <div className="grid gap-2 md:col-span-2">
+                    <p
+                      id="member-ministries"
+                      className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#39434d]"
+                    >
+                      Ban ngành{" "}
+                      <span className="normal-case tracking-normal text-[#8a94a6]">
+                        (chọn được nhiều ban)
+                      </span>
+                    </p>
+                    <MinistryPicker
+                      labelledBy="member-ministries"
+                      value={form.ministries}
+                      onChange={(value) => updateField("ministries", value)}
                     />
                   </div>
                 </div>

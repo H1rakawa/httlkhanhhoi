@@ -4,6 +4,8 @@ import { toast } from "@heroui/react";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { MEMBER_ROLES, ROLE_DESCRIPTIONS, ROLE_LABELS, type MemberRole } from "@/lib/roles";
+import type { Ministry } from "@/lib/ministries";
+import MinistryPicker, { MinistryChips } from "./MinistryPicker";
 import type { AdminMember } from "./memberData";
 
 export type MemberRowAction = "reset-password" | "block" | "unblock" | "delete";
@@ -380,6 +382,95 @@ export function MemberActionMenu({
                 Đây là tài khoản bạn đang đăng nhập.
               </p>
             )}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
+}
+
+/** Ô ban ngành: bấm để mở bảng chọn nhiều ban, bấm "Lưu" mới ghi. */
+export function MemberMinistrySelect({
+  member,
+  max = 2,
+  onSave,
+}: {
+  member: AdminMember;
+  max?: number;
+  onSave: (ministries: Ministry[]) => Promise<boolean>;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Ministry[]>(member.ministries);
+  const [saving, setSaving] = useState(false);
+  const close = () => !saving && setOpen(false);
+  const position = useAnchoredMenu(open, triggerRef, menuRef, 360, "start", close);
+  const changed = draft.join() !== member.ministries.join();
+
+  const save = async () => {
+    setSaving(true);
+    const ok = await onSave(draft);
+    setSaving(false);
+    if (ok) setOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => {
+          if (!open) setDraft(member.ministries);
+          setOpen((value) => !value);
+        }}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`Ban ngành của ${member.name}. Bấm để chỉnh sửa`}
+        className={[
+          "flex w-full min-w-0 items-center gap-1.5 rounded-[12px] px-1.5 py-1 text-left transition hover:bg-white/60",
+          open ? "bg-white/70 ring-2 ring-[#0066cc]/20" : "",
+        ].join(" ")}
+      >
+        <span className="min-w-0 flex-1">
+          <MinistryChips value={member.ministries} max={max} />
+        </span>
+        <Icon path="m6 9 6 6 6-6" className="h-3.5 w-3.5 text-[#98a2b3]" />
+      </button>
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="dialog"
+            aria-label={`Chọn ban ngành cho ${member.name}`}
+            className={`${menuClassName} p-3`}
+            style={{ ...position, width: 360 }}
+          >
+            <p className="px-1 pb-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#8a94a6]">
+              Ban ngành · {member.name}
+            </p>
+            <MinistryPicker value={draft} onChange={setDraft} />
+            <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#eef2f6] pt-3">
+              <span className="text-xs font-bold text-[#667085]">Đã chọn {draft.length} ban</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={close}
+                  disabled={saving}
+                  className="h-9 rounded-full px-4 text-xs font-extrabold text-[#475467] hover:bg-[#f3f7fb]"
+                >
+                  Huỷ
+                </button>
+                <button
+                  type="button"
+                  onClick={save}
+                  disabled={saving || !changed}
+                  className="h-9 rounded-full bg-[#0066cc] px-4 text-xs font-extrabold text-white transition hover:bg-[#0077ee] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? "Đang lưu…" : "Lưu"}
+                </button>
+              </div>
+            </div>
           </div>,
           document.body,
         )}

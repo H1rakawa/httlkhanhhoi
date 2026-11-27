@@ -6,10 +6,12 @@ import Pagination from "@/com/lib/Pagination";
 import { type AdminMember } from "@/com/admin/member/memberData";
 import {
   MemberActionMenu,
+  MemberMinistrySelect,
   MemberRoleSelect,
   type MemberRowAction,
 } from "@/com/admin/member/AdminMemberMenus";
 import type { MemberRole } from "@/lib/roles";
+import type { Ministry } from "@/lib/ministries";
 
 function BlockedPill() {
   return (
@@ -148,6 +150,7 @@ function MemberMobileCard({
   onToggleMember,
   onOpenDetail,
   onPickRole,
+  onSaveMinistries,
   onAction,
 }: {
   member: AdminMember;
@@ -156,6 +159,7 @@ function MemberMobileCard({
   onToggleMember: () => void;
   onOpenDetail: () => void;
   onPickRole: (role: MemberRole) => void;
+  onSaveMinistries: (ministries: Ministry[]) => Promise<boolean>;
   onAction: (action: MemberRowAction) => void;
 }) {
   return (
@@ -215,6 +219,12 @@ function MemberMobileCard({
           Ngày tham gia
           <span className="mt-1 block text-[#65717c]">{member.joinedAt}</span>
         </button>
+        <div className="col-span-2 rounded-2xl bg-white/58 px-3 py-2">
+          Ban ngành
+          <div className="mt-1">
+            <MemberMinistrySelect member={member} max={4} onSave={onSaveMinistries} />
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -225,11 +235,13 @@ function MemberDetailModal({
   isSelf,
   onClose,
   onPickRole,
+  onSaveMinistries,
 }: {
   member: AdminMember;
   isSelf: boolean;
   onClose: () => void;
   onPickRole: (role: MemberRole) => void;
+  onSaveMinistries: (ministries: Ministry[]) => Promise<boolean>;
 }) {
   const initial = member.name.charAt(0).toUpperCase();
 
@@ -349,6 +361,15 @@ function MemberDetailModal({
             </div>
           </dl>
 
+          <section className="mt-8">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
+              Ban ngành
+            </p>
+            <div className="mt-3">
+              <MemberMinistrySelect member={member} max={13} onSave={onSaveMinistries} />
+            </div>
+          </section>
+
           <div className="mt-9 flex flex-wrap items-center justify-between gap-3 border-t border-[#dfe6ef]/80 pt-5">
             <div className="flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6b7280]">
               Vai trò
@@ -374,6 +395,7 @@ export default function AdminMemberTable({
   onToggleMember,
   onToggleAll,
   onPickRole,
+  onSaveMinistries,
   onAction,
   page,
   pageSize,
@@ -386,6 +408,7 @@ export default function AdminMemberTable({
   onToggleMember: (memberId: string) => void;
   onToggleAll: () => void;
   onPickRole: (members: AdminMember[], role: MemberRole) => void;
+  onSaveMinistries: (member: AdminMember, ministries: Ministry[]) => Promise<boolean>;
   onAction: (member: AdminMember, action: MemberRowAction) => void;
   page: number;
   pageSize: number;
@@ -423,6 +446,7 @@ export default function AdminMemberTable({
               onToggleMember={() => onToggleMember(member.id)}
               onOpenDetail={() => setActiveMember(member)}
               onPickRole={(role) => onPickRole([member], role)}
+              onSaveMinistries={(ministries) => onSaveMinistries(member, ministries)}
               onAction={(action) => onAction(member, action)}
             />
           );
@@ -441,10 +465,11 @@ export default function AdminMemberTable({
                   onClick={onToggleAll}
                 />
               </th>
-              <th className="w-[22%] px-3 py-5">Thành viên</th>
-              <th className="w-[31%] px-3 py-5">Email</th>
-              <th className="w-[17%] px-3 py-5">Vai trò</th>
-              <th className="w-[18%] px-3 py-5">Ngày tham gia</th>
+              <th className="w-[19%] px-3 py-5">Thành viên</th>
+              <th className="w-[22%] px-3 py-5">Email</th>
+              <th className="w-[15%] px-3 py-5">Vai trò</th>
+              <th className="w-[24%] px-3 py-5">Ban ngành</th>
+              <th className="w-[12%] px-3 py-5">Ngày tham gia</th>
               <th className="w-18 px-3 py-5" aria-label="Thao tác" />
             </tr>
           </thead>
@@ -496,6 +521,12 @@ export default function AdminMemberTable({
                       onPick={(role) => onPickRole([member], role)}
                     />
                   </td>
+                  <td className="px-3 py-5">
+                    <MemberMinistrySelect
+                      member={member}
+                      onSave={(ministries) => onSaveMinistries(member, ministries)}
+                    />
+                  </td>
                   <td className="px-3 py-5 text-[#65717c]">
                     <button
                       type="button"
@@ -538,6 +569,7 @@ export default function AdminMemberTable({
           isSelf={activeMember.id === currentUserId}
           onClose={() => setActiveMember(null)}
           onPickRole={(role) => onPickRole([activeMember], role)}
+          onSaveMinistries={(ministries) => onSaveMinistries(activeMember, ministries)}
         />
       )}
     </section>

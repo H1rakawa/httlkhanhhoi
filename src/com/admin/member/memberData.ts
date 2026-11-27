@@ -1,4 +1,5 @@
 import { ROLE_LABELS, type MemberRole } from "@/lib/roles";
+import { normalizeMinistries, type Ministry } from "@/lib/ministries";
 
 export type { MemberRole };
 export type MemberStatus = "active" | "inactive" | "blocked";
@@ -10,6 +11,7 @@ export type AdminMember = {
   phone: string | null;
   role: MemberRole;
   status: MemberStatus;
+  ministries: Ministry[];
   joinedAt: string;
   selected?: boolean;
   avatar: string | null;
@@ -23,6 +25,7 @@ export type AdminMemberApiProfile = {
   avatar_url: string | null;
   role: MemberRole;
   status: MemberStatus;
+  ministries?: string[] | null;
   created_at: string;
   updated_at: string;
 };
@@ -54,6 +57,7 @@ export function mapProfileToAdminMember(
     phone: profile.phone,
     role: profile.role,
     status: profile.status ?? "active",
+    ministries: normalizeMinistries(profile.ministries),
     joinedAt: formatMemberDate(profile.created_at),
     avatar: profile.avatar_url,
   };

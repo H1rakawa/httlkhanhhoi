@@ -11,6 +11,7 @@ import type { MemberRowAction } from "@/com/admin/member/AdminMemberMenus";
 import { AdminConfirmDialog } from "@/com/admin/ui/AdminUi";
 import { adminFetch } from "@/com/admin/ui/adminClient";
 import { isStaffRole, ROLE_LABELS } from "@/lib/roles";
+import { isMinistry, MINISTRY_LABELS, type Ministry } from "@/lib/ministries";
 import {
   mapProfileToAdminMember,
   type AdminMember,
@@ -142,6 +143,7 @@ export default function AdminMemberContent({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<"" | MemberRole>("");
+  const [ministry, setMinistry] = useState<"" | Ministry>("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,6 +159,7 @@ export default function AdminMemberContent({
     });
     if (query.trim()) params.set("q", query.trim());
     if (role) params.set("role", role);
+    if (ministry) params.set("ministry", ministry);
 
     try {
       const response = await fetch(`/api/admin/members?${params.toString()}`, {
@@ -186,7 +189,7 @@ export default function AdminMemberContent({
     } finally {
       setIsLoading(false);
     }
-  }, [page, query, role]);
+  }, [page, query, role, ministry]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -275,6 +278,30 @@ export default function AdminMemberContent({
     }
   };
 
+  const saveMinistries = async (member: AdminMember, ministries: Ministry[]) => {
+    try {
+      const result = await adminFetch<{ ministries: string[] }>(`/api/admin/members/${member.id}`, {
+        method: "PATCH",
+        body: { ministries },
+      });
+      const saved = result.ministries.filter(isMinistry);
+      setMembers((current) =>
+        current.map((item) => (item.id === member.id ? { ...item, ministries: saved } : item)),
+      );
+      toast.success(`Đã cập nhật ban ngành của ${member.name}`, {
+        description: saved.length ? saved.map((item) => MINISTRY_LABELS[item]).join(", ") : "Không thuộc ban nào",
+        timeout: 3500,
+      });
+      return true;
+    } catch (saveError) {
+      toast.danger("Chưa lưu được ban ngành", {
+        description: saveError instanceof Error ? saveError.message : "Vui lòng thử lại.",
+        timeout: 5000,
+      });
+      return false;
+    }
+  };
+
   const selectedMembers = members.filter((member) => selectedIds.includes(member.id));
   const confirm = pending ? confirmCopy(pending) : null;
 
@@ -296,6 +323,11 @@ export default function AdminMemberContent({
             <AdminMemberFilters
               query={query}
               role={role}
+              ministry={ministry}
+              onMinistryChange={(value) => {
+                setPage(1);
+                setMinistry(value);
+              }}
               onQueryChange={(value) => {
                 setPage(1);
                 setQuery(value);
@@ -322,6 +354,7 @@ export default function AdminMemberContent({
                 onToggleMember={toggleMember}
                 onToggleAll={toggleAllMembers}
                 onPickRole={requestRole}
+                onSaveMinistries={saveMinistries}
                 onAction={requestAction}
                 page={page}
                 pageSize={PAGE_SIZE}

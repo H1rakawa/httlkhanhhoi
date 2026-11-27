@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireStaffApi } from "@/lib/admin/staff";
 import { logAdminActivity } from "@/lib/admin/prayers";
 import { MEMBER_ROLES } from "@/lib/roles";
+import { isMinistry, normalizeMinistries } from "@/lib/ministries";
 import { createClient } from "@supabase/supabase-js";
 import {
   getSupabaseConfig,
@@ -11,7 +12,7 @@ import {
 
 const validRoles = new Set<string>(MEMBER_ROLES);
 const profileSelectColumns =
-  "id,name,email,phone,avatar_url,role,status,created_at,updated_at";
+  "id,name,email,phone,avatar_url,role,status,ministries,created_at,updated_at";
 
 type MemberPatchBody = {
   ids?: string[];
@@ -23,8 +24,7 @@ type CreateMemberPayload = {
   email?: string;
   phone?: string;
   role?: string;
-  team?: string;
-  ministry?: string;
+  ministries?: unknown;
   isWorker?: boolean;
 };
 
@@ -122,6 +122,7 @@ export async function GET(request: Request) {
     const offset = (page - 1) * pageSize;
     const q = searchParams.get("q")?.trim();
     const role = searchParams.get("role")?.trim();
+    const ministry = searchParams.get("ministry")?.trim();
 
     const query = new URLSearchParams({
       select: profileSelectColumns,
@@ -131,6 +132,7 @@ export async function GET(request: Request) {
     });
 
     if (role && validRoles.has(role)) query.set("role", `eq.${role}`);
+    if (isMinistry(ministry)) query.set("ministries", `cs.{${ministry}}`);
     if (q) query.set("or", `(name.ilike.*${q}*,email.ilike.*${q}*)`);
 
     const { data, response } = await supabaseProfilesRequest<ProfileRow[]>(
@@ -177,7 +179,7 @@ export async function POST(request: Request) {
     const email = normalizeEmail(payload?.email);
     const phone = normalizeText(payload?.phone);
     const role = validRoles.has(payload?.role || "") ? payload?.role || "member" : "";
-    const ministry = normalizeText(payload?.ministry || payload?.team);
+    const ministries = normalizeMinistries(payload?.ministries);
     const isWorker = Boolean(payload?.isWorker);
 
     if (!name) {
@@ -208,8 +210,7 @@ export async function POST(request: Request) {
           name,
           phone,
           role,
-          team: ministry,
-          ministry,
+          ministries,
           is_worker: isWorker,
         },
         redirectTo: getRedirectUrl(request),
@@ -239,6 +240,7 @@ export async function POST(request: Request) {
         email,
         phone: phone || null,
         role,
+        ministries,
         status: "active",
         avatar_url: null,
       },
@@ -264,8 +266,7 @@ export async function POST(request: Request) {
         email,
         phone,
         role,
-        team: ministry,
-        ministry,
+        ministries,
         isWorker,
       },
     });

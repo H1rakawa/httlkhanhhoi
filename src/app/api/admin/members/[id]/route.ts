@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { badRequest, readJsonBody, requireStaffApi } from "@/lib/admin/staff";
 import { logAdminActivity } from "@/lib/admin/prayers";
+import { normalizeMinistries } from "@/lib/ministries";
 import { getSupabaseServiceRoleKey, getSupabaseUrl } from "@/lib/supabase/config";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -76,6 +77,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Không thể thực hiện thao tác." },
+      { status: 500 },
+    );
+  }
+}
+
+/** Cập nhật ban ngành của một thành viên: body { ministries: string[] }. */
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const admin = await requireStaffApi("Bạn không có quyền quản lý thành viên.", { adminOnly: true });
+    if ("error" in admin) return admin.error;
+
+    const { id } = await params;
+    if (!UUID_PATTERN.test(id)) return badRequest("Mã thành viên không hợp lệ.");
+
+    const body = await readJsonBody(request);
+    if (!body || !Array.isArray(body.ministries)) return badRequest("Danh sách ban ngành không hợp lệ.");
+    const ministries = normalizeMinistries(body.ministries);
+
+    const supabase = createSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ ministries, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("id,ministries")
+      .maybeSingle();
+    if (error) return badRequest(error.message || "Không thể cập nhật ban ngành.");
+    if (!data) return NextResponse.json({ error: "Không tìm thấy thành viên." }, { status: 404 });
+
+    await logAdminActivity(admin.accessToken, admin.userId, [
+      { action: "update", targetTable: "profiles", targetId: id, metadata: { ministries } },
+    ]);
+
+    return NextResponse.json({ ministries: data.ministries });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Không thể cập nhật ban ngành." },
       { status: 500 },
     );
   }

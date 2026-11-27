@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { MEMBER_ROLES } from "@/lib/roles";
+import { MINISTRIES, MINISTRY_LABELS, type Ministry } from "@/lib/ministries";
 import {
   roleLabels,
   type MemberRole,
@@ -11,8 +12,10 @@ import {
 type AdminMemberFiltersProps = {
   query: string;
   role: "" | MemberRole;
+  ministry: "" | Ministry;
   onQueryChange: (value: string) => void;
   onRoleChange: (value: "" | MemberRole) => void;
+  onMinistryChange: (value: "" | Ministry) => void;
 };
 
 type FilterOption<T extends string> = {
@@ -74,7 +77,7 @@ function FilterDropdown<T extends string>({
       if (!rect) return;
 
       const gap = 8;
-      const menuWidth = Math.max(rect.width, 150);
+      const menuWidth = Math.max(rect.width, 190);
       setMenuPosition({
         top: rect.bottom + gap,
         left: Math.min(
@@ -101,7 +104,7 @@ function FilterDropdown<T extends string>({
         ref={buttonRef}
         type="button"
         onClick={() => onOpenChange(isOpen ? null : openKey)}
-        className="flex h-12 w-full min-w-0 items-center justify-between gap-3 rounded-[16px] bg-white px-5 text-sm font-extrabold text-[#3f4750] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(31,48,70,0.08)] outline-none transition hover:bg-white/95 sm:min-w-[150px]"
+        className="flex h-12 w-full min-w-0 items-center justify-between gap-3 rounded-[16px] bg-white px-5 text-sm font-extrabold text-[#3f4750] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(31,48,70,0.08)] outline-none transition hover:bg-white/95 sm:min-w-[170px]"
         aria-label={ariaLabel}
         aria-expanded={isOpen}
       >
@@ -112,7 +115,7 @@ function FilterDropdown<T extends string>({
       {isOpen &&
         createPortal(
           <div
-            className="fixed z-[140] overflow-hidden rounded-[16px] border border-[#dfe7ef] bg-white p-1.5 shadow-[0_18px_45px_rgba(31,48,70,0.18)]"
+            className="fixed z-[140] max-h-[min(420px,calc(100vh-120px))] overflow-y-auto rounded-[16px] border border-[#dfe7ef] bg-white p-1.5 shadow-[0_18px_45px_rgba(31,48,70,0.18)]"
             style={{
               top: menuPosition.top,
               left: menuPosition.left,
@@ -153,16 +156,23 @@ const roleOptions: Array<FilterOption<"" | MemberRole>> = [
   ...MEMBER_ROLES.map((value) => ({ value, label: roleLabels[value] })),
 ];
 
+const ministryOptions: Array<FilterOption<"" | Ministry>> = [
+  { value: "", label: "Tất cả ban ngành" },
+  ...MINISTRIES.map((value) => ({ value, label: MINISTRY_LABELS[value] })),
+];
+
 export default function AdminMemberFilters({
   query,
   role,
+  ministry,
   onQueryChange,
   onRoleChange,
+  onMinistryChange,
 }: AdminMemberFiltersProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   return (
-    <section className="liquid-glass mt-6 grid gap-3 rounded-[22px] p-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:rounded-[24px]">
+    <section className="liquid-glass mt-6 grid gap-3 rounded-[22px] p-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:rounded-[24px]">
       <label className="flex h-12 items-center gap-3 rounded-[16px] bg-white/58 px-4 text-[#6b7280] shadow-inner sm:col-span-2 lg:col-span-1">
         <svg
           viewBox="0 0 24 24"
@@ -194,6 +204,16 @@ export default function AdminMemberFilters({
         activeKey={activeDropdown}
         onOpenChange={setActiveDropdown}
         onChange={onRoleChange}
+      />
+
+      <FilterDropdown
+        value={ministry}
+        options={ministryOptions}
+        ariaLabel="Lọc theo ban ngành"
+        openKey="ministry"
+        activeKey={activeDropdown}
+        onOpenChange={setActiveDropdown}
+        onChange={onMinistryChange}
       />
     </section>
   );
