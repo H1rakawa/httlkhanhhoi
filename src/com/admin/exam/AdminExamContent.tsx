@@ -363,6 +363,7 @@ function AdminExamTable({
                         {item.title}
                       </Link>
                       <p className="mt-1 text-xs font-bold text-[#667085]">
+                        {item.code && <span className="text-[#0066cc]">Mã {item.code} · </span>}
                         {item.description}
                       </p>
                     </div>
@@ -418,6 +419,7 @@ function AdminExamTable({
                     {item.title}
                   </Link>
                   <p className="mt-1 text-xs font-bold text-[#667085]">
+                    {item.code && <span className="text-[#0066cc]">Mã {item.code} · </span>}
                     {item.description}
                   </p>
                 </div>

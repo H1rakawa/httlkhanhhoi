@@ -1,5 +1,5 @@
 import {
-  assignmentRouteId,
+  assignmentCode,
   assignmentStatus,
   type AssignmentAnswer,
   type AssignmentItem,
@@ -21,6 +21,7 @@ type SubmissionRow = {
 
 type AssignmentRow = {
   id: number;
+  assignment_code: string | null;
   title: string;
   description: string | null;
   category: string | null;
@@ -60,7 +61,7 @@ type AnswerRow = {
 
 const SUBMISSION_FIELDS = "id,status,content,submitted_at,grade,feedback,graded_at";
 const ASSIGNMENT_FIELDS =
-  "id,title,description,category,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url)";
+  "id,assignment_code,title,description,category,week_number,attachment_url,due_date,media_asset:media_asset_id(public_url)";
 
 /** Chỉ lấy bài nộp của chính người xem (ban mục vụ đọc được mọi bài nộp). */
 function ownSubmissionFilter(userId: string) {
@@ -70,7 +71,7 @@ function ownSubmissionFilter(userId: string) {
 function toAssignment(row: AssignmentRow): AssignmentItem {
   const submission = row.submissions?.[0] ?? null;
   return {
-    id: assignmentRouteId(row.id),
+    id: assignmentCode(row.id, row.assignment_code),
     rawId: row.id,
     title: row.title,
     description: row.description,
@@ -116,6 +117,30 @@ export async function getMemberAssignments(
     accessToken,
   );
   return rows.map(toAssignment);
+}
+
+/**
+ * Đổi tham số đường dẫn thành id bài tập: ưu tiên mã bài tập nhập tay, sau đó tới dạng cũ
+ * HW-009 hoặc số id (link trong thông báo cũ).
+ */
+export async function resolveAssignmentId(param: string, accessToken: string) {
+  let value = param;
+  try {
+    value = decodeURIComponent(param);
+  } catch {
+    // Giữ nguyên nếu không giải mã được.
+  }
+  value = value.trim();
+  if (!value || value.length > 100) return null;
+
+  const rows = await supabaseDataRequest<Array<{ id: number }>>(
+    `assignments?assignment_code=eq.${encodeURIComponent(value)}&admin_status=neq.draft&select=id&limit=1`,
+    accessToken,
+  ).catch(() => []);
+  if (rows[0]) return { rawId: rows[0].id, requested: value };
+
+  const legacy = value.match(/^(?:HW-)?(\d{1,9})$/i);
+  return legacy ? { rawId: Number(legacy[1]), requested: value } : null;
 }
 
 export async function getAssignmentDetail(rawId: number, userId: string, accessToken: string) {

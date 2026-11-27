@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  assignmentRouteId,
+  assignmentHref,
   statusClasses,
   type AssignmentItem,
 } from "@/com/assignment/assignmentData";
@@ -76,7 +76,7 @@ export default function ProfileActivity({
               {recentAssignments.map((item) => (
                 <li key={item.rawId} className="border-b border-white/70 last:border-b-0">
                   <Link
-                    href={`/assignment/${assignmentRouteId(item.rawId)}/result`}
+                    href={assignmentHref(item, true)}
                     className="flex items-center justify-between gap-4 p-4 text-[#1d1d1f] no-underline hover:bg-white/48"
                   >
                     <span className="min-w-0">

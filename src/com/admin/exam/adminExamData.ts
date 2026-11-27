@@ -6,6 +6,8 @@ export type AdminExamStatus = "ongoing" | "upcoming" | "ended" | "draft";
 
 export type AdminExamItem = {
   id: string;
+  /** Mã bài tập ban mục vụ nhập (hiển thị cho thành viên và dùng làm đường dẫn). */
+  code: string | null;
   title: string;
   description: string;
   week: string;
@@ -46,53 +48,3 @@ export const adminExamWeekOptions = [
   { value: "week-3", label: "Tuần 03" },
 ] as const;
 
-export const adminExamItems: AdminExamItem[] = [
-  {
-    id: "EX-204",
-    title: "Thiền định buổi sáng - Cấp độ 1",
-    description: "24 học viên tham gia",
-    week: "Tuần 01",
-    weekValue: "week-1",
-    dueDate: "20/12/2024",
-    status: "ongoing",
-    participants: 24,
-    completed: 18,
-    iconTone: "blue",
-  },
-  {
-    id: "EX-203",
-    title: "Bài viết về chánh niệm",
-    description: "Chưa bắt đầu",
-    week: "Tuần 02",
-    weekValue: "week-2",
-    dueDate: "25/12/2024",
-    status: "upcoming",
-    participants: 16,
-    completed: 0,
-    iconTone: "gold",
-  },
-  {
-    id: "EX-202",
-    title: "Phân tích hành vi tự thân",
-    description: "42 học viên đã hoàn thành",
-    week: "Tuần 01",
-    weekValue: "week-1",
-    dueDate: "15/12/2024",
-    status: "ended",
-    participants: 42,
-    completed: 42,
-    iconTone: "dark",
-  },
-  {
-    id: "EX-201",
-    title: "Thiền quán tưởng cơ bản",
-    description: "18 học viên tham gia",
-    week: "Tuần 03",
-    weekValue: "week-3",
-    dueDate: "30/12/2024",
-    status: "ongoing",
-    participants: 18,
-    completed: 11,
-    iconTone: "blue",
-  },
-];

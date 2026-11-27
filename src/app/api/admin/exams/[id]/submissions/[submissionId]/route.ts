@@ -3,6 +3,7 @@ import { getGradingSubmission, parseGradeInput, saveGrade } from "@/lib/admin/gr
 import { logAdminActivity } from "@/lib/admin/prayers";
 import { badRequest, parseRouteId, readJsonBody, requireStaffApi } from "@/lib/admin/staff";
 import { supabaseDataRequest } from "@/lib/supabase/auth";
+import { assignmentRouteId } from "@/com/assignment/assignmentData";
 
 type RouteProps = { params: Promise<{ id: string; submissionId: string }> };
 
@@ -69,7 +70,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
               type: "assignment",
               title: wasGraded ? "Điểm bài tập đã được cập nhật" : "Bài tập đã được chấm",
               content: `${current.assignmentTitle}: ${input.grade}/10 điểm.`,
-              link: `/assignment/${current.assignmentId}/result`,
+              link: `/assignment/${assignmentRouteId(current.assignmentId)}/result`,
             }),
           }).catch(() => undefined)
         : undefined,

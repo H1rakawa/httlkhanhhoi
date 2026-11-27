@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  assignmentRouteId,
+  assignmentHref,
   statusClasses,
   type AssignmentAnswer,
   type AssignmentItem,
@@ -84,7 +84,7 @@ export default function AssignmentResult({
   const hasPoints = answers.some((answer) => answer.pointsAwarded != null);
   const tone = submission.grade != null ? gradeTone(submission.grade) : null;
   const percent = submission.grade != null ? Math.max(0, Math.min(100, submission.grade * 10)) : 0;
-  const workHref = `/assignment/${assignmentRouteId(assignment.rawId)}`;
+  const workHref = assignmentHref(assignment);
 
   return (
     <div className="relative z-10 mx-auto w-[calc(100%-2rem)] max-w-6xl pb-24 pt-24 md:pb-28 md:pt-28">

@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import AssignmentBackdrop from "@/com/assignment/AssignmentBackdrop";
 import AssignmentResult from "@/com/assignment/AssignmentResult";
-import { assignmentRawId, assignmentRouteId } from "@/com/assignment/assignmentData";
+import { assignmentHref } from "@/com/assignment/assignmentData";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
-import { getAssignmentAnswerKey, getAssignmentDetail } from "@/lib/assignments/assignments";
+import {
+  getAssignmentAnswerKey,
+  getAssignmentDetail,
+  resolveAssignmentId,
+} from "@/lib/assignments/assignments";
 import { getAccessToken, getCurrentUser } from "@/lib/supabase/auth";
 
 type AssignmentResultPageProps = {
@@ -21,16 +25,19 @@ export default async function AssignmentResultPage({ params }: AssignmentResultP
   const accessToken = await getAccessToken();
   if (!user || !accessToken) redirect("/auth");
 
-  const rawId = assignmentRawId((await params).id);
-  if (!rawId) notFound();
+  const resolved = await resolveAssignmentId((await params).id, accessToken);
+  if (!resolved) notFound();
+  const { rawId } = resolved;
 
   const detail = await getAssignmentDetail(rawId, user.id, accessToken).catch(() => null);
   if (!detail) notFound();
 
+  if (resolved.requested !== detail.assignment.id) redirect(assignmentHref(detail.assignment, true));
+
   const { submission } = detail;
   // Chưa nộp (hoặc mới lưu nháp) thì quay về trang làm bài.
   if (!submission || submission.status === "draft") {
-    redirect(`/assignment/${assignmentRouteId(rawId)}`);
+    redirect(assignmentHref(detail.assignment));
   }
 
   const answerKey =

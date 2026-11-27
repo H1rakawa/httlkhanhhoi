@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { logAdminActivity } from "@/lib/admin/prayers";
 import { requireStaffApi } from "@/lib/admin/staff";
+import { linkMediaAsset, removeMediaAsset } from "@/lib/admin/media";
 import {
   assignmentWriteError,
   cleanText,
@@ -11,6 +12,8 @@ import {
   isExamStatus,
   normalizeCategory,
   normalizeQuestions,
+  parseAttachment,
+  parseDueDate,
   publishError,
   createSupabaseAdminClient,
   rawAssignmentId as parseAssignmentId,
@@ -155,7 +158,7 @@ export async function GET(
       supabaseAdmin
         .from("profiles")
         .select("id", { count: "exact", head: true })
-        .eq("role", "member"),
+        .in("role", ["member", "deacon"]),
       supabaseAdmin
         .from("submissions")
         .select("id,user_id,status,grade,submitted_at")
@@ -273,7 +276,7 @@ export async function PATCH(request: Request, { params }: AdminExamDetailRoutePr
     const supabaseAdmin = createSupabaseAdminClient();
     const { data: current } = await supabaseAdmin
       .from("assignments")
-      .select("id,title,admin_status,assignment_questions(count)")
+      .select("id,title,admin_status,media_asset_id,assignment_questions(count)")
       .eq("id", assignmentId)
       .maybeSingle();
     if (!current) return NextResponse.json({ error: "Không tìm thấy bài tập." }, { status: 404 });
@@ -316,6 +319,14 @@ export async function PATCH(request: Request, { params }: AdminExamDetailRoutePr
 
     const lockQuestions = submissions.total > 0;
     const isPublish = body.action === "publish";
+    let dueDate: string | null;
+    let attachment: ReturnType<typeof parseAttachment>;
+    try {
+      dueDate = parseDueDate(body.dueDate);
+      attachment = parseAttachment(body);
+    } catch (inputError) {
+      return errorResponse(inputError, "Dữ liệu không hợp lệ.", 400);
+    }
     const title = cleanText(body.title);
     const questions = normalizeQuestions(body);
 
@@ -347,6 +358,8 @@ export async function PATCH(request: Request, { params }: AdminExamDetailRoutePr
         assignment_code: cleanText(body.code) || null,
         category: normalizeCategory(body.category),
         description: cleanText(body.description) || null,
+        due_date: dueDate,
+        ...attachment,
         admin_status: nextStatus,
         icon_tone: nextStatus === "draft" ? "gold" : nextStatus === "ended" ? "dark" : "blue",
       })
@@ -357,6 +370,18 @@ export async function PATCH(request: Request, { params }: AdminExamDetailRoutePr
         { status: 400 },
       );
     }
+
+    // File cũ bị thay / bỏ thì xoá khỏi Storage để không để rác.
+    const previousAsset = current.media_asset_id as string | null;
+    if (previousAsset && previousAsset !== attachment.media_asset_id) {
+      // Bản nhân bản dùng chung file với bài gốc: chỉ xoá khi không còn bài nào dùng.
+      const { count: stillUsed } = await supabaseAdmin
+        .from("assignments")
+        .select("id", { count: "exact", head: true })
+        .eq("media_asset_id", previousAsset);
+      if (!stillUsed) await removeMediaAsset(admin.accessToken, previousAsset);
+    }
+    await linkMediaAsset(admin.accessToken, attachment.media_asset_id, "assignments", assignmentId);
 
     if (!lockQuestions) {
       const { error: deleteError } = await supabaseAdmin

@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   formatDueDate,
   vietnamDateKey,
+  assignmentHref,
   type AssignmentItem,
 } from "@/com/assignment/assignmentData";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
@@ -61,7 +62,7 @@ export default function UpcomingAssignments({
           {assignments.map((assignment) => (
             <Link
               key={assignment.id}
-              href={`/assignment/${assignment.id}`}
+              href={assignmentHref(assignment)}
               className={[
                 "liquid-glass-item flex flex-col items-start gap-4 border-2 border-l-4 border-white/80 p-4 text-[#1d1d1f] no-underline sm:flex-row sm:items-center",
                 done(assignment) ? "border-l-[#0066cc]" : "border-l-[#cfd8e4]",

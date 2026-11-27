@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireStaffApi } from "@/lib/admin/staff";
+import { linkMediaAsset } from "@/lib/admin/media";
 import {
   assignmentWriteError,
   cleanText,
@@ -8,6 +9,8 @@ import {
   insertQuestions,
   normalizeCategory,
   normalizeQuestions,
+  parseAttachment,
+  parseDueDate,
   publishError,
   type ExamPayload,
 } from "@/lib/admin/exams";
@@ -16,6 +19,7 @@ const validStatuses = new Set(["ongoing", "upcoming", "ended", "draft"]);
 
 type AssignmentRow = {
   id: number;
+  assignment_code: string | null;
   title: string;
   description: string | null;
   week_number: number | null;
@@ -51,6 +55,7 @@ function mapAssignment(row: AssignmentRow) {
 
   return {
     id: formatExamCode(row.id),
+    code: row.assignment_code?.trim() || null,
     title: row.title,
     description:
       participants > 0
@@ -106,14 +111,14 @@ export async function GET(request: Request) {
     let query = supabaseAdmin
       .from("assignments")
       .select(
-        "id,title,description,week_number,due_date,admin_status,icon_tone,submissions(status)",
+        "id,assignment_code,title,description,week_number,due_date,admin_status,icon_tone,submissions(status)",
         { count: "exact" },
       )
       .order("due_date", { ascending: true, nullsFirst: false })
       .range(offset, offset + pageSize - 1);
 
     if (q) {
-      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,assignment_code.ilike.%${q}%`);
     }
 
     if (week && week !== "all") {
@@ -169,6 +174,18 @@ export async function POST(request: Request) {
       if (message) return NextResponse.json({ error: message }, { status: 400 });
     }
 
+    let dueDate: string | null;
+    let attachment: ReturnType<typeof parseAttachment>;
+    try {
+      dueDate = parseDueDate(payload.dueDate);
+      attachment = parseAttachment(payload);
+    } catch (inputError) {
+      return NextResponse.json(
+        { error: inputError instanceof Error ? inputError.message : "Dữ liệu không hợp lệ." },
+        { status: 400 },
+      );
+    }
+
     const supabaseAdmin = createSupabaseAdminClient();
     const { data: assignment, error: assignmentError } = await supabaseAdmin
       .from("assignments")
@@ -177,7 +194,8 @@ export async function POST(request: Request) {
         assignment_code: cleanText(payload.code) || null,
         category: normalizeCategory(payload.category),
         description: cleanText(payload.description) || null,
-        due_date: cleanText(payload.dueDate) || null,
+        due_date: dueDate,
+        ...attachment,
         created_by: admin.account.user.id,
         admin_status: isPublish ? "ongoing" : "draft",
         icon_tone: isPublish ? "blue" : "gold",
@@ -197,6 +215,8 @@ export async function POST(request: Request) {
       await supabaseAdmin.from("assignments").delete().eq("id", assignment.id);
       return NextResponse.json({ error: questionError }, { status: 400 });
     }
+
+    await linkMediaAsset(admin.accessToken, attachment.media_asset_id, "assignments", assignment.id);
 
     return NextResponse.json(
       {

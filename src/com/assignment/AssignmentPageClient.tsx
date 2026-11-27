@@ -6,7 +6,7 @@ import DashboardIcon from "@/com/dashboard/DashboardIcon";
 import FilterSelect from "@/com/assignment/FilterSelect";
 import {
   type AssignmentItem,
-  assignmentRouteId,
+  assignmentHref,
   assignmentStatuses,
   formatDueDate,
   statusClasses,
@@ -161,7 +161,7 @@ export default function AssignmentPageClient({ assignments, loadError }: Assignm
             {filteredAssignments.map((assignment) => (
               <Link
                 key={assignment.id}
-                href={`/assignment/${assignmentRouteId(assignment.id)}${assignment.status === "Đã chấm" ? "/result" : ""}`}
+                href={assignmentHref(assignment, assignment.status === "Đã chấm")}
                 className="grid gap-5 bg-white/18 px-5 py-6 text-[#1d1d1f] no-underline transition-colors hover:bg-white/34 lg:grid-cols-[0.55fr_2fr_1fr_1fr_1fr_0.55fr] lg:items-center lg:gap-4 lg:px-7"
                 aria-label={`${assignment.status === "Đã chấm" ? "Xem kết quả" : "Làm bài"} ${assignment.title}`}
               >

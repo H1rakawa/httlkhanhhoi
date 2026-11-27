@@ -8,7 +8,7 @@ export type AssignmentStatus =
 export type SubmissionStatus = "draft" | "submitted" | "graded";
 
 export type AssignmentItem = {
-  /** Mã hiển thị, dạng HW-001. */
+  /** Mã hiển thị: mã bài tập ban mục vụ nhập, chưa nhập thì dạng HW-001. Dùng luôn làm đường dẫn. */
   id: string;
   rawId: number;
   title: string;
@@ -100,14 +100,25 @@ export function formatDueDate(dueDate: string | null) {
   }).format(new Date(`${dueDate}T12:00:00+07:00`));
 }
 
+/** Mã dự phòng theo id (HW-009), dùng khi bài chưa có mã nhập tay; đường dẫn cũ vẫn mở được. */
 export function assignmentRouteId(id: string | number) {
   const raw = String(id);
   return raw.startsWith("HW-") ? raw : `HW-${raw.padStart(3, "0")}`;
 }
 
+/** Id số từ tham số API (/api/assignments/9/...). */
 export function assignmentRawId(id: string) {
   const match = id.match(/\d+/);
   return match ? Number(match[0]) : null;
+}
+
+export function assignmentCode(rawId: number, code: string | null | undefined) {
+  return code?.trim() || assignmentRouteId(rawId);
+}
+
+/** Đường dẫn trang làm bài / kết quả theo mã hiển thị. */
+export function assignmentHref(assignment: { id: string }, result = false) {
+  return `/assignment/${encodeURIComponent(assignment.id)}${result ? "/result" : ""}`;
 }
 
 export function statusClasses(status: AssignmentStatus) {

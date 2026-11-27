@@ -60,8 +60,12 @@ export type ExamPayload = {
   title?: string;
   code?: string;
   category?: string;
+  /** YYYY-MM-DD, rỗng = không đặt hạn. */
   dueDate?: string;
   description?: string;
+  /** File đã tải lên media_assets, hoặc đường dẫn ngoài (Google Drive…). */
+  mediaAssetId?: string | null;
+  attachmentUrl?: string | null;
   questions?: ExamQuestionPayload[];
 };
 
@@ -107,6 +111,34 @@ export function publishError(title: string, questions: NormalizedQuestion[]) {
   return invalidChoice
     ? "Câu trắc nghiệm cần ít nhất 2 đáp án và 1 đáp án đúng trước khi đăng."
     : null;
+}
+
+/** Hạn nộp dạng YYYY-MM-DD hợp lệ, rỗng → null, sai → lỗi. */
+export function parseDueDate(value: unknown) {
+  const text = cleanText(value);
+  if (!text) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text) || Number.isNaN(Date.parse(`${text}T00:00:00Z`))) {
+    throw new Error("Hạn nộp không hợp lệ.");
+  }
+  return text;
+}
+
+/** File đính kèm: ưu tiên file đã tải lên, không có thì đường dẫn http(s). */
+export function parseAttachment(payload: ExamPayload) {
+  const assetId = cleanText(payload.mediaAssetId);
+  if (assetId) {
+    if (!/^[0-9a-f-]{36}$/i.test(assetId)) throw new Error("Mã file đính kèm không hợp lệ.");
+    return { media_asset_id: assetId, attachment_url: null };
+  }
+  const url = cleanText(payload.attachmentUrl);
+  if (!url) return { media_asset_id: null, attachment_url: null };
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error();
+    return { media_asset_id: null, attachment_url: parsed.toString() };
+  } catch {
+    throw new Error("Đường dẫn file đính kèm phải bắt đầu bằng http(s)://");
+  }
 }
 
 export function assignmentWriteError(error: { code?: string; message?: string } | null, fallback: string) {
@@ -208,12 +240,22 @@ export async function duplicateAssignment(supabase: SupabaseAdmin, assignmentId:
   return copy;
 }
 
+export type EditableAttachment = {
+  mediaAssetId: string | null;
+  url: string;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+};
+
 export type EditableExam = {
   id: string;
   title: string;
   code: string;
   category: string;
   description: string;
+  dueDate: string;
+  attachment: EditableAttachment | null;
   status: AdminExamStatus;
   submissionCount: number;
   questions: Array<{
@@ -233,6 +275,10 @@ type EditableRow = {
   category: string | null;
   description: string | null;
   admin_status: AdminExamStatus;
+  due_date: string | null;
+  attachment_url: string | null;
+  media_asset_id: string | null;
+  media_asset: { public_url: string | null; file_name: string | null; mime_type: string | null; size_bytes: number | null } | null;
   assignment_questions?: Array<{
     question_type: "multiple_choice" | "essay";
     prompt: string;
@@ -252,7 +298,7 @@ export async function getEditableExam(rawId: string): Promise<EditableExam | nul
   const { data, error } = await supabase
     .from("assignments")
     .select(
-      "id,title,assignment_code,category,description,admin_status,assignment_questions(question_type,prompt,helper_text,scripture_reference,allow_multiple,sort_order,assignment_question_options(option_text,is_correct,sort_order))",
+      "id,title,assignment_code,category,description,admin_status,due_date,attachment_url,media_asset_id,media_asset:media_asset_id(public_url,file_name,mime_type,size_bytes),assignment_questions(question_type,prompt,helper_text,scripture_reference,allow_multiple,sort_order,assignment_question_options(option_text,is_correct,sort_order))",
     )
     .eq("id", assignmentId)
     .maybeSingle();
@@ -267,6 +313,18 @@ export async function getEditableExam(rawId: string): Promise<EditableExam | nul
     code: row.assignment_code ?? "",
     category: normalizeCategory(row.category),
     description: row.description ?? "",
+    dueDate: row.due_date ?? "",
+    attachment: row.media_asset_id && row.media_asset?.public_url
+      ? {
+          mediaAssetId: row.media_asset_id,
+          url: row.media_asset.public_url,
+          fileName: row.media_asset.file_name,
+          mimeType: row.media_asset.mime_type,
+          sizeBytes: row.media_asset.size_bytes,
+        }
+      : row.attachment_url
+        ? { mediaAssetId: null, url: row.attachment_url, fileName: null, mimeType: null, sizeBytes: null }
+        : null,
     status: row.admin_status,
     submissionCount: total,
     questions: (row.assignment_questions ?? [])

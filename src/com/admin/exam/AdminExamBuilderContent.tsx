@@ -7,7 +7,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import DashboardIcon from "@/com/dashboard/DashboardIcon";
-import type { EditableExam } from "@/lib/admin/exams";
+import type { EditableAttachment, EditableExam } from "@/lib/admin/exams";
+import { UploadButton } from "@/com/admin/ui/AdminUi";
+import { formatFileSize } from "@/com/admin/ui/adminClient";
 import { ASSIGNMENT_CATEGORIES } from "./adminExamData";
 
 type AdminExamBuilderContentProps = {
@@ -39,6 +41,88 @@ type QuestionDraft = {
 
 const categories: readonly string[] = ASSIGNMENT_CATEGORIES;
 
+const ATTACHMENT_ACCEPT = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "audio/mpeg,audio/mp4,audio/wav,audio/webm,audio/ogg",
+  "video/mp4,video/webm,video/quicktime",
+  "image/jpeg,image/png,image/webp",
+].join(",");
+
+const inputClass =
+  "h-12 rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 text-sm font-bold text-[#101828] outline-none transition focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10";
+
+/** File đính kèm: tải file lên hoặc dán đường dẫn ngoài. */
+function AttachmentField({
+  attachment,
+  setAttachment,
+  link,
+  setLink,
+}: {
+  attachment: EditableAttachment | null;
+  setAttachment: (value: EditableAttachment | null) => void;
+  link: string;
+  setLink: (value: string) => void;
+}) {
+  const uploaded = attachment?.mediaAssetId ? attachment : null;
+
+  return (
+    <div className="grid gap-3 rounded-[16px] border border-dashed border-[#b9c6d8] bg-white/70 p-4">
+      {uploaded ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] bg-[#f3f8ff] px-4 py-3">
+          <a
+            href={uploaded.url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-w-0 items-center gap-3 text-[#182230] no-underline hover:text-[#0066cc]"
+          >
+            <DashboardIcon name="document" className="h-5 w-5 shrink-0 text-[#0066cc]" />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-extrabold">{uploaded.fileName ?? "File đính kèm"}</span>
+              <span className="block text-xs font-bold text-[#667085]">
+                {[uploaded.mimeType, uploaded.sizeBytes ? formatFileSize(uploaded.sizeBytes) : ""].filter(Boolean).join(" · ") || "Đã tải lên"}
+              </span>
+            </span>
+          </a>
+          <button
+            type="button"
+            onClick={() => setAttachment(null)}
+            className="h-8 rounded-full border border-[#ffd5d1] bg-white px-3 text-xs font-extrabold text-[#b42318] transition hover:bg-[#fff6f5]"
+          >
+            Bỏ file
+          </button>
+        </div>
+      ) : (
+        <input
+          value={link}
+          onChange={(event) => setLink(event.target.value)}
+          placeholder="Dán đường dẫn (Google Drive, YouTube…) hoặc tải file lên bên dưới"
+          className={inputClass}
+        />
+      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <UploadButton
+          accept={ATTACHMENT_ACCEPT}
+          relatedTable="assignments"
+          label={uploaded ? "Thay file khác" : "Tải file lên"}
+          onUploaded={(asset) => {
+            setAttachment({
+              mediaAssetId: asset.id,
+              url: asset.publicUrl,
+              fileName: asset.fileName,
+              mimeType: asset.mimeType,
+              sizeBytes: asset.sizeBytes,
+            });
+            setLink("");
+          }}
+        />
+        <span className="text-xs font-bold text-[#8a94a6]">PDF, Word, âm thanh, video hoặc ảnh</span>
+      </div>
+    </div>
+  );
+}
+
 const questionTypeOptions: Array<{ value: QuestionType; label: string }> = [
   { value: "multiple_choice", label: "Trắc nghiệm" },
   { value: "essay", label: "Tự luận" },
@@ -48,9 +132,10 @@ function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function createQuestion(type: QuestionType = "multiple_choice"): QuestionDraft {
+/** `id` cố định khi tạo ở lần render đầu, để HTML server và client khớp nhau (tránh lỗi hydration). */
+function createQuestion(type: QuestionType = "multiple_choice", id?: string): QuestionDraft {
   return {
-    id: createId("question"),
+    id: id ?? createId("question"),
     type,
     prompt: "",
     helperText: "",
@@ -59,8 +144,8 @@ function createQuestion(type: QuestionType = "multiple_choice"): QuestionDraft {
     options:
       type === "multiple_choice"
         ? [
-            { id: createId("option"), text: "", isCorrect: false },
-            { id: createId("option"), text: "", isCorrect: false },
+            { id: id ? `${id}-option-1` : createId("option"), text: "", isCorrect: false },
+            { id: id ? `${id}-option-2` : createId("option"), text: "", isCorrect: false },
           ]
         : [],
   };
@@ -348,6 +433,12 @@ function InfoPanel({
   setCategory,
   description,
   setDescription,
+  dueDate,
+  setDueDate,
+  attachment,
+  setAttachment,
+  attachmentLink,
+  setAttachmentLink,
 }: {
   title: string;
   setTitle: (value: string) => void;
@@ -357,6 +448,12 @@ function InfoPanel({
   setCategory: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
+  dueDate: string;
+  setDueDate: (value: string) => void;
+  attachment: EditableAttachment | null;
+  setAttachment: (value: EditableAttachment | null) => void;
+  attachmentLink: string;
+  setAttachmentLink: (value: string) => void;
 }) {
   return (
     <section className="liquid-glass mt-8 rounded-[26px] p-5 shadow-[0_24px_70px_rgba(31,48,70,0.1)] md:p-7">
@@ -384,7 +481,7 @@ function InfoPanel({
           <input
             value={code}
             onChange={(event) => setCode(event.target.value)}
-            placeholder="Nhập mã bài tập..."
+            placeholder="VD: 230 (dùng làm mã và đường dẫn cho thành viên)"
             className="h-12 rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 text-sm font-bold text-[#101828] outline-none transition focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10"
           />
         </div>
@@ -395,6 +492,26 @@ function InfoPanel({
             onChange={setCategory}
           />
         </div>
+        <div className="grid gap-2">
+          <FieldLabel>Hạn nộp</FieldLabel>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            {dueDate && (
+              <button
+                type="button"
+                onClick={() => setDueDate("")}
+                className="h-12 shrink-0 rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 text-xs font-extrabold text-[#667085] transition hover:text-[#b42318]"
+              >
+                Bỏ hạn
+              </button>
+            )}
+          </div>
+        </div>
         <div className="grid gap-2 md:col-span-2">
           <FieldLabel>Mô tả ngắn</FieldLabel>
           <textarea
@@ -403,6 +520,15 @@ function InfoPanel({
             placeholder="Nhập mô tả ngắn để học viên hiểu mục tiêu bài tập..."
             rows={3}
             className="resize-none rounded-[14px] border border-[#dce3ed] bg-white/86 px-4 py-3 text-sm font-bold leading-6 text-[#101828] outline-none transition focus:border-[#0066cc] focus:ring-4 focus:ring-[#0066cc]/10"
+          />
+        </div>
+        <div className="grid gap-2 md:col-span-2">
+          <FieldLabel>File đính kèm</FieldLabel>
+          <AttachmentField
+            attachment={attachment}
+            setAttachment={setAttachment}
+            link={attachmentLink}
+            setLink={setAttachmentLink}
           />
         </div>
       </div>
@@ -768,22 +894,29 @@ export default function AdminExamBuilderContent({
   const [code, setCode] = useState(initialExam?.code ?? "");
   const [category, setCategory] = useState(initialExam?.category ?? categories[0]);
   const [description, setDescription] = useState(initialExam?.description ?? "");
+  const [dueDate, setDueDate] = useState(initialExam?.dueDate ?? "");
+  const [attachment, setAttachment] = useState<EditableAttachment | null>(
+    initialExam?.attachment?.mediaAssetId ? initialExam.attachment : null,
+  );
+  const [attachmentLink, setAttachmentLink] = useState(
+    initialExam?.attachment && !initialExam.attachment.mediaAssetId ? initialExam.attachment.url : "",
+  );
   const [questions, setQuestions] = useState<QuestionDraft[]>(() =>
     initialExam?.questions.length
-      ? initialExam.questions.map((question) => ({
-          id: createId("question"),
+      ? initialExam.questions.map((question, questionIndex) => ({
+          id: `question-initial-${questionIndex}`,
           type: question.type,
           prompt: question.prompt,
           helperText: question.helperText,
           scriptureReference: question.scriptureReference,
           allowMultiple: question.allowMultiple,
-          options: question.options.map((option) => ({
-            id: createId("option"),
+          options: question.options.map((option, optionIndex) => ({
+            id: `question-initial-${questionIndex}-option-${optionIndex}`,
             text: option.text,
             isCorrect: option.isCorrect,
           })),
         }))
-      : [createQuestion("multiple_choice")],
+      : [createQuestion("multiple_choice", "question-initial-0")],
   );
   // Đã có học viên làm bài: giữ nguyên câu hỏi để không làm hỏng bài nộp.
   const questionsLocked = (initialExam?.submissionCount ?? 0) > 0;
@@ -817,8 +950,10 @@ export default function AdminExamBuilderContent({
           title,
           code,
           category,
-          dueDate: "",
+          dueDate,
           description,
+          mediaAssetId: attachment?.mediaAssetId ?? null,
+          attachmentUrl: attachment ? null : attachmentLink.trim() || null,
           questions: questions.map((question) => ({
             type: question.type,
             prompt: question.prompt,
@@ -907,6 +1042,12 @@ export default function AdminExamBuilderContent({
               setCategory={setCategory}
               description={description}
               setDescription={setDescription}
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              attachment={attachment}
+              setAttachment={setAttachment}
+              attachmentLink={attachmentLink}
+              setAttachmentLink={setAttachmentLink}
             />
 
             <div className="mt-8 flex items-center justify-between gap-4">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  assignmentHref,
   type AssignmentAnswer,
   type AssignmentItem,
   type AssignmentQuestion,
@@ -194,7 +195,7 @@ export default function AssignmentWorkClient({
                 </p>
               )}
               <Link
-                href={`/assignment/${assignment.id}/result`}
+                href={assignmentHref(assignment, true)}
                 className="mt-5 inline-flex text-sm font-semibold text-[#14743a] no-underline hover:underline"
               >
                 Xem chi tiết kết quả và đáp án →
@@ -479,7 +480,7 @@ export default function AssignmentWorkClient({
                   {related.map((item) => (
                     <Link
                       key={item.id}
-                      href={`/assignment/${item.id}`}
+                      href={assignmentHref(item)}
                       className="rounded-[12px] border border-white/80 bg-white/62 p-4 text-[#07111f] no-underline shadow-[0_12px_30px_rgba(31,48,70,0.08)]"
                     >
                       <div className="flex items-center justify-between gap-3">
@@ -536,7 +537,7 @@ export default function AssignmentWorkClient({
                   {graded ? "Đã chấm điểm" : "Đã nộp bài"}
                 </span>
                 <Link
-                  href={`/assignment/${assignment.id}/result`}
+                  href={assignmentHref(assignment, true)}
                   className="flex h-12 items-center justify-center rounded-[14px] bg-[#07111f] px-8 text-sm font-semibold text-white no-underline shadow-[0_14px_28px_rgba(7,17,31,0.2)]"
                 >
                   {graded ? "Xem điểm và nhận xét" : "Xem bài đã nộp"}

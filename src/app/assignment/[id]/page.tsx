@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import AssignmentBackdrop from "@/com/assignment/AssignmentBackdrop";
 import AssignmentWorkClient from "@/com/assignment/AssignmentWorkClient";
-import { assignmentRawId } from "@/com/assignment/assignmentData";
+import { assignmentHref } from "@/com/assignment/assignmentData";
 import Footer from "@/com/Footer";
 import Header from "@/com/Header";
-import { getAssignmentDetail, getMemberAssignments } from "@/lib/assignments/assignments";
+import {
+  getAssignmentDetail,
+  getMemberAssignments,
+  resolveAssignmentId,
+} from "@/lib/assignments/assignments";
 import { getAccessToken, getCurrentUser } from "@/lib/supabase/auth";
 
 type AssignmentWorkPageProps = {
@@ -21,14 +25,17 @@ export default async function AssignmentWorkPage({ params }: AssignmentWorkPageP
   const accessToken = await getAccessToken();
   if (!user || !accessToken) redirect("/auth");
 
-  const rawId = assignmentRawId((await params).id);
-  if (!rawId) notFound();
+  const resolved = await resolveAssignmentId((await params).id, accessToken);
+  if (!resolved) notFound();
+  const { rawId } = resolved;
 
   const [detail, all] = await Promise.all([
     getAssignmentDetail(rawId, user.id, accessToken).catch(() => null),
     getMemberAssignments(user.id, accessToken).catch(() => []),
   ]);
   if (!detail) notFound();
+  // Link cũ (HW-009, số id) chuyển về đường dẫn theo mã bài tập.
+  if (resolved.requested !== detail.assignment.id) redirect(assignmentHref(detail.assignment));
 
   // Ưu tiên bài chưa làm xong, cùng phân loại.
   const pending = all.filter(

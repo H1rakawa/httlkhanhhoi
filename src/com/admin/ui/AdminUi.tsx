@@ -294,7 +294,7 @@ export function UploadButton({
   disabled,
 }: {
   accept: string;
-  relatedTable: "resources" | "events" | "news_posts" | "testimonies";
+  relatedTable: "resources" | "events" | "news_posts" | "testimonies" | "assignments";
   label?: string;
   onUploaded: (asset: UploadedAsset) => void;
   disabled?: boolean;
@@ -352,7 +352,7 @@ export function ImageField({
   label: string;
   url: string;
   onChange: (url: string, assetId: string | null) => void;
-  relatedTable: "resources" | "events" | "news_posts" | "testimonies";
+  relatedTable: "resources" | "events" | "news_posts" | "testimonies" | "assignments";
   hint?: string;
   required?: boolean;
 }) {

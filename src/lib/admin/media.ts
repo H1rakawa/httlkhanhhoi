@@ -31,7 +31,7 @@ const BUCKET_RULES: Record<string, { maxBytes: number; mimeTypes: string[] }> = 
   },
 };
 
-export const MEDIA_RELATED_TABLES = ["resources", "events", "news_posts", "testimonies"] as const;
+export const MEDIA_RELATED_TABLES = ["resources", "events", "news_posts", "testimonies", "assignments"] as const;
 export type MediaRelatedTable = (typeof MEDIA_RELATED_TABLES)[number];
 
 export type AdminMediaAsset = {
