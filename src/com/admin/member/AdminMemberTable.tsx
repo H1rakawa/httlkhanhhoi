@@ -264,7 +264,7 @@ function MemberDetailModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-110 flex items-center justify-center bg-white/38 px-4 py-8 backdrop-blur-[10px]"
+      className="fixed inset-0 z-110 flex overflow-y-auto bg-white/38 px-4 py-8 backdrop-blur-[10px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="member-detail-title"
@@ -273,38 +273,31 @@ function MemberDetailModal({
       }}
     >
       <article
-        className="liquid-glass relative w-full max-w-160 overflow-hidden rounded-[28px] border-white/80 bg-white/74 text-[#141922] shadow-[0_34px_120px_rgba(31,48,70,0.2)]"
+        className="liquid-glass relative m-auto w-full max-w-160 overflow-hidden rounded-[28px] border-white/80 bg-white/74 text-[#141922] shadow-[0_34px_120px_rgba(31,48,70,0.2)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(244,248,255,0.86)),url('/images/parallax-background.png')] bg-cover bg-center" />
+        {/* .liquid-glass > * ép position: relative, nên nút đóng nằm trong khung ảnh bìa để định vị góc phải. */}
+        <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(244,248,255,0.86)),url('/images/parallax-background.png')] bg-cover bg-center">
           <button
             type="button"
-            onMouseDown={(event) => {
-              event.preventDefault();
-            event.stopPropagation();
-            onClose();
-          }}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onClose();
-          }}
-          className="absolute right-5 top-5 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/92 text-[#303943] shadow-[0_14px_32px_rgba(31,48,70,0.18)] backdrop-blur-xl transition hover:bg-white hover:text-[#0066cc] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#0066cc]"
-          aria-label="Đóng chi tiết thành viên"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-5 w-5"
-            aria-hidden="true"
+            onClick={onClose}
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/92 text-[#303943] shadow-[0_14px_32px_rgba(31,48,70,0.18)] backdrop-blur-xl transition hover:bg-white hover:text-[#0066cc] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#0066cc]"
+            aria-label="Đóng chi tiết thành viên"
           >
-            <path d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
 
         <div className="relative px-8 pb-8">
           <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end">
