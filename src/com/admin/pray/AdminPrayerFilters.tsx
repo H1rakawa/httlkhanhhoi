@@ -5,52 +5,45 @@ import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   adminPrayerCategoryOptions,
+  adminPrayerSortOptions,
   adminPrayerStatusOptions,
-  type AdminPrayerCategory,
-  type AdminPrayerStatus,
+  type AdminPrayerCategoryValue,
+  type AdminPrayerSort,
+  type AdminPrayerStatusValue,
 } from "./adminPrayerData";
 import { FilterIcon, SearchIcon } from "./AdminPrayerIcons";
 
-type StatusValue = AdminPrayerStatus | "all";
-type CategoryValue = AdminPrayerCategory | "Tất cả danh mục";
-type FilterValue = "all" | "latest" | "pending" | "public";
-
-const adminPrayerFilterOptions = [
-  { value: "all", label: "Lọc" },
-  { value: "latest", label: "Mới nhất" },
-  { value: "pending", label: "Ưu tiên chờ duyệt" },
-  { value: "public", label: "Ưu tiên công khai" },
-] as const;
-
 type AdminPrayerFiltersProps = {
   query: string;
-  category: CategoryValue;
-  status: StatusValue;
+  category: AdminPrayerCategoryValue;
+  status: AdminPrayerStatusValue;
+  sort: AdminPrayerSort;
   onQueryChange: (value: string) => void;
-  onCategoryChange: (value: CategoryValue) => void;
-  onStatusChange: (value: StatusValue) => void;
+  onCategoryChange: (value: AdminPrayerCategoryValue) => void;
+  onStatusChange: (value: AdminPrayerStatusValue) => void;
+  onSortChange: (value: AdminPrayerSort) => void;
 };
 
 export default function AdminPrayerFilters({
   query,
   category,
   status,
+  sort,
   onQueryChange,
   onCategoryChange,
   onStatusChange,
+  onSortChange,
 }: AdminPrayerFiltersProps) {
-  const [filter, setFilter] = useState<FilterValue>("all");
-
   return (
     <section className="liquid-glass mt-6 rounded-[24px] p-3">
-      <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_190px_165px_140px]">
-        <label className="flex h-12 min-w-0 items-center gap-3 rounded-[14px] bg-white/64 px-4 text-[#8a98a8] shadow-inner">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-[minmax(260px,1fr)_190px_180px_200px]">
+        <label className="flex h-12 min-w-0 items-center gap-3 rounded-[14px] bg-white/64 px-4 text-[#8a98a8] shadow-inner md:col-span-3 xl:col-span-1">
           <SearchIcon />
           <input
             type="search"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Tìm kiếm theo tên hoặc nội dung..."
+            placeholder="Tìm theo tiêu đề, nội dung, người gửi..."
             className="h-full min-w-0 flex-1 bg-transparent text-sm font-extrabold text-[#111827] outline-none placeholder:text-[#929baa]"
           />
         </label>
@@ -58,25 +51,22 @@ export default function AdminPrayerFilters({
         <DropdownSelect
           label="Danh mục"
           value={category}
-          options={adminPrayerCategoryOptions.map((option) => ({
-            value: option,
-            label: option,
-          }))}
+          options={adminPrayerCategoryOptions}
           onChange={onCategoryChange}
         />
 
         <DropdownSelect
           label="Trạng thái"
           value={status}
-          options={[...adminPrayerStatusOptions]}
+          options={adminPrayerStatusOptions}
           onChange={onStatusChange}
         />
 
         <DropdownSelect
-          label="Bộ lọc"
-          value={filter}
-          options={[...adminPrayerFilterOptions]}
-          onChange={setFilter}
+          label="Sắp xếp"
+          value={sort}
+          options={adminPrayerSortOptions}
+          onChange={onSortChange}
           icon={<FilterIcon />}
           triggerClassName="bg-[#e4eefb] hover:bg-[#d8e7f8]"
         />

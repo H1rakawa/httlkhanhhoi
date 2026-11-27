@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import AdminDashboardContent from "@/com/admin/AdminDashboardContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { getCurrentAccount } from "@/lib/supabase/auth";
+import { getAdminOverview } from "@/lib/admin/overview";
+import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
 import {
   getUserAvatarUrl,
   getUserDisplayName,
@@ -9,9 +10,12 @@ import {
 
 export default async function AdminDashboardPage() {
   const account = await getCurrentAccount();
+  const accessToken = await getAccessToken();
 
-  if (!account) redirect("/auth");
+  if (!account || !accessToken) redirect("/auth");
   if (account.profile?.role !== "admin") redirect("/dashboard");
+
+  const overview = await getAdminOverview(accessToken);
 
   return (
     <main className="relative min-h-screen overflow-clip bg-[#eef3f7] text-[#111827]">
@@ -26,6 +30,7 @@ export default async function AdminDashboardPage() {
         adminId={account.user.id}
         displayName={getUserDisplayName(account.user, account.profile)}
         avatarUrl={getUserAvatarUrl(account.user, account.profile)}
+        overview={overview}
       />
     </main>
   );

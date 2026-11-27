@@ -2,17 +2,34 @@ import { redirect } from "next/navigation";
 import AdminSidebar from "@/com/admin/AdminSidebar";
 import AdminPrayerContent from "@/com/admin/pray/AdminPrayerContent";
 import SiteParallaxBackdrop from "@/com/shared/SiteParallaxBackdrop";
-import { getCurrentAccount } from "@/lib/supabase/auth";
+import { isStaffProfile } from "@/lib/admin/contact";
+import { getAdminPrayers } from "@/lib/admin/prayers";
+import { getAccessToken, getCurrentAccount } from "@/lib/supabase/auth";
+import type { AdminPrayerItem } from "@/com/admin/pray/adminPrayerData";
 import {
   getUserAvatarUrl,
   getUserDisplayName,
 } from "@/lib/supabase/user-display";
 
+export const metadata = {
+  title: "Duyệt cầu thay | Quản trị HTTL Khánh Hội",
+};
+
 export default async function AdminPrayPage() {
   const account = await getCurrentAccount();
+  const accessToken = await getAccessToken();
 
-  if (!account) redirect("/auth");
-  if (account.profile?.role !== "admin") redirect("/dashboard");
+  if (!account || !accessToken) redirect("/auth");
+  // Ban mục vụ (admin hoặc giáo viên đang hoạt động) — trùng RLS public.is_staff().
+  if (!isStaffProfile(account.profile)) redirect("/dashboard");
+
+  let prayers: AdminPrayerItem[] = [];
+  let loadError: string | null = null;
+  try {
+    prayers = await getAdminPrayers(accessToken);
+  } catch {
+    loadError = "Không tải được danh sách lời cầu thay. Vui lòng tải lại trang.";
+  }
 
   return (
     <main className="relative min-h-screen overflow-clip bg-[#eef3f7] text-[#111827]">
@@ -33,7 +50,7 @@ export default async function AdminPrayPage() {
         <section className="min-w-0">
           <div className="relative min-h-[calc(100svh-1.5rem)] overflow-hidden rounded-[24px] border border-white/72 bg-[rgba(244,248,255,0.46)] shadow-[0_34px_120px_rgba(15,23,42,0.14)] backdrop-blur-[10px] sm:rounded-[28px] md:min-h-[calc(100svh-2.5rem)] lg:min-h-[calc(100svh-3rem)] lg:rounded-[30px]">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(220,230,255,0.56),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(255,247,219,0.52),transparent_24%)]" />
-            <AdminPrayerContent />
+            <AdminPrayerContent initialItems={prayers} loadError={loadError} />
           </div>
         </section>
       </div>

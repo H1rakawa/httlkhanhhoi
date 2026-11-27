@@ -1,102 +1,73 @@
-export type AdminPrayerStatus = "pending" | "approved" | "answered";
+import {
+  PRAYER_CATEGORIES,
+  type PrayerPrivacy,
+  type PrayerStatus,
+} from "@/com/pray/prayData";
 
-export type AdminPrayerCategory = "Sức khỏe" | "Gia đình" | "Tâm linh" | "Tài chính";
+export type AdminPrayerStatus = PrayerStatus;
 
 export type AdminPrayerItem = {
-  id: string;
+  id: number;
   title: string;
-  senderName: string;
-  senderEmail: string;
-  submittedDate: string;
-  category: AdminPrayerCategory;
-  status: AdminPrayerStatus;
   content: string;
-  avatarUrl: string;
+  category: string;
+  privacy: PrayerPrivacy;
+  isAnonymous: boolean;
+  status: AdminPrayerStatus;
+  imageUrl: string | null;
+  intercessionCount: number;
+  commentCount: number;
+  createdAt: string;
+  approvedAt: string | null;
+  answeredAt: string | null;
+  userId: string;
+  senderName: string;
+  senderEmail: string | null;
+  senderAvatar: string | null;
+  approverName: string | null;
 };
 
-export const adminPrayerStats = [
-  {
-    label: "Tổng lời cầu nguyện",
-    value: "1,284",
-    icon: "document",
-    tone: "blue",
-  },
-  {
-    label: "Chờ duyệt",
-    value: "12",
-    icon: "clipboard",
-    tone: "gold",
-  },
-  {
-    label: "Công khai",
-    value: "1,272",
-    icon: "eye",
-    tone: "blue",
-  },
-] as const;
+export type AdminPrayerCategoryValue = (typeof PRAYER_CATEGORIES)[number] | "all";
+export type AdminPrayerStatusValue = AdminPrayerStatus | "all";
+export type AdminPrayerSort = "latest" | "oldest" | "pending" | "intercessions";
 
-export const adminPrayerItems: AdminPrayerItem[] = [
-  {
-    id: "nguyen-thu-thao",
-    title: "Cầu nguyện cho sức khỏe của mẹ",
-    senderName: "Nguyễn Thu Thảo",
-    senderEmail: "thao.nguyen@email.com",
-    submittedDate: "14/10/2023",
-    category: "Sức khỏe",
-    status: "pending",
-    content: "Xin Chúa chữa lành cho mẹ con trong thời gian hồi phục...",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80",
-  },
-  {
-    id: "tran-van-nam",
-    title: "Xin Chúa giữ gìn gia đình",
-    senderName: "Trần Văn Nam",
-    senderEmail: "nam.tran@email.com",
-    submittedDate: "13/10/2023",
-    category: "Gia đình",
-    status: "approved",
-    content: "Cầu nguyện cho sự bình an của gia đình trong mùa này...",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80",
-  },
-  {
-    id: "le-minh-tuan",
-    title: "Thêm sức mạnh trong đời sống thuộc linh",
-    senderName: "Lê Minh Tuấn",
-    senderEmail: "tuan.le@email.com",
-    submittedDate: "12/10/2023",
-    category: "Tâm linh",
-    status: "approved",
-    content: "Xin Chúa ban thêm sức mạnh và sự khôn ngoan...",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80",
-  },
-  {
-    id: "pham-thi-mai",
-    title: "Xin sự tiếp trợ cho tài chính gia đình",
-    senderName: "Phạm Thị Mai",
-    senderEmail: "mai.pham@email.com",
-    submittedDate: "12/10/2023",
-    category: "Tài chính",
-    status: "answered",
-    content: "Cầu xin sự tiếp trợ từ Chúa cho gia đình con...",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80",
-  },
+export const adminPrayerCategoryOptions: { value: AdminPrayerCategoryValue; label: string }[] = [
+  { value: "all", label: "Tất cả danh mục" },
+  ...PRAYER_CATEGORIES.map((category) => ({ value: category, label: category })),
 ];
 
-export const adminPrayerCategoryOptions = [
-  "Tất cả danh mục",
-  "Sức khỏe",
-  "Gia đình",
-  "Tâm linh",
-  "Tài chính",
-] as const;
-
-export const adminPrayerStatusOptions = [
-  { value: "all", label: "Trạng thái" },
+export const adminPrayerStatusOptions: { value: AdminPrayerStatusValue; label: string }[] = [
+  { value: "all", label: "Tất cả trạng thái" },
   { value: "pending", label: "Chờ duyệt" },
-  { value: "approved", label: "Công khai" },
-  { value: "answered", label: "Đã nhận lời" },
-] as const;
+  { value: "approved", label: "Đã duyệt" },
+  { value: "answered", label: "Đã nhậm lời" },
+  { value: "rejected", label: "Từ chối" },
+];
+
+export const adminPrayerSortOptions: { value: AdminPrayerSort; label: string }[] = [
+  { value: "latest", label: "Mới nhất" },
+  { value: "oldest", label: "Cũ nhất" },
+  { value: "pending", label: "Ưu tiên chờ duyệt" },
+  { value: "intercessions", label: "Nhiều cầu thay nhất" },
+];
+
+export const ADMIN_PRAYER_STATUS_LABELS: Record<AdminPrayerStatus, string> = {
+  pending: "Chờ duyệt",
+  approved: "Đã duyệt",
+  answered: "Đã nhậm lời",
+  rejected: "Từ chối",
+};
+
+export function isAdminPrayerStatus(value: unknown): value is AdminPrayerStatus {
+  return value === "pending" || value === "approved" || value === "answered" || value === "rejected";
+}
+
+export function formatAdminDate(value: string | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(new Date(value));
+}
