@@ -4,14 +4,10 @@ import Image from "next/image";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { FacebookIcon, YoutubeIcon } from "@/com/shared/Icons";
+import { navItems } from "@/com/shared/data";
 
-const quickLinks = [
-  { label: "Về chúng tôi", href: "/about" },
-  { label: "Lịch sinh hoạt", href: "/calendar" },
-  { label: "Truyền giảng", href: "/preachout" },
-  { label: "Tin tức", href: "/news" },
-  { label: "Liên hệ", href: "/contact" },
-];
+// Cùng thứ tự với menu trên Header.
+const quickLinks = navItems;
 
 const legalLinks = [
   { label: "Chính sách bảo mật", href: "/privacy" },

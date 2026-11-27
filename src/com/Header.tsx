@@ -94,7 +94,7 @@ export default function Header({
           />
         </NextLink>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-6 lg:flex xl:gap-8">
           {navItems.map((item) => {
             const isActive =
               activePath !== "/" && item.href.split("#")[0] === activePath;
@@ -117,12 +117,12 @@ export default function Header({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <HeaderAccountMenu />
           </div>
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20 focus:outline-none md:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20 focus:outline-none lg:hidden"
             aria-expanded={isMobileMenuOpen}
             aria-label="Menu"
           >
@@ -162,7 +162,7 @@ export default function Header({
       {/* Mobile Menu Panel */}
       <div
         className={[
-          "overflow-hidden border-t border-white/10 bg-black/95 backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-out md:hidden",
+          "overflow-hidden border-t border-white/10 bg-black/95 backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-out lg:hidden",
           isMobileMenuOpen ? "max-h-140 opacity-100" : "max-h-0 opacity-0",
         ].join(" ")}
       >
